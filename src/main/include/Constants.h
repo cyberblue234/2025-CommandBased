@@ -81,12 +81,14 @@
 
 #include <ctre/phoenix6/swerve/SwerveDrivetrainConstants.hpp>
 #include <ctre/phoenix6/swerve/SwerveModuleConstants.hpp>
+#include <ctre/phoenix6/swerve/SwerveDrivetrain.hpp>
 
 #include <numbers>
 #include <string>
 #include <array>
 #include <vector>
 #include <math.h>
+#include <iostream>
 
 /// @brief Contains the IDs of all the CAN devices. They all have device types to make sure no conflicts of IDs
 namespace RobotMap
@@ -307,6 +309,83 @@ namespace DrivetrainConstants
         constexpr units::kilogram_square_meter_t kInertia{0.01}; // Moment of inertia of driving the wheels
         constexpr units::volt_t kFrictionVoltage = 0.2_V; // Simulated voltage necessary to overcome friction
     }
+
+    constexpr ctre::phoenix6::configs::Slot0Configs driveGains = ctre::phoenix6::configs::Slot0Configs()
+        .WithKP(Drive::kP).WithKI(Drive::kI).WithKD(Drive::kD)
+        .WithKS(Drive::kS).WithKV(Drive::kV).WithKA(Drive::kA);
+    constexpr ctre::phoenix6::configs::Slot0Configs steerGains = ctre::phoenix6::configs::Slot0Configs()
+        .WithKP(Steer::kP).WithKI(Steer::kI).WithKD(Steer::kD)
+        .WithKS(Steer::kS).WithKV(Steer::kV).WithKA(Steer::kA)
+        .WithStaticFeedforwardSign(ctre::phoenix6::signals::StaticFeedforwardSignValue::UseClosedLoopSign);
+
+    constexpr ctre::phoenix6::swerve::ClosedLoopOutputType kDriveClosedLoopOutput = ctre::phoenix6::swerve::ClosedLoopOutputType::Voltage;
+    constexpr ctre::phoenix6::swerve::ClosedLoopOutputType kSteerClosedLoopOutput = ctre::phoenix6::swerve::ClosedLoopOutputType::Voltage;
+
+    constexpr ctre::phoenix6::swerve::DriveMotorArrangement kDriveMotorType = ctre::phoenix6::swerve::DriveMotorArrangement::TalonFX_Integrated;
+    constexpr ctre::phoenix6::swerve::SteerMotorArrangement kSteerMotorType = ctre::phoenix6::swerve::SteerMotorArrangement::TalonFX_Integrated;
+    constexpr ctre::phoenix6::swerve::SteerFeedbackType kSteerFeedbackType = ctre::phoenix6::swerve::SteerFeedbackType::RemoteCANcoder;
+
+    constexpr ctre::phoenix6::configs::TalonFXConfiguration driveInitialConfigs = ctre::phoenix6::configs::TalonFXConfiguration()
+        .WithCurrentLimits(ctre::phoenix6::configs::CurrentLimitsConfigs()
+            .WithStatorCurrentLimit(Drive::kStatorCurrentLimit)
+            .WithStatorCurrentLimitEnable(true));
+    constexpr ctre::phoenix6::configs::TalonFXConfiguration steerInitialConfigs = ctre::phoenix6::configs::TalonFXConfiguration()
+        .WithCurrentLimits(ctre::phoenix6::configs::CurrentLimitsConfigs()
+            .WithStatorCurrentLimit(Steer::kStatorCurrentLimit)
+            .WithStatorCurrentLimitEnable(true));
+    constexpr ctre::phoenix6::configs::CANcoderConfiguration canCoderInitialConfigs{};
+    constexpr ctre::phoenix6::configs::Pigeon2Configuration pigeonConfigs{};
+
+    constexpr ctre::phoenix6::swerve::SwerveDrivetrainConstants drivetrainConstants = ctre::phoenix6::swerve::SwerveDrivetrainConstants()
+        .WithCANBusName("rio").WithPigeon2Id(RobotMap::Drivetrain::kGyroID).WithPigeon2Configs(pigeonConfigs);
+
+    constexpr ctre::phoenix6::swerve::SwerveModuleConstantsFactory<ctre::phoenix6::configs::TalonFXConfiguration, ctre::phoenix6::configs::TalonFXConfiguration, ctre::phoenix6::configs::CANcoderConfiguration> swerveModuleConstantsCreator = 
+        ctre::phoenix6::swerve::SwerveModuleConstantsFactory<ctre::phoenix6::configs::TalonFXConfiguration, ctre::phoenix6::configs::TalonFXConfiguration, ctre::phoenix6::configs::CANcoderConfiguration>()
+            .WithDriveMotorGearRatio(Drive::kGearRatio).WithSteerMotorGearRatio(Steer::kGearRatio)
+            .WithCouplingGearRatio(kCoupleRatio)
+            .WithWheelRadius(kWheelRadius)
+            .WithDriveMotorGains(driveGains).WithSteerMotorGains(steerGains)
+            .WithDriveMotorClosedLoopOutput(kDriveClosedLoopOutput).WithSteerMotorClosedLoopOutput(kSteerClosedLoopOutput)
+            .WithSlipCurrent(kSlipCurrent)
+            .WithSpeedAt12Volts(kMaxSpeed)
+            .WithDriveMotorType(kDriveMotorType).WithSteerMotorType(kSteerMotorType)
+            .WithFeedbackSource(kSteerFeedbackType)
+            .WithDriveMotorInitialConfigs(driveInitialConfigs).WithSteerMotorInitialConfigs(steerInitialConfigs)
+            .WithEncoderInitialConfigs(canCoderInitialConfigs)
+            .WithDriveInertia(Drive::kInertia).WithSteerInertia(Steer::kInertia)
+            .WithDriveFrictionVoltage(Drive::kFrictionVoltage).WithSteerFrictionVoltage(Steer::kFrictionVoltage);
+
+    constexpr ctre::phoenix6::swerve::SwerveModuleConstants<ctre::phoenix6::configs::TalonFXConfiguration, ctre::phoenix6::configs::TalonFXConfiguration, ctre::phoenix6::configs::CANcoderConfiguration> frontLeft = 
+        swerveModuleConstantsCreator.CreateModuleConstants
+        (
+            RobotMap::Drivetrain::FrontLeft::kDriveID, RobotMap::Drivetrain::FrontLeft::kSteerID, RobotMap::Drivetrain::FrontLeft::kCANcoderID,
+            FrontLeft::kMagnetOffset, FrontLeft::kLocation.X(), FrontLeft::kLocation.Y(), 
+            FrontLeft::kDriveMotorInverted, FrontLeft::kSteerMotorInverted, FrontLeft::kCANcoderInverted
+        );
+    constexpr ctre::phoenix6::swerve::SwerveModuleConstants<ctre::phoenix6::configs::TalonFXConfiguration, ctre::phoenix6::configs::TalonFXConfiguration, ctre::phoenix6::configs::CANcoderConfiguration> frontRight = 
+        swerveModuleConstantsCreator.CreateModuleConstants
+        (
+            RobotMap::Drivetrain::FrontRight::kDriveID, RobotMap::Drivetrain::FrontRight::kSteerID, RobotMap::Drivetrain::FrontRight::kCANcoderID,
+            FrontRight::kMagnetOffset, FrontRight::kLocation.X(), FrontRight::kLocation.Y(), 
+            FrontRight::kDriveMotorInverted, FrontRight::kSteerMotorInverted, FrontRight::kCANcoderInverted
+        );
+    constexpr ctre::phoenix6::swerve::SwerveModuleConstants<ctre::phoenix6::configs::TalonFXConfiguration, ctre::phoenix6::configs::TalonFXConfiguration, ctre::phoenix6::configs::CANcoderConfiguration> backLeft = 
+        swerveModuleConstantsCreator.CreateModuleConstants
+        (
+            RobotMap::Drivetrain::BackLeft::kDriveID, RobotMap::Drivetrain::BackLeft::kSteerID, RobotMap::Drivetrain::BackLeft::kCANcoderID,
+            BackLeft::kMagnetOffset, BackLeft::kLocation.X(), BackLeft::kLocation.Y(), 
+            BackLeft::kDriveMotorInverted, BackLeft::kSteerMotorInverted, BackLeft::kCANcoderInverted
+        );
+    constexpr ctre::phoenix6::swerve::SwerveModuleConstants<ctre::phoenix6::configs::TalonFXConfiguration, ctre::phoenix6::configs::TalonFXConfiguration, ctre::phoenix6::configs::CANcoderConfiguration> backRight = 
+        swerveModuleConstantsCreator.CreateModuleConstants
+        (
+            RobotMap::Drivetrain::BackRight::kDriveID, RobotMap::Drivetrain::BackRight::kSteerID, RobotMap::Drivetrain::BackRight::kCANcoderID,
+            BackRight::kMagnetOffset, BackRight::kLocation.X(), BackRight::kLocation.Y(), 
+            BackRight::kDriveMotorInverted, BackRight::kSteerMotorInverted, BackRight::kCANcoderInverted
+        );
+
+    constexpr frc::Rotation2d kBlueAlliancePersepctiveRotation{0_deg};
+    constexpr frc::Rotation2d kRedAlliancePersepctiveRotation{180_deg};
 
     inline pathplanner::ModuleConfig moduleConfigs{kWheelRadius, DrivetrainConstants::kMaxSpeed, kWheelCOF, frc::DCMotor::KrakenX60(1), Drive::kGearRatio, Drive::kStatorCurrentLimit, 1};
 }

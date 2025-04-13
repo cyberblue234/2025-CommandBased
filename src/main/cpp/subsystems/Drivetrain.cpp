@@ -1,7 +1,7 @@
 #include "subsystems/Drivetrain.h"
 
 Drivetrain::Drivetrain() : swerve::SwerveDrivetrain<hardware::TalonFX, hardware::TalonFX, hardware::CANcoder>(drivetrainConstants, frontLeft, frontRight, backLeft, backRight)
-{
+{    
     // Configure the AutoBuilder last
     AutoBuilder::configure(
         [this](){ return GetState().Pose; }, // Robot pose supplier
@@ -29,8 +29,5 @@ Drivetrain::Drivetrain() : swerve::SwerveDrivetrain<hardware::TalonFX, hardware:
         this // Reference to this subsystem to set requirements
     );
 
-    if (utils::IsSimulation())
-    {
-        StartSimThread();
-    }
+    frc::SmartDashboard::PutData("Field", &field);
 }

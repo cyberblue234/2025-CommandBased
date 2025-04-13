@@ -11,17 +11,26 @@ RobotContainer::RobotContainer()
 }
 
 void RobotContainer::ConfigureBindings() 
-{
+{	
 	// swerve.SetDefaultCommand
 	// (
-	// 	swerve.ApplyRequest([this]()
-	// 	{			
+	// 	swerve.ApplyRequest([this]() {			
 	// 		return std::make_unique<ctre::phoenix6::swerve::requests::FieldCentric>(
 	// 			drive.WithVelocityX(units::meters_per_second_t{-gamepad.GetLeftY() * DrivetrainConstants::kMaxSpeed.value()})
 	// 			.WithVelocityY(units::meters_per_second_t{-gamepad.GetLeftX() * DrivetrainConstants::kMaxSpeed.value()})
 	// 			.WithRotationalRate(units::radians_per_second_t{-gamepad.GetRightX() * DrivetrainConstants::kMaxAngularSpeed.value()}));
 	// 	})
 	// );
+
+	swerve.SetDefaultCommand(frc2::cmd::Run
+	(
+		[this]()
+		{
+			swerve.SetControl(drive.WithVelocityX(units::meters_per_second_t{-gamepad.GetLeftY() * DrivetrainConstants::kMaxSpeed.value()})
+				.WithVelocityY(units::meters_per_second_t{-gamepad.GetLeftX() * DrivetrainConstants::kMaxSpeed.value()})
+				.WithRotationalRate(units::radians_per_second_t{-gamepad.GetRightX() * DrivetrainConstants::kMaxAngularSpeed.value()}));
+		}, {&swerve}
+	));
 }
 
 frc2::CommandPtr RobotContainer::GetAutonomousCommand()
