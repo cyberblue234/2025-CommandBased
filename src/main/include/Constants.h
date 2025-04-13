@@ -1,0 +1,333 @@
+#pragma once
+
+#include <units/acceleration.h>
+#include <units/angle.h>
+#include <units/angular_acceleration.h>
+#include <units/angular_velocity.h>
+#include <units/area.h>
+#include <units/capacitance.h>
+#include <units/charge.h>
+#include <units/concentration.h>
+#include <units/conductance.h>
+#include <units/current.h>
+#include <units/curvature.h>
+#include <units/data.h>
+#include <units/data_transfer_rate.h>
+#include <units/density.h>
+#include <units/dimensionless.h>
+#include <units/energy.h>
+#include <units/force.h>
+#include <units/frequency.h>
+#include <units/illuminance.h>
+#include <units/impedance.h>
+#include <units/inductance.h>
+#include <units/length.h>
+#include <units/luminous_flux.h>
+#include <units/luminous_intensity.h>
+#include <units/magnetic_field_strength.h>
+#include <units/magnetic_flux.h>
+#include <units/mass.h>
+#include <units/moment_of_inertia.h>
+#include <units/power.h>
+#include <units/pressure.h>
+#include <units/radiation.h>
+#include <units/solid_angle.h>
+#include <units/substance.h>
+#include <units/temperature.h>
+#include <units/time.h>
+#include <units/torque.h>
+#include <units/velocity.h>
+#include <units/voltage.h>
+#include <units/volume.h>
+
+#include <frc/geometry/Translation2d.h>
+#include <frc/geometry/Translation3d.h>
+#include <frc/geometry/Pose2d.h>
+#include <frc/geometry/Pose3d.h>
+#include <frc/geometry/Rotation2d.h>
+#include <frc/geometry/Rotation3d.h>
+#include <frc/controller/SimpleMotorFeedforward.h>
+#include <frc/controller/ArmFeedforward.h>
+#include <frc/controller/ElevatorFeedforward.h>
+#include <frc/controller/ProfiledPIDController.h>
+#include <frc/trajectory/TrapezoidProfile.h>
+
+#include <pathplanner/lib/path/PathConstraints.h>
+#include <pathplanner/lib/config/ModuleConfig.h>
+#include <pathplanner/lib/config/RobotConfig.h>
+
+#include <frc/RobotController.h>
+#include <frc/RobotBase.h>
+
+#include <frc/smartdashboard/SmartDashboard.h>
+
+#include "networktables/NetworkTable.h"
+#include "networktables/NetworkTableInstance.h"
+#include <networktables/IntegerTopic.h>
+#include <networktables/IntegerArrayTopic.h>
+#include <networktables/DoubleTopic.h>
+#include <networktables/DoubleArrayTopic.h>
+#include <networktables/StringTopic.h>
+#include <networktables/StructTopic.h>
+#include <networktables/StructArrayTopic.h>
+
+#include <frc2/command/CommandPtr.h>
+#include <frc2/command/Commands.h>
+#include <frc2/command/StartEndCommand.h>
+#include <frc2/command/RunCommand.h>
+#include <frc2/command/SequentialCommandGroup.h>
+#include <frc2/command/InstantCommand.h>
+#include <frc2/command/WaitCommand.h>
+
+#include <ctre/phoenix6/swerve/SwerveDrivetrainConstants.hpp>
+#include <ctre/phoenix6/swerve/SwerveModuleConstants.hpp>
+
+#include <numbers>
+#include <string>
+#include <array>
+#include <vector>
+#include <math.h>
+
+/// @brief Contains the IDs of all the CAN devices. They all have device types to make sure no conflicts of IDs
+namespace RobotMap
+{
+    /// @brief The Drivetrain IDs
+    namespace Drivetrain
+    {
+        namespace FrontLeft
+        {
+            // TalonFX
+            inline constexpr int kDriveID = 1;
+            // TalonFX
+            inline constexpr int kSteerID = 2;
+            // CANCoder
+            inline constexpr int kCANcoderID = 1;
+        }
+        namespace FrontRight
+        {
+            // TalonFX
+            inline constexpr int kDriveID = 3;
+            // TalonFX
+            inline constexpr int kSteerID = 4;
+            // CANCoder
+            inline constexpr int kCANcoderID = 2;
+        }
+        namespace BackLeft
+        {
+            // TalonFX
+            inline constexpr int kDriveID = 5;
+            // TalonFX
+            inline constexpr int kSteerID = 6;
+            // CANCoder
+            inline constexpr int kCANcoderID = 3;
+        }
+        namespace BackRight
+        {
+            // TalonFX
+            inline constexpr int kDriveID = 7;
+            // TalonFX
+            inline constexpr int kSteerID = 8;
+            // CANCoder
+            inline constexpr int kCANcoderID = 4;
+        }
+
+        // Pigeon2
+        inline constexpr int kGyroID = 1;
+    }
+
+    /// @brief The Elevator IDs
+    namespace Elevator
+    {
+        //TalonFX
+        inline constexpr int kMotor1ID = 9;
+        //TalonFX
+        inline constexpr int kMotor2ID = 10;
+        //DIO
+        inline constexpr int kBottomLimitSwitchID = 2;
+        //DIO
+        inline constexpr int kTopLimitSwitchID = 3;
+    }
+
+    namespace Claw
+    {
+        //TalonFX
+        inline constexpr int kWristMotorID = 11;
+        //SparkFlex
+        inline constexpr int kIOMotorID = 12;
+        //CANcoder
+        inline constexpr int kCanCoderID = 5;
+
+        //CANrange
+        inline constexpr int kCanRangeID = 1;
+    }
+
+    namespace Climber
+    {
+        //SparkMax
+        inline constexpr int kClimbMotorID = 2;
+        //DIO
+        inline constexpr int kLimitSwitch = 1;
+    }
+    namespace Pneumatics
+    {
+        //RevPH
+        inline constexpr int kPneumaticHubID = 1;
+        //Pneumatic Hub Slot
+        inline constexpr int kStopperSlot = 0;
+    }
+}
+
+/// @brief Personal add-on to the WPILib units library. See https://docs.wpilib.org/en/stable/docs/software/basic-programming/cpp-units.html for details on it.
+namespace units
+{
+    using meters_per_turn = compound_unit<meter, inverse<turn>>;
+    using meters_per_turn_t = unit_t<meters_per_turn>;
+    using radians_per_turn = compound_unit<radian, inverse<turn>>;
+    using radians_per_turn_t = unit_t<radians_per_turn>;
+    using degrees_per_turn = compound_unit<degree, inverse<turn>>;
+    using degrees_per_turn_t = unit_t<degrees_per_turn>;
+}
+
+namespace RobotConstants
+{
+    inline constexpr units::meter_t kRobotWidth = 28_in;
+    inline constexpr units::meter_t kRobotLength = 31_in;
+    inline constexpr units::meter_t kBumperWidth = 3_in;
+    inline constexpr units::meter_t kRobotWidthWithBumper = kRobotWidth + kBumperWidth * 2;
+    inline constexpr units::meter_t kRobotLengthWithBumper = kRobotLength + kBumperWidth * 2;
+    inline constexpr units::meter_t kTrackWidth = 20.75_in;
+    inline constexpr units::meter_t kWheelBase = 24_in;
+
+    inline constexpr units::kilogram_t kBatteryMass = 12.89_lb;
+    inline constexpr units::kilogram_t kBumperMass = 16.6_lb;
+    inline constexpr units::kilogram_t kMass = 115_lb + kBumperMass + kBatteryMass; 
+    inline constexpr units::kilogram_square_meter_t kMOI = (1.0 / 12.0) * kMass * (kRobotWidthWithBumper * kRobotWidthWithBumper + kRobotLengthWithBumper * kRobotLengthWithBumper);
+}
+
+namespace DrivetrainConstants
+{
+    namespace FrontLeft
+    {   
+        // The locations of the swerve modules in reference to the center of the robot
+        // A common error is to use an incorrect coordinate system where the positive Y axis points forward on the robot. 
+        // The correct coordinate system has the positive X axis pointing forward.
+        constexpr frc::Translation2d kLocation  = frc::Translation2d{+RobotConstants::kWheelBase / 2, +RobotConstants::kTrackWidth / 2};
+        // Offsets for the CANcoders to ensure 0 is pointing forward
+        constexpr units::turn_t kMagnetOffset  = -0.69067_tr;
+        constexpr bool kDriveMotorInverted = false;
+        constexpr bool kSteerMotorInverted = true;
+        constexpr bool kCANcoderInverted = false;
+    }
+    namespace FrontRight
+    {   
+        constexpr frc::Translation2d kLocation  = frc::Translation2d{+RobotConstants::kWheelBase / 2, -RobotConstants::kTrackWidth / 2};
+        constexpr units::turn_t kMagnetOffset  = 0.68213_tr;
+        constexpr bool kDriveMotorInverted = false;
+        constexpr bool kSteerMotorInverted = true;
+        constexpr bool kCANcoderInverted = false;
+    }
+    namespace BackLeft
+    {   
+        constexpr frc::Translation2d kLocation  = frc::Translation2d{-RobotConstants::kWheelBase / 2, +RobotConstants::kTrackWidth / 2};
+        constexpr units::turn_t kMagnetOffset  = -0.052002_tr;
+        constexpr bool kDriveMotorInverted = false;
+        constexpr bool kSteerMotorInverted = true;
+        constexpr bool kCANcoderInverted = false;
+    }
+    namespace BackRight
+    {   
+        constexpr frc::Translation2d kLocation  = frc::Translation2d{-RobotConstants::kWheelBase / 2, -RobotConstants::kTrackWidth / 2};
+        constexpr units::turn_t kMagnetOffset  = -0.12573_tr;
+        constexpr bool kDriveMotorInverted = false;
+        constexpr bool kSteerMotorInverted = true;
+        constexpr bool kCANcoderInverted = false;
+    }
+
+    // Maximum desired speed of the robot. Does not have to be maximum theoretical speed if that is too high for desired driving speed
+    constexpr units::meters_per_second_t kMaxSpeed = 4.74_mps;
+    // Maximum desired angular speed of the robot. Does not have to be maximum theoretical speed if that is too high for desired driving speed
+    constexpr units::radians_per_second_t kMaxAngularSpeed = std::numbers::pi * 4_rad_per_s;
+
+    // Every 1 rotation of the azimuth results in kCoupleRatio drive motor turns;
+    // This may need to be tuned to your individual robot
+    constexpr double kCoupleRatio = 3.8181818181818183;
+    // Radius of the wheel
+    constexpr units::meter_t kWheelRadius = 2_in;
+    // Because we don't know the actual coeffient of friction between the wheel tread and the carpet, we just assume it is 1
+    // If wheels are slipping a lot, we can lower to force pathplanner to slow down 
+    constexpr double kWheelCOF = 1.0;
+    constexpr units::ampere_t kSlipCurrent = 100_A;
+
+    // PIDs and feedforward constants of the drive motor
+    namespace Drive
+    {
+        // Gearing between the drive motor and wheel in turns - how many turns of the drive motor does it take to drive the wheel one full revolution
+        constexpr double kGearRatio = 6.39;
+
+        constexpr double kP = 0.1;
+        constexpr double kI = 0.0;
+        constexpr double kD = 0.0;
+
+        constexpr double kS = 0.24;
+        constexpr double kV = 2.3;
+        constexpr double kA = 0.20;
+
+        // This stator current limit ensures we don't damage the motor by pushing too much current
+        constexpr units::ampere_t kStatorCurrentLimit = 100_A;
+
+        // The amount of meters the robot drives per turn of the drive motor. The circumference of the wheel is the distance the robot drives for one full revolution of the wheel. Dividing by the gear ratio gets you to meters per one turn of the drive motor
+        // constexpr units::meters_per_turn_t kDistanceRatio = kWheelRadius * 2 * std::numbers::pi / units::turn_t(Drive::kGearRatio);
+
+        // Simulation values
+        constexpr units::kilogram_square_meter_t kInertia{0.01}; // Moment of inertia of driving the wheels
+        constexpr units::volt_t kFrictionVoltage = 0.2_V; // Simulated voltage necessary to overcome friction
+    }
+    // PIDs of the steer motor
+    namespace Steer
+    {
+        // Gearing between the steer motor and wheel in turns - how many turns of the steer motor does it take to turn the wheel one full revolution
+        constexpr double kGearRatio = 12.1;
+
+        constexpr double kP = 100.0;
+        constexpr double kI = 0.0;
+        constexpr double kD = 0.5;
+
+        constexpr double kS = 0.24;
+        constexpr double kV = 2.3;
+        constexpr double kA = 0.20;
+        
+        // Swerve azimuth does not require much torque output, so we can set a relatively low
+        // stator current limit to help avoid brownouts without impacting performance.
+        constexpr units::ampere_t kStatorCurrentLimit = 60_A;
+
+        // Because we use the CANcoder to determine turning distance, the ratio is just one revolution of the wheel (360° or 2π) for every turn
+        constexpr units::radians_per_turn_t kDistanceRatio = 2_rad * std::numbers::pi / 1_tr;
+
+        // Simulation values
+        constexpr units::kilogram_square_meter_t kInertia{0.01}; // Moment of inertia of driving the wheels
+        constexpr units::volt_t kFrictionVoltage = 0.2_V; // Simulated voltage necessary to overcome friction
+    }
+
+    inline pathplanner::ModuleConfig moduleConfigs{kWheelRadius, DrivetrainConstants::kMaxSpeed, kWheelCOF, frc::DCMotor::KrakenX60(1), Drive::kGearRatio, Drive::kStatorCurrentLimit, 1};
+}
+
+/// @brief Constants for PathPlanner
+namespace PathPlannerConstants
+{
+    // PIDs for the translation component of PathPlanner
+    namespace Translation
+    {
+        constexpr double kP = 8.0;
+        constexpr double kI = 0.0;
+        constexpr double kD = 0.1;
+    }
+    // PIDs for the rotation component of PathPlanner
+    namespace Rotation
+    {
+        constexpr double kP = 5.0;
+        constexpr double kI = 0.0;
+        constexpr double kD = 0.1;
+    }
+    
+    inline pathplanner::RobotConfig kConfig{RobotConstants::kMass, RobotConstants::kMOI, DrivetrainConstants::moduleConfigs, std::vector<frc::Translation2d>{DrivetrainConstants::FrontLeft::kLocation, DrivetrainConstants::FrontRight::kLocation, DrivetrainConstants::BackLeft::kLocation, DrivetrainConstants::BackRight::kLocation}};
+}
