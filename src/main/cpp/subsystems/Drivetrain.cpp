@@ -9,9 +9,9 @@ Drivetrain::Drivetrain() : swerve::SwerveDrivetrain<hardware::TalonFX, hardware:
         [this](){ return GetState().Speeds; }, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
         [this](frc::ChassisSpeeds speeds, DriveFeedforwards feedforwards)
         { 
-            pathApplyRobotSpeeds.WithSpeeds(speeds)
+            SetControl(pathApplyRobotSpeeds.WithSpeeds(speeds)
                 .WithWheelForceFeedforwardsX(feedforwards.robotRelativeForcesX)
-                .WithWheelForceFeedforwardsY(feedforwards.robotRelativeForcesY);
+                .WithWheelForceFeedforwardsY(feedforwards.robotRelativeForcesY));
         }, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
         std::make_shared<PPHolonomicDriveController>(translationPIDs, rotationPIDs),
         PathPlannerConstants::kConfig, // The robot configuration

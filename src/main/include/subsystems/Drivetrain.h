@@ -1,6 +1,6 @@
 #pragma once
 
-#include <frc2/command/Subsystem.h>
+#include <frc2/command/SubsystemBase.h>
 
 #include <ctre/phoenix6/Pigeon2.hpp>
 #include <ctre/phoenix6/CANcoder.hpp>
@@ -29,21 +29,20 @@ using namespace pathplanner;
 using namespace DrivetrainConstants;
 
 
-class Drivetrain : public swerve::SwerveDrivetrain<hardware::TalonFX, hardware::TalonFX, hardware::CANcoder>, public frc2::Subsystem
+class Drivetrain : public swerve::SwerveDrivetrain<hardware::TalonFX, hardware::TalonFX, hardware::CANcoder>, public frc2::SubsystemBase
 {
 public:
     Drivetrain();
 
-    frc2::CommandPtr ApplyRequest(std::function<std::unique_ptr<swerve::requests::SwerveRequest>()> requestSupplier)
+    frc2::CommandPtr ApplyRequest(std::function<std::shared_ptr<swerve::requests::SwerveRequest>()> requestSupplier)
     {
-        return frc2::cmd::Run([this, requestSupplier] 
+        return Run([this, requestSupplier] 
             { 
-                auto test = requestSupplier();
-                SetControl(*test); 
-            }, {this})
-            .WithName("SwerveApplyRequest");
+                persistentRequest = requestSupplier();
+                SetControl(*persistentRequest);
+            }).WithName("SwerveApplyRequest");
     }
-    
+
     frc2::CommandPtr SysIdDynamic(frc2::sysid::Direction direction)
     {
         return sysIdRoutineToApply.Dynamic(direction);
@@ -80,6 +79,8 @@ public:
 private:
     
     bool hasAppliedDriverPerspective = false;
+
+    std::shared_ptr<ctre::phoenix6::swerve::requests::SwerveRequest> persistentRequest;
 
     swerve::requests::ApplyRobotSpeeds pathApplyRobotSpeeds{};
     swerve::requests::SysIdSwerveTranslation translationCharacterization{};

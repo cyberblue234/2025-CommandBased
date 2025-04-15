@@ -3,37 +3,38 @@
 // the WPILib BSD license file in the root directory of this project.
 
 #include "RobotContainer.h"
-#include <frc2/command/Commands.h>
 
 RobotContainer::RobotContainer()
 {
 	ConfigureBindings();
+
+	std::vector<std::string> autos = pathplanner::AutoBuilder::getAllAutoNames();
+    autoChooser.SetDefaultOption("Nothing", "Nothing");
+	for (auto i = autos.begin(); i != autos.end(); ++i)
+	{
+		autoChooser.AddOption(*i, *i);
+	}
+
+	frc::SmartDashboard::PutData("Auto Chooser", &autoChooser);
+	frc::SmartDashboard::PutData("Swerve", &swerve);
 }
 
 void RobotContainer::ConfigureBindings() 
 {	
-	// swerve.SetDefaultCommand
-	// (
-	// 	swerve.ApplyRequest([this]() {			
-	// 		return std::make_unique<ctre::phoenix6::swerve::requests::FieldCentric>(
-	// 			drive.WithVelocityX(units::meters_per_second_t{-gamepad.GetLeftY() * DrivetrainConstants::kMaxSpeed.value()})
-	// 			.WithVelocityY(units::meters_per_second_t{-gamepad.GetLeftX() * DrivetrainConstants::kMaxSpeed.value()})
-	// 			.WithRotationalRate(units::radians_per_second_t{-gamepad.GetRightX() * DrivetrainConstants::kMaxAngularSpeed.value()}));
-	// 	})
-	// );
-
-	swerve.SetDefaultCommand(frc2::cmd::Run
+	swerve.SetDefaultCommand
 	(
-		[this]()
-		{
-			swerve.SetControl(drive.WithVelocityX(units::meters_per_second_t{-gamepad.GetLeftY() * DrivetrainConstants::kMaxSpeed.value()})
-				.WithVelocityY(units::meters_per_second_t{-gamepad.GetLeftX() * DrivetrainConstants::kMaxSpeed.value()})
-				.WithRotationalRate(units::radians_per_second_t{-gamepad.GetRightX() * DrivetrainConstants::kMaxAngularSpeed.value()}));
-		}, {&swerve}
-	));
+		swerve.ApplyRequest([this]() {			
+			return std::make_shared<ctre::phoenix6::swerve::requests::FieldCentric>(
+				drive.WithVelocityX(-gamepad.GetLeftY() * DrivetrainConstants::kMaxSpeed)
+				.WithVelocityY(-gamepad.GetLeftX() * DrivetrainConstants::kMaxSpeed)
+				.WithRotationalRate(-gamepad.GetRightX() * DrivetrainConstants::kMaxAngularSpeed));
+		})
+	);
 }
 
-frc2::CommandPtr RobotContainer::GetAutonomousCommand()
+std::optional<frc2::CommandPtr> RobotContainer::GetAutonomousCommand()
 {
-	return frc2::cmd::Print("No autonomous command configured");
+	std::string auton = autoChooser.GetSelected();
+    if (auton == "Nothing") return {};
+    return pathplanner::PathPlannerAuto(auton).ToPtr();
 }
