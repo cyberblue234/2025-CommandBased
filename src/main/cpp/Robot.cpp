@@ -8,6 +8,11 @@
 
 Robot::Robot() {}
 
+void Robot::RobotInit()
+{
+	ctre::phoenix6::SignalLogger::Start();
+}
+
 void Robot::RobotPeriodic()
 {
 	frc2::CommandScheduler::GetInstance().Run();

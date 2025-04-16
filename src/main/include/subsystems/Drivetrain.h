@@ -12,17 +12,20 @@
 #include <ctre/phoenix6/SignalLogger.hpp>
 
 #include <frc/Notifier.h>
+
 #include <frc2/command/sysid/SysIdRoutine.h>
 
 #include <pathplanner/lib/auto/AutoBuilder.h>
 #include <pathplanner/lib/config/RobotConfig.h>
 #include <pathplanner/lib/controllers/PPHolonomicDriveController.h>
 #include <pathplanner/lib/util/PathPlannerLogging.h>
+
 #include <frc/DriverStation.h>
+
+#include <frc/smartdashboard/Field2d.h>
 
 #include "Constants.h"
 
-#include <frc/smartdashboard/Field2d.h>
 
 using namespace ctre::phoenix6;
 using namespace pathplanner;
@@ -34,14 +37,7 @@ class Drivetrain : public swerve::SwerveDrivetrain<hardware::TalonFX, hardware::
 public:
     Drivetrain();
 
-    frc2::CommandPtr ApplyRequest(std::function<std::shared_ptr<swerve::requests::SwerveRequest>()> requestSupplier)
-    {
-        return Run([this, requestSupplier] 
-            { 
-                persistentRequest = requestSupplier();
-                SetControl(*persistentRequest);
-            }).WithName("SwerveApplyRequest");
-    }
+    frc2::CommandPtr DriveWithSpeedsCommand(std::function<frc::ChassisSpeeds()> speedsSupplier);
 
     frc2::CommandPtr SysIdDynamic(frc2::sysid::Direction direction)
     {
@@ -52,41 +48,32 @@ public:
         return sysIdRoutineToApply.Quasistatic(direction);
     }
 
-    void Periodic() override
-    {
-        if (!hasAppliedDriverPerspective || frc::DriverStation::IsDisabled())
-        {
-            auto alliance = frc::DriverStation::GetAlliance();
-            if (alliance) 
-            {
-                SetOperatorPerspectiveForward(alliance.value() == frc::DriverStation::Alliance::kBlue ? kBlueAlliancePersepctiveRotation : kRedAlliancePersepctiveRotation);
-                hasAppliedDriverPerspective = true; 
-            }
-        }
-
-        if (utils::IsSimulation())
-        {
-            const units::second_t currentTime = utils::GetCurrentTime();
-            units::second_t deltaTime = currentTime - lastSimTime;
-            lastSimTime = currentTime;
-
-            UpdateSimState(deltaTime, frc::RobotController::GetBatteryVoltage());
-        }
-
-        field.SetRobotPose(GetState().Pose);
-    }
+    void Periodic() override;
     
 private:
-    
     bool hasAppliedDriverPerspective = false;
 
-    std::shared_ptr<ctre::phoenix6::swerve::requests::SwerveRequest> persistentRequest;
+    ctre::phoenix6::swerve::requests::FieldCentric drive = ctre::phoenix6::swerve::requests::FieldCentric() 
+        .WithDeadband(DrivetrainConstants::kMaxSpeed * 0.1).WithRotationalDeadband(DrivetrainConstants::kMaxAngularSpeed * 0.1)
+        .WithDriveRequestType(ctre::phoenix6::swerve::impl::DriveRequestType::OpenLoopVoltage);
+    ctre::phoenix6::swerve::requests::SwerveDriveBrake brake{};
 
     swerve::requests::ApplyRobotSpeeds pathApplyRobotSpeeds{};
     swerve::requests::SysIdSwerveTranslation translationCharacterization{};
     swerve::requests::SysIdSwerveSteerGains steerCharacterization{};
     swerve::requests::SysIdSwerveRotation rotationCharacterization{};
 
+    std::shared_ptr<nt::NetworkTable> GetTable()
+    {
+        return nt::NetworkTableInstance::GetDefault().GetTable("swerve");
+    }
+
+    nt::StructPublisher<frc::Pose2d> odometryPublisher = GetTable()->GetStructTopic<frc::Pose2d>("odometry").Publish();
+    nt::StructPublisher<frc::ChassisSpeeds> speedsPublisher = GetTable()->GetStructTopic<frc::ChassisSpeeds>("speeds").Publish();
+    nt::StructArrayPublisher<frc::SwerveModulePosition> modulePositionsPublisher = GetTable()->GetStructArrayTopic<frc::SwerveModulePosition>("modulePositions").Publish();
+    nt::StructArrayPublisher<frc::SwerveModuleState> moduleStatesPublisher = GetTable()->GetStructArrayTopic<frc::SwerveModuleState>("moduleStates").Publish();
+    nt::StructArrayPublisher<frc::SwerveModuleState> moduleTargetsPublisher = GetTable()->GetStructArrayTopic<frc::SwerveModuleState>("moduleTargets").Publish();
+    
     frc2::sysid::SysIdRoutine sysIdRoutineTranslation
     {
         frc2::sysid::Config

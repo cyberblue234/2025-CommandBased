@@ -23,13 +23,23 @@ void RobotContainer::ConfigureBindings()
 {	
 	swerve.SetDefaultCommand
 	(
-		swerve.ApplyRequest([this]() {			
-			return std::make_shared<ctre::phoenix6::swerve::requests::FieldCentric>(
-				drive.WithVelocityX(-gamepad.GetLeftY() * DrivetrainConstants::kMaxSpeed)
-				.WithVelocityY(-gamepad.GetLeftX() * DrivetrainConstants::kMaxSpeed)
-				.WithRotationalRate(-gamepad.GetRightX() * DrivetrainConstants::kMaxAngularSpeed));
+		swerve.DriveWithSpeedsCommand([this]
+		{
+			frc::ChassisSpeeds speeds;
+			speeds.vx = -gamepad.GetLeftY() * DrivetrainConstants::kMaxSpeed;
+			speeds.vy = -gamepad.GetLeftX() * DrivetrainConstants::kMaxSpeed;
+			speeds.omega = -gamepad.GetRightX() * DrivetrainConstants::kMaxAngularSpeed;
+			return speeds;
 		})
 	);
+
+	// Sys Id triggers. Only works during Test mode.
+	gamepad.Back().OnTrue(frc2::cmd::RunOnce(SignalLogger::Start).OnlyIf(frc::DriverStation::IsTest));
+	gamepad.Start().OnTrue(frc2::cmd::RunOnce(SignalLogger::Stop).OnlyIf(frc::DriverStation::IsTest));
+	gamepad.POVUp().WhileTrue(swerve.SysIdQuasistatic(frc2::sysid::Direction::kForward).OnlyIf(frc::DriverStation::IsTest));
+	gamepad.POVRight().WhileTrue(swerve.SysIdQuasistatic(frc2::sysid::Direction::kReverse).OnlyIf(frc::DriverStation::IsTest));
+	gamepad.POVDown().WhileTrue(swerve.SysIdDynamic(frc2::sysid::Direction::kForward).OnlyIf(frc::DriverStation::IsTest));
+	gamepad.POVLeft().WhileTrue(swerve.SysIdDynamic(frc2::sysid::Direction::kReverse).OnlyIf(frc::DriverStation::IsTest));
 }
 
 std::optional<frc2::CommandPtr> RobotContainer::GetAutonomousCommand()

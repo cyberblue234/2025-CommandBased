@@ -29,11 +29,6 @@ private:
     frc2::CommandXboxController gamepad{0};
     frc2::CommandJoystick controlBoard{1};
 
-    ctre::phoenix6::swerve::requests::FieldCentric drive = ctre::phoenix6::swerve::requests::FieldCentric() 
-        .WithDeadband(DrivetrainConstants::kMaxSpeed * 0.1).WithRotationalDeadband(DrivetrainConstants::kMaxAngularSpeed * 0.1)
-        .WithDriveRequestType(ctre::phoenix6::swerve::impl::DriveRequestType::OpenLoopVoltage);
-    ctre::phoenix6::swerve::requests::SwerveDriveBrake brake{};
-
     Drivetrain swerve{};
 
     frc::SendableChooser<std::string> autoChooser;
