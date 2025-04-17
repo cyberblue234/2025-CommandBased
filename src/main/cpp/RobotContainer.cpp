@@ -17,6 +17,7 @@ RobotContainer::RobotContainer()
 
 	frc::SmartDashboard::PutData("Auto Chooser", &autoChooser);
 	frc::SmartDashboard::PutData("Swerve", &swerve);
+	frc::SmartDashboard::PutData("Elevator", &elevator);
 }
 
 void RobotContainer::ConfigureBindings() 
@@ -32,6 +33,15 @@ void RobotContainer::ConfigureBindings()
 			return speeds;
 		})
 	);
+	
+	elevator.SetDefaultCommand
+	(
+		elevator.StopMotorsCommand()
+	);
+
+	gamepad.A().WhileTrue(elevator.GoToHeightCommand(3_ft));
+	controlBoard.AxisGreaterThan(ControlsConstants::kManualElevatorAxis, 0.5).WhileTrue(elevator.SetMotorsCommand(ElevatorConstants::kElevatorPower));
+	controlBoard.AxisLessThan(ControlsConstants::kManualElevatorAxis, -0.5).WhileTrue(elevator.SetMotorsCommand(-ElevatorConstants::kElevatorPower));
 
 	// Sys Id triggers. Only works during Test mode.
 	gamepad.Back().OnTrue(frc2::cmd::RunOnce(SignalLogger::Start).OnlyIf(frc::DriverStation::IsTest));

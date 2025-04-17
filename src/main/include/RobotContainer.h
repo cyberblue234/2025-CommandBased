@@ -15,6 +15,7 @@
 
 #include "Constants.h"
 #include "subsystems/Drivetrain.h"
+#include "subsystems/Elevator.h"
 
 class RobotContainer
 {
@@ -30,6 +31,7 @@ private:
     frc2::CommandJoystick controlBoard{1};
 
     Drivetrain swerve{};
+    Elevator elevator{};
 
     frc::SendableChooser<std::string> autoChooser;
 };

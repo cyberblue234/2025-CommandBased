@@ -49,6 +49,46 @@ public:
     }
 
     void Periodic() override;
+
+    void InitSendable(wpi::SendableBuilder &builder) override
+    {
+        frc2::SubsystemBase::InitSendable(builder);
+
+        builder.AddDoubleProperty("setSpeed",
+            [this] 
+            {
+                frc::ChassisSpeeds speeds = GetState().Speeds;
+                return std::pow(std::pow(speeds.vx.value(), 2) + std::pow(speeds.vy.value(), 2), 0.5);
+            },
+            nullptr
+        );
+
+        std::string modules[] = {"frontLeft", "frontRight", "backLeft", "backRight"};
+
+        for (int i = 0; i < 4; i++)
+        {
+            builder.AddDoubleProperty(modules[i] + "/speed",
+                [this, i] { return GetState().ModuleStates[i].speed.value(); },
+                nullptr
+            );
+            builder.AddDoubleProperty(modules[i] + "/angle",
+                [this, i] { return GetState().ModuleStates[i].angle.Degrees().value(); },
+                nullptr
+            );
+            builder.AddDoubleProperty(modules[i] + "/speedSet",
+                [this, i] { return GetState().ModuleTargets[i].speed.value(); },
+                nullptr
+            );
+            builder.AddDoubleProperty(modules[i] + "/angleSet",
+                [this, i] { return GetState().ModuleTargets[i].angle.Degrees().value(); },
+                nullptr
+            );
+            builder.AddDoubleProperty(modules[i] + "/distance",
+                [this, i] { return GetState().ModulePositions[i].distance.value(); },
+                nullptr
+            );
+        }
+    }
     
 private:
     bool hasAppliedDriverPerspective = false;
@@ -65,7 +105,7 @@ private:
 
     std::shared_ptr<nt::NetworkTable> GetTable()
     {
-        return nt::NetworkTableInstance::GetDefault().GetTable("swerve");
+        return nt::NetworkTableInstance::GetDefault().GetTable("SmartDashboard")->GetSubTable("Swerve");
     }
 
     nt::StructPublisher<frc::Pose2d> odometryPublisher = GetTable()->GetStructTopic<frc::Pose2d>("odometry").Publish();

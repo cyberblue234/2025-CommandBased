@@ -179,6 +179,29 @@ namespace RobotMap
     }
 }
 
+namespace ControlsConstants
+{
+    // Analog inputs
+    const int kManualWristAxis = 2;
+    const int kManualElevatorAxis = 1;
+    const int kClimberAxis = 3;
+    const int kManualIntakeAxis = 0;
+
+    const int kL1Button = 5;
+    const int kL2Button = 3;
+    const int kL3Button = 1;
+    const int kL4Button = 6;
+    const int kAlgaeHighButton = 8;
+    const int kAlgaeLowButton = 11;
+    const int kCoralStationButton = 4;
+    const int kProcessorButton = 7;
+    const int kBargeButton = 2;
+    const int kCoralHomeButton = 9;
+    const int kAlgaeHomeButton = 12;
+
+    const int kIOButton = 10;
+}
+
 /// @brief Personal add-on to the WPILib units library. See https://docs.wpilib.org/en/stable/docs/software/basic-programming/cpp-units.html for details on it.
 namespace units
 {
@@ -188,6 +211,12 @@ namespace units
     using radians_per_turn_t = unit_t<radians_per_turn>;
     using degrees_per_turn = compound_unit<degree, inverse<turn>>;
     using degrees_per_turn_t = unit_t<degrees_per_turn>;
+
+    using kv_meters_t = unit_t<frc::SimpleMotorFeedforward<meters>::kv_unit>;
+    using ka_meters_t = unit_t<frc::SimpleMotorFeedforward<meters>::ka_unit>;
+
+    using kv_degrees_t = unit_t<frc::SimpleMotorFeedforward<degrees>::kv_unit>;
+    using ka_degrees_t = unit_t<frc::SimpleMotorFeedforward<degrees>::ka_unit>;
 }
 
 namespace RobotConstants
@@ -201,7 +230,7 @@ namespace RobotConstants
     inline constexpr units::meter_t kWheelBase = 24_in;
 
     inline constexpr units::kilogram_t kBatteryMass = 12.89_lb;
-    inline constexpr units::kilogram_t kBumperMass = 16.6_lb;
+    inline constexpr units::kilogram_t kBumperMass = 20.0_lb;
     inline constexpr units::kilogram_t kMass = 115_lb + kBumperMass + kBatteryMass; 
     inline constexpr units::kilogram_square_meter_t kMOI = (1.0 / 12.0) * kMass * (kRobotWidthWithBumper * kRobotWidthWithBumper + kRobotLengthWithBumper * kRobotLengthWithBumper);
 }
@@ -246,9 +275,9 @@ namespace DrivetrainConstants
     }
 
     // Maximum desired speed of the robot. Does not have to be maximum theoretical speed if that is too high for desired driving speed
-    constexpr units::meters_per_second_t kMaxSpeed = 4.74_mps;
+    constexpr units::meters_per_second_t kMaxSpeed = 5.0_mps;
     // Maximum desired angular speed of the robot. Does not have to be maximum theoretical speed if that is too high for desired driving speed
-    constexpr units::radians_per_second_t kMaxAngularSpeed = std::numbers::pi * 4_rad_per_s;
+    constexpr units::radians_per_second_t kMaxAngularSpeed = 900_deg_per_s;
 
     // Every 1 rotation of the azimuth results in kCoupleRatio drive motor turns;
     // This may need to be tuned to your individual robot
@@ -271,7 +300,7 @@ namespace DrivetrainConstants
         constexpr double kD = 0.0;
 
         constexpr double kS = 0.24;
-        constexpr double kV = 2.3;
+        constexpr double kV = 5;
         constexpr double kA = 0.20;
 
         // This stator current limit ensures we don't damage the motor by pushing too much current
@@ -410,3 +439,66 @@ namespace PathPlannerConstants
     
     inline pathplanner::RobotConfig kConfig{RobotConstants::kMass, RobotConstants::kMOI, DrivetrainConstants::moduleConfigs, std::vector<frc::Translation2d>{DrivetrainConstants::FrontLeft::kLocation, DrivetrainConstants::FrontRight::kLocation, DrivetrainConstants::BackLeft::kLocation, DrivetrainConstants::BackRight::kLocation}};
 }
+
+
+/// @brief Constants for the Elevator Class
+namespace ElevatorConstants
+{
+    // PIDs and feedforward values
+    constexpr double kP = 40.0;
+    constexpr double kI = 0.0;
+    constexpr double kD = 0.1;
+    constexpr double kS = 0.0;
+    constexpr double kG = 0.0;
+    constexpr double kV = 9.0;
+    constexpr double kA = 0.3;
+    constexpr units::turns_per_second_t kCruiseVelocity = 80_tps;
+    constexpr units::turns_per_second_squared_t kAcceleration = 160_tr_per_s_sq;
+    constexpr units::turns_per_second_cubed_t kJerk = 1600_tr_per_s_cu;
+
+    // The gearing between the motor and the sprocket
+    constexpr units::turn_t kMotorGearing = 20_tr;
+    // Theoretical diameter of the sprocket connected to the chain which raises the first stage
+    constexpr units::meter_t kSprocketPitchDiameter = 1.751_in;
+    // How many meters the carriage travels per rotation of the motors.
+    // Note, carriage raises at a rate of 2:1 compared to the first stage
+    constexpr units::meters_per_turn_t kMetersPerMotorTurn = 2 * (kSprocketPitchDiameter * std::numbers::pi) / kMotorGearing;
+
+    // The distance from the ground to the bottom of the carriage
+    constexpr units::meter_t kHeightOffset      = 6.5_in;
+    // Should be equal to kMaxEncoderValue * kMetersPerMotorTurn + kHeightOffset
+    constexpr units::meter_t kMaxElevatorHeight = 4.5_ft + kHeightOffset;
+    // Maximum encoder count - should be slightly lower than the maximum possible encoder count
+    constexpr units::turn_t kMaxEncoderValue    = (kMaxElevatorHeight - kHeightOffset) / kMetersPerMotorTurn;
+
+    constexpr units::meter_t kTolerance = 0.5_in;
+
+    constexpr double kElevatorPower = 0.25;
+}
+
+
+/// @brief Struct for the different possible positions
+struct Position
+{
+    /// @brief The height of the elevator
+    const units::meter_t height = 0_m;
+    /// @brief The angle of the claw
+    const units::degree_t angle = 0_deg;
+    /// @brief What power to set to the IO motor
+    const double ioMotorPower = 0.0;
+    /// @brief Set to true when intaking coral - will be used to stop the IO motor when we have a coral in the claw
+    const bool isForCoralIntake = false;
+
+    const Position operator=(const Position &rhs)
+    {
+        return {rhs.height, rhs.angle, rhs.ioMotorPower, rhs.isForCoralIntake};
+    }
+    bool operator==(const Position &rhs)
+    {
+        return this->height == rhs.height && this->angle == rhs.angle && this->ioMotorPower == rhs.ioMotorPower && this->isForCoralIntake == rhs.isForCoralIntake;
+    }
+    std::string to_string()
+    {
+        return "Height: " + units::to_string(height.convert<units::feet>()) + "; Angle: " + units::to_string(angle) + "; IO Power: " + std::to_string(ioMotorPower);
+    }
+};

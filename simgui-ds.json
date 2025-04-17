@@ -1,29 +1,44 @@
 {
+  "Keyboard 0 Settings": {
+    "window": {
+      "visible": true
+    }
+  },
   "keyboardJoysticks": [
     {
       "axisConfig": [
         {
-          "decKey": 65,
-          "incKey": 68
-        },
-        {
           "decKey": 87,
-          "incKey": 83
+          "decayRate": 1.0,
+          "incKey": 81,
+          "keyRate": 1.0
         },
         {
-          "decKey": 69,
-          "decayRate": 0.0,
-          "incKey": 82,
-          "keyRate": 0.009999999776482582
+          "decKey": 83,
+          "decayRate": 1.0,
+          "incKey": 65,
+          "keyRate": 1.0
+        },
+        {
+          "decKey": 88,
+          "decayRate": 1.0,
+          "incKey": 90,
+          "keyRate": 1.0
+        },
+        {
+          "decKey": 70,
+          "decayRate": 1.0,
+          "incKey": 68,
+          "keyRate": 1.0
         }
       ],
-      "axisCount": 3,
+      "axisCount": 4,
       "buttonCount": 4,
       "buttonKeys": [
-        90,
-        88,
-        67,
-        86
+        -1,
+        -1,
+        -1,
+        -1
       ],
       "povConfig": [
         {
@@ -37,7 +52,7 @@
           "key90": 326
         }
       ],
-      "povCount": 1
+      "povCount": 0
     },
     {
       "axisConfig": [
@@ -93,6 +108,9 @@
     {
       "guid": "030000004c050000c405000000000000",
       "useGamepad": true
+    },
+    {
+      "guid": "Keyboard0"
     }
   ]
 }
