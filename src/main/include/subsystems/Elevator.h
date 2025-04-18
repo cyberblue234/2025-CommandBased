@@ -1,7 +1,8 @@
 #pragma once
 
 #include <frc2/command/SubsystemBase.h>
-#include <frc2/command/button/Trigger.h>
+
+#include <frc/filter/Debouncer.h>
 
 #include <ctre/phoenix6/TalonFX.hpp>
 #include <ctre/phoenix6/configs/Configurator.hpp>
@@ -13,6 +14,7 @@
 #include <frc/system/plant/DCMotor.h>
 #include <frc/simulation/ElevatorSim.h>
 #include <frc/system/plant/LinearSystemId.h>
+#include <frc/simulation/DIOSim.h>
 
 #include <frc/DigitalInput.h>
 
@@ -55,15 +57,6 @@ public:
                 motor1.SetControl(controls::DutyCycleOut{power}
                     .WithLimitForwardMotion(GetEncoder() > kMaxEncoderValue || IsTopLimitSwitchClosed())
                     .WithLimitReverseMotion(IsBottomLimitSwitchClosed()));
-                if (frc::RobotBase::IsSimulation())
-                {
-                    ctre::phoenix6::sim::TalonFXSimState& motor1Sim = motor1.GetSimState();
-                    ctre::phoenix6::sim::TalonFXSimState& motor2Sim = motor2.GetSimState();
-                    motor1Sim.SetSupplyVoltage(frc::RobotController::GetBatteryVoltage());
-                    motor2Sim.SetSupplyVoltage(frc::RobotController::GetBatteryVoltage());
-                    motor1Sim.AddRotorPosition((1_mps / kMetersPerMotorTurn * power) * 0.02_s);
-                    motor2Sim.AddRotorPosition((1_mps / kMetersPerMotorTurn * power) * 0.02_s);
-                }
             }
         ).Unless
         (
@@ -88,18 +81,8 @@ public:
                 motor1.SetControl(controls::MotionMagicVoltage{(this->desiredHeight - kHeightOffset) / kMetersPerMotorTurn}
                         .WithLimitForwardMotion(GetEncoder() > kMaxEncoderValue || IsTopLimitSwitchClosed())
                         .WithLimitReverseMotion(IsBottomLimitSwitchClosed()));
-                if (frc::RobotBase::IsSimulation())
-                {
-                    ctre::phoenix6::sim::TalonFXSimState& motor1Sim = motor1.GetSimState();
-                    ctre::phoenix6::sim::TalonFXSimState& motor2Sim = motor2.GetSimState();
-                    motor1Sim.SetSupplyVoltage(frc::RobotController::GetBatteryVoltage());
-                    motor2Sim.SetSupplyVoltage(frc::RobotController::GetBatteryVoltage());
-                    units::turn_t setpoint{motor1.GetClosedLoopReference().GetValue()};
-                    motor1Sim.SetRawRotorPosition(setpoint);
-                    motor2Sim.SetRawRotorPosition(setpoint);
-                }
             }
-        );
+        ).OnlyIf([this] { return isElevatorRegistered; });
     }
 
     frc2::CommandPtr GoToPositionCommand(Position desiredPosition)
@@ -122,7 +105,7 @@ public:
     /// @brief Gets the state of the bottom limit switch
     /// @retval true if the limit switch is closed (pressed)
     /// @retval false if the limit switch is open
-    bool IsBottomLimitSwitchClosed() { return bottomLimitSwitch.Get() && simLimSwitch; }
+    bool IsBottomLimitSwitchClosed() { return bottomLimitSwitch.Get(); }
 
     /// @brief Gets the state of the top limit switch
     /// @retval true if the limit switch is closed (pressed)
@@ -162,10 +145,41 @@ public:
         );
     }
 
+    frc2::CommandPtr RegisterElevatorCommand()
+    {
+        return frc2::cmd::RunOnce([this]
+        {
+            ResetEncoders();
+            isElevatorRegistered = true;
+        });
+    }
+
     void Periodic() override 
     {
+        if (bottomLimitDebouncer.Calculate(IsBottomLimitSwitchClosed()))
+        {
+            
+        }
+
         stage1Publisher.Set(frc::Pose3d{0_m, 0_m, (GetHeight() - kHeightOffset) / 2, frc::Rotation3d{0_deg, 0_deg, 0_deg}});
         carriagePublisher.Set(frc::Pose3d{0_m, 0_m, GetHeight() - kHeightOffset, frc::Rotation3d{0_deg, 0_deg, 0_deg}});
+
+        if (frc::RobotBase::IsSimulation())
+        {
+            ctre::phoenix6::sim::TalonFXSimState& motor1Sim = motor1.GetSimState();
+            ctre::phoenix6::sim::TalonFXSimState& motor2Sim = motor2.GetSimState();
+            motor1Sim.SetSupplyVoltage(frc::RobotController::GetBatteryVoltage());
+            motor2Sim.SetSupplyVoltage(frc::RobotController::GetBatteryVoltage());
+            elevatorSim.SetInputVoltage(motor1Sim.GetMotorVoltage());
+            elevatorSim.Update(20_ms);
+
+            motor1Sim.SetRawRotorPosition((elevatorSim.GetPosition() - kHeightOffset) / kMetersPerMotorTurn);
+            motor2Sim.SetRawRotorPosition((elevatorSim.GetPosition() - kHeightOffset) / kMetersPerMotorTurn);
+            motor1Sim.SetRotorVelocity(elevatorSim.GetVelocity() / kMetersPerMotorTurn);
+            motor2Sim.SetRotorVelocity(elevatorSim.GetVelocity() / kMetersPerMotorTurn);
+
+            bottomLimitSim.SetValue(elevatorSim.WouldHitLowerLimit(GetHeight()));
+        }
     }
 
 private:
@@ -178,11 +192,12 @@ private:
 
     // Creates the limit switch - it is a digital (true or false) input
     frc::DigitalInput bottomLimitSwitch{RobotMap::Elevator::kBottomLimitSwitchID};
-    frc2::Trigger bottomLimitTrigger{[this] { return IsBottomLimitSwitchClosed(); }};
+    frc::Debouncer bottomLimitDebouncer{100_ms, frc::Debouncer::DebounceType::kBoth};
     frc::DigitalInput topLimitSwitch{RobotMap::Elevator::kTopLimitSwitchID};
     bool bypassTopLimit = false;
     // Simulated representation of the limit switch
-    bool simLimSwitch = true;
+    frc::sim::DIOSim bottomLimitSim{bottomLimitSwitch};
+    frc::sim::DIOSim topLimitSim{topLimitSwitch};
 
     // If the elevator is not registered, the elevator encoders have not been reset. 
     // In that case, we will not allow the elevator to use PID control
@@ -197,5 +212,17 @@ private:
 
     nt::StructPublisher<frc::Pose3d> stage1Publisher = nt::NetworkTableInstance::GetDefault().GetTable("Robot")->GetStructTopic<frc::Pose3d>("stage_1").Publish();
     nt::StructPublisher<frc::Pose3d> carriagePublisher = nt::NetworkTableInstance::GetDefault().GetTable("Robot")->GetStructTopic<frc::Pose3d>("carriage").Publish();
+
+    frc::sim::ElevatorSim elevatorSim
+    {
+        frc::DCMotor::KrakenX60(2),
+        kMotorGearing,
+        20_lb,
+        kSprocketPitchDiameter,
+        kHeightOffset,
+        kMaxElevatorHeight,
+        false,
+        kHeightOffset
+    };
     
 };

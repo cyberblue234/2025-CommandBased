@@ -444,6 +444,14 @@ namespace PathPlannerConstants
 /// @brief Constants for the Elevator Class
 namespace ElevatorConstants
 {
+    // The gearing between the motor and the sprocket
+    constexpr double kMotorGearing = 20;
+    // Theoretical diameter of the sprocket connected to the chain which raises the first stage
+    constexpr units::meter_t kSprocketPitchDiameter = 1.751_in;
+    // How many meters the carriage travels per rotation of the motors.
+    // Note, carriage raises at a rate of 2:1 compared to the first stage
+    constexpr units::meters_per_turn_t kMetersPerMotorTurn = 2 * (kSprocketPitchDiameter * std::numbers::pi) / units::turn_t{kMotorGearing};
+
     // PIDs and feedforward values
     constexpr double kP = 40.0;
     constexpr double kI = 0.0;
@@ -456,20 +464,12 @@ namespace ElevatorConstants
     constexpr units::turns_per_second_squared_t kAcceleration = 160_tr_per_s_sq;
     constexpr units::turns_per_second_cubed_t kJerk = 1600_tr_per_s_cu;
 
-    // The gearing between the motor and the sprocket
-    constexpr units::turn_t kMotorGearing = 20_tr;
-    // Theoretical diameter of the sprocket connected to the chain which raises the first stage
-    constexpr units::meter_t kSprocketPitchDiameter = 1.751_in;
-    // How many meters the carriage travels per rotation of the motors.
-    // Note, carriage raises at a rate of 2:1 compared to the first stage
-    constexpr units::meters_per_turn_t kMetersPerMotorTurn = 2 * (kSprocketPitchDiameter * std::numbers::pi) / kMotorGearing;
-
     // The distance from the ground to the bottom of the carriage
-    constexpr units::meter_t kHeightOffset      = 6.5_in;
+    constexpr units::meter_t kHeightOffset = 6.5_in;
     // Should be equal to kMaxEncoderValue * kMetersPerMotorTurn + kHeightOffset
     constexpr units::meter_t kMaxElevatorHeight = 4.5_ft + kHeightOffset;
     // Maximum encoder count - should be slightly lower than the maximum possible encoder count
-    constexpr units::turn_t kMaxEncoderValue    = (kMaxElevatorHeight - kHeightOffset) / kMetersPerMotorTurn;
+    constexpr units::turn_t kMaxEncoderValue = (kMaxElevatorHeight - kHeightOffset) / kMetersPerMotorTurn;
 
     constexpr units::meter_t kTolerance = 0.5_in;
 

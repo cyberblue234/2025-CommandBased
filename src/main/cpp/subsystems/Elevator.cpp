@@ -44,13 +44,11 @@ Elevator::Elevator()
     // Makes the second elevator motor a follower to the first elevator motor
     motor2.SetControl(follower);
 
-    if (frc::RobotBase::IsSimulation()) isElevatorRegistered = true;
-
-    bottomLimitTrigger.Debounce(100_ms).OnTrue(frc2::cmd::RunOnce([this]
+    if (frc::RobotBase::IsSimulation())
     {
-        ResetEncoders();
-        if (!isElevatorRegistered) isElevatorRegistered = true;
-    }));
+        topLimitSim.SetValue(false);
+        bottomLimitSim.SetValue(true);
+    }
 }
 
 const units::turn_t Elevator::GetEncoder()
