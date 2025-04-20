@@ -17,6 +17,7 @@ void Robot::RobotPeriodic()
 {
 	frc2::CommandScheduler::GetInstance().Run();
 	frc::SmartDashboard::PutNumber("Voltage", frc::RobotController::GetBatteryVoltage().value());
+	container.UpdateSimulatedRobotComponents();
 }
 
 void Robot::DisabledInit() {}

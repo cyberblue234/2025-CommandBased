@@ -69,7 +69,7 @@ frc2::CommandPtr Elevator::StopMotorsCommand()
         { 
             StopMotors();
         }
-    );
+    ).WithName("ElevatorStopMotor");
 }
 
 frc2::CommandPtr Elevator::SetMotorsCommand(double power)
@@ -88,7 +88,7 @@ frc2::CommandPtr Elevator::SetMotorsCommand(double power)
         {
             return isElevatorRegistered == false && power > 0;
         }
-    );
+    ).WithName("ElevatorSetMotors");
 }
 
 frc2::CommandPtr Elevator::GoToHeightCommand(units::meter_t desiredHeight)
@@ -106,21 +106,22 @@ frc2::CommandPtr Elevator::GoToHeightCommand(units::meter_t desiredHeight)
                     .WithLimitForwardMotion(GetEncoder() > kMaxEncoderValue || IsTopLimitSwitchClosed())
                     .WithLimitReverseMotion(IsBottomLimitSwitchClosed()));
         }
-    ).OnlyIf([this] { return isElevatorRegistered; });
+    ).OnlyIf([this] { return isElevatorRegistered; }).WithName("ElevatorGoToHeight");
 }
 
 frc2::CommandPtr Elevator::GoToPositionCommand(Position desiredPosition)
 {
-    return GoToHeightCommand(desiredPosition.height).BeforeStarting([this, desiredPosition]
-    {
-        this->desiredPosition = desiredPosition;
-    });
+    return GoToHeightCommand(desiredPosition.height).WithName("ElevatorGoToPosition");
 }
 
 void Elevator::InitSendable(wpi::SendableBuilder &builder)
 {
     frc2::SubsystemBase::InitSendable(builder);
-
+    
+    builder.AddDoubleProperty("desiredHeight",
+        [this] { return desiredHeight.value(); },
+        {}
+    );
     builder.AddDoubleProperty("height",
         [this] { return GetHeight().convert<units::feet>().value(); },
         {}
@@ -269,9 +270,6 @@ void Elevator::Periodic()
         ResetEncoders();
         isElevatorRegistered = true;
     }
-
-    stage1Publisher.Set(frc::Pose3d{0_m, 0_m, (GetHeight() - kHeightOffset) / 2, frc::Rotation3d{0_deg, 0_deg, 0_deg}});
-    carriagePublisher.Set(frc::Pose3d{0_m, 0_m, GetHeight() - kHeightOffset, frc::Rotation3d{0_deg, 0_deg, 0_deg}});
 
     if (frc::RobotBase::IsSimulation())
     {

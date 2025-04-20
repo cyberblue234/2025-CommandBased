@@ -16,6 +16,7 @@
 #include "Constants.h"
 #include "subsystems/Drivetrain.h"
 #include "subsystems/Elevator.h"
+#include "subsystems/Claw.h"
 
 class RobotContainer
 {
@@ -26,6 +27,23 @@ public:
 
     Drivetrain *GetSwerve() { return &swerve; }
     Elevator *GetElevator() { return &elevator; }
+    Wrist *GetWrist() { return &wrist; }
+    IO *GetIO() { return &io; }
+
+    frc2::CommandPtr SetDesiredPositionCommand(Position desiredPosition)
+    {
+        return frc2::cmd::RunOnce
+        (
+            [this, desiredPosition] { this->desiredPosition = desiredPosition; }
+        );
+    }
+
+    void UpdateSimulatedRobotComponents()
+    {
+        stage1Publisher.Set(frc::Pose3d{0_m, 0_m, (elevator.GetHeight() - ElevatorConstants::kHeightOffset) / 2, frc::Rotation3d{0_deg, 0_deg, 0_deg}});
+        carriagePublisher.Set(frc::Pose3d{0_m, 0_m, elevator.GetHeight() - ElevatorConstants::kHeightOffset, frc::Rotation3d{0_deg, 0_deg, 0_deg}});
+        clawPublisher.Set(frc::Pose3d{0.265_m, 0_m, elevator.GetHeight() - ElevatorConstants::kHeightOffset + 0.4354_m, frc::Rotation3d{0_deg, wrist.GetCurrentAngle(), 0_deg}});
+    }
 
 private:
     void ConfigureBindings();
@@ -35,6 +53,18 @@ private:
 
     Drivetrain swerve{};
     Elevator elevator{};
+    nt::StructPublisher<frc::Pose3d> stage1Publisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructTopic<frc::Pose3d>("stage_1").Publish();
+    nt::StructPublisher<frc::Pose3d> carriagePublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructTopic<frc::Pose3d>("carriage").Publish();
+    Wrist wrist{};
+    nt::StructPublisher<frc::Pose3d> clawPublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructTopic<frc::Pose3d>("claw").Publish();
+    IO io{};
 
     frc::SendableChooser<std::string> autoChooser;
+
+    Position desiredPosition;
+
+    void AddTeleopButtonControl(const int button, frc2::CommandPtr command)
+    {
+        controlBoard.Button(button).Debounce(100_ms).WhileTrue(std::move(command).OnlyIf(frc::DriverStation::IsTeleop));
+    }
 };

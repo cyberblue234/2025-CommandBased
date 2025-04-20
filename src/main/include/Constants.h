@@ -182,24 +182,24 @@ namespace RobotMap
 namespace ControlsConstants
 {
     // Analog inputs
-    const int kManualWristAxis = 2;
-    const int kManualElevatorAxis = 1;
-    const int kClimberAxis = 3;
-    const int kManualIntakeAxis = 0;
+    constexpr int kManualWristAxis = 2;
+    constexpr int kManualElevatorAxis = 1;
+    constexpr int kClimberAxis = 3;
+    constexpr int kManualIntakeAxis = 0;
 
-    const int kL1Button = 5;
-    const int kL2Button = 3;
-    const int kL3Button = 1;
-    const int kL4Button = 6;
-    const int kAlgaeHighButton = 8;
-    const int kAlgaeLowButton = 11;
-    const int kCoralStationButton = 4;
-    const int kProcessorButton = 7;
-    const int kBargeButton = 2;
-    const int kCoralHomeButton = 9;
-    const int kAlgaeHomeButton = 12;
+    constexpr int kL1Button = 5;
+    constexpr int kL2Button = 3;
+    constexpr int kL3Button = 1;
+    constexpr int kL4Button = 6;
+    constexpr int kAlgaeHighButton = 8;
+    constexpr int kAlgaeLowButton = 11;
+    constexpr int kCoralStationButton = 4;
+    constexpr int kProcessorButton = 7;
+    constexpr int kBargeButton = 2;
+    constexpr int kCoralHomeButton = 9;
+    constexpr int kAlgaeHomeButton = 12;
 
-    const int kIOButton = 10;
+    constexpr int kIOButton = 10;
 }
 
 /// @brief Personal add-on to the WPILib units library. See https://docs.wpilib.org/en/stable/docs/software/basic-programming/cpp-units.html for details on it.
@@ -482,10 +482,52 @@ namespace ElevatorConstants
     constexpr double kElevatorPower = 0.25;
 }
 
+namespace ClawConstants
+{
+    namespace Gains
+    {
+        constexpr double kP = 1.3;
+        constexpr double kI = 0.0;
+        constexpr double kD = 0.01;
+        constexpr double kS = 0.0;
+        constexpr double kG = 0.0;
+        constexpr double kV = 0.135;
+        constexpr double kA = 0.005;
+    }
+    namespace MotionMagic
+    {
+        constexpr units::turns_per_second_t kCruiseVelocity = 200_tps;
+        constexpr units::turns_per_second_squared_t kAcceleration = 400_tr_per_s_sq;
+        constexpr units::turns_per_second_cubed_t kJerk = 4000_tr_per_s_cu;
+    }
+
+    // Intake and output powers for coral and algae
+    const double kCoralIntakePower = -0.35;
+    const double kAlgaeIntakePower = 0.5;
+    // Outputting should be negative compared to intaking
+    const double kCoralOutputPower = 0.5;
+    const double kProcessorPower = -0.3;
+    const double kBargePower = -1.0;
+    const double kManualIOPower = 0.2;
+
+    const units::turn_t kCanCoderMagnetOffset = 0.1582_tr;
+
+    const units::degree_t kTolerance = 2.0_deg;
+
+    const units::degree_t kLowLimit = -10.0_deg;
+    const units::degree_t kHighLimit = 180_deg;
+
+    const double kWristGearRatio = 233.45;
+    const units::degrees_per_turn_t kDegreesPerMotorTurn = 360_deg / units::turn_t{kWristGearRatio};
+
+    const double kWristPower = 0.2;
+}
+
 
 /// @brief Struct for the different possible positions
 struct Position
 {
+    const std::string name = "null";
     /// @brief The height of the elevator
     const units::meter_t height = 0_m;
     /// @brief The angle of the claw
@@ -497,14 +539,29 @@ struct Position
 
     const Position operator=(const Position &rhs)
     {
-        return {rhs.height, rhs.angle, rhs.ioMotorPower, rhs.isForCoralIntake};
+        return {rhs.name, rhs.height, rhs.angle, rhs.ioMotorPower, rhs.isForCoralIntake};
     }
     bool operator==(const Position &rhs)
     {
-        return this->height == rhs.height && this->angle == rhs.angle && this->ioMotorPower == rhs.ioMotorPower && this->isForCoralIntake == rhs.isForCoralIntake;
+        return this->name == rhs.name;
     }
     std::string to_string()
     {
-        return "Height: " + units::to_string(height.convert<units::feet>()) + "; Angle: " + units::to_string(angle) + "; IO Power: " + std::to_string(ioMotorPower);
+        return name + "; Height: " + units::to_string(height.convert<units::feet>()) + "; Angle: " + units::to_string(angle) + "; IO Power: " + std::to_string(ioMotorPower);
     }
 };
+
+namespace Positions
+{    
+    const Position L1           = Position("L1", 1.6_ft, 150.0_deg,  ClawConstants::kCoralOutputPower, false);
+    const Position L2           = Position("L2", 1.1_ft, 13.5_deg,  -ClawConstants::kCoralOutputPower, false);
+    const Position L3           = Position("L3", 2.5_ft, 13.5_deg,  -ClawConstants::kCoralOutputPower, false);
+    const Position L4           = Position("L4", 4.55_ft, 13.5_deg, -ClawConstants::kCoralOutputPower, false);
+    const Position AlgaeLow     = Position("AlgaeLow", 2.2_ft, 170.0_deg,  ClawConstants::kAlgaeIntakePower, false);
+    const Position AlgaeHigh    = Position("AlgaeHigh", 3.4_ft, 170.0_deg,  ClawConstants::kAlgaeIntakePower, false);
+    const Position CoralStation = Position("CoralStation", 1.915_ft, 110.0_deg,  ClawConstants::kCoralIntakePower, true);
+    const Position Processor    = Position("Processor", ElevatorConstants::kHeightOffset, 160.0_deg,  ClawConstants::kProcessorPower, false);
+    const Position Barge        = Position("Barge", ElevatorConstants::kMaxElevatorHeight, 63.0_deg,  ClawConstants::kBargePower, false);
+    const Position CoralHome    = Position("CoralHome", ElevatorConstants::kHeightOffset, 15.0_deg,  ClawConstants::kCoralIntakePower, false);
+    const Position AlgaeHome    = Position("AlgaeHome", ElevatorConstants::kHeightOffset, 75.0_deg,  0.0, false);
+}

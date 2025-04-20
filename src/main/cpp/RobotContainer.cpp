@@ -18,6 +18,8 @@ RobotContainer::RobotContainer()
 	frc::SmartDashboard::PutData("Auto Chooser", &autoChooser);
 	frc::SmartDashboard::PutData("Swerve", &swerve);
 	frc::SmartDashboard::PutData("Elevator", &elevator);
+	frc::SmartDashboard::PutData("Wrist", &wrist);
+	frc::SmartDashboard::PutData("IO", &io);
 }
 
 void RobotContainer::ConfigureBindings() 
@@ -39,14 +41,39 @@ void RobotContainer::ConfigureBindings()
 		elevator.StopMotorsCommand()
 	);
 
-	controlBoard.Button(1).Debounce(100_ms).WhileTrue(elevator.GoToHeightCommand(1_ft));
-	controlBoard.Button(2).Debounce(100_ms).WhileTrue(elevator.GoToHeightCommand(2_ft));
-	controlBoard.Button(3).Debounce(100_ms).WhileTrue(elevator.GoToHeightCommand(3_ft));
-	controlBoard.Button(4).Debounce(100_ms).WhileTrue(elevator.GoToHeightCommand(4_ft));
-	controlBoard.Button(5).Debounce(100_ms).WhileTrue(elevator.GoToHeightCommand(5_ft));
+	wrist.SetDefaultCommand
+	(
+		wrist.StopWristMotorCommand()
+	);
 
-	controlBoard.AxisGreaterThan(ControlsConstants::kManualElevatorAxis, 0.5).WhileTrue(elevator.SetMotorsCommand(ElevatorConstants::kElevatorPower));
-	controlBoard.AxisLessThan(ControlsConstants::kManualElevatorAxis, -0.5).WhileTrue(elevator.SetMotorsCommand(-ElevatorConstants::kElevatorPower));
+	io.SetDefaultCommand
+	(
+		io.StopIOMotorCommand()
+	);
+
+	AddTeleopButtonControl
+	(
+		ControlsConstants::kL1Button,
+		frc2::cmd::Parallel
+		(
+			SetDesiredPositionCommand(Positions::L1),
+			elevator.GoToPositionCommand(Positions::L1),
+			wrist.GoToPositionCommand(Positions::L1),
+			io.SetIOPowerCommand(Positions::L1.ioMotorPower).OnlyIf([this] { return elevator.IsAtPosition() && wrist.IsAtPosition(); })
+		)
+	);
+	
+
+	// Manual elevator controls
+	controlBoard.AxisGreaterThan(ControlsConstants::kManualElevatorAxis, 0.5).WhileTrue(elevator.SetMotorsCommand(ElevatorConstants::kElevatorPower).OnlyIf(frc::DriverStation::IsTeleop));
+	controlBoard.AxisLessThan(ControlsConstants::kManualElevatorAxis, -0.5).WhileTrue(elevator.SetMotorsCommand(-ElevatorConstants::kElevatorPower).OnlyIf(frc::DriverStation::IsTeleop));
+	// Manual wrist controls
+	controlBoard.AxisGreaterThan(ControlsConstants::kManualWristAxis, 0.5).WhileTrue(wrist.SetWristPowerCommand(ClawConstants::kWristPower).OnlyIf(frc::DriverStation::IsTeleop));
+	controlBoard.AxisLessThan(ControlsConstants::kManualWristAxis, -0.5).WhileTrue(wrist.SetWristPowerCommand(-ClawConstants::kWristPower).OnlyIf(frc::DriverStation::IsTeleop));
+	// Manual IO controls
+	controlBoard.AxisGreaterThan(ControlsConstants::kManualIntakeAxis, 0.5).WhileTrue(io.SetIOPowerCommand(ClawConstants::kManualIOPower).OnlyIf(frc::DriverStation::IsTeleop));
+	controlBoard.AxisLessThan(ControlsConstants::kManualIntakeAxis, -0.5).WhileTrue(io.SetIOPowerCommand(-ClawConstants::kManualIOPower).OnlyIf(frc::DriverStation::IsTeleop));
+	
 
 	// Sys Id triggers. Only works during Test mode.
 	gamepad.Back().OnTrue(frc2::cmd::RunOnce(SignalLogger::Start).OnlyIf(frc::DriverStation::IsTest));

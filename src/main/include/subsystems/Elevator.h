@@ -66,7 +66,7 @@ public:
         return topLimitSwitch.Get(); 
     }
 
-    bool IsAtPosition() { return units::math::abs<units::meter_t>(GetHeight() - desiredHeight) < kTolerance; }
+    bool IsAtPosition() { return units::math::abs<units::meter_t>(GetHeight() - desiredHeight) < ElevatorConstants::kTolerance; }
 
     void SetBypassTopLimit(bool set)
     {
@@ -88,7 +88,6 @@ private:
     configs::TalonFXConfiguration motorConfig{};
 
     units::meter_t desiredHeight;
-    Position desiredPosition;
 
     // Creates the limit switch - it is a digital (true or false) input
     frc::DigitalInput bottomLimitSwitch{RobotMap::Elevator::kBottomLimitSwitchID};
@@ -110,8 +109,7 @@ private:
     // If followerInverted is true, the input will be the opposite (5 volts -> -5 volts)
     controls::Follower follower{RobotMap::Elevator::kMotor1ID, followerInverted};
 
-    nt::StructPublisher<frc::Pose3d> stage1Publisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructTopic<frc::Pose3d>("stage_1").Publish();
-    nt::StructPublisher<frc::Pose3d> carriagePublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructTopic<frc::Pose3d>("carriage").Publish();
+    
 
     frc::sim::ElevatorSim elevatorSim
     {
