@@ -39,7 +39,12 @@ void RobotContainer::ConfigureBindings()
 		elevator.StopMotorsCommand()
 	);
 
-	gamepad.A().WhileTrue(elevator.GoToHeightCommand(3_ft));
+	controlBoard.Button(1).Debounce(100_ms).WhileTrue(elevator.GoToHeightCommand(1_ft));
+	controlBoard.Button(2).Debounce(100_ms).WhileTrue(elevator.GoToHeightCommand(2_ft));
+	controlBoard.Button(3).Debounce(100_ms).WhileTrue(elevator.GoToHeightCommand(3_ft));
+	controlBoard.Button(4).Debounce(100_ms).WhileTrue(elevator.GoToHeightCommand(4_ft));
+	controlBoard.Button(5).Debounce(100_ms).WhileTrue(elevator.GoToHeightCommand(5_ft));
+
 	controlBoard.AxisGreaterThan(ControlsConstants::kManualElevatorAxis, 0.5).WhileTrue(elevator.SetMotorsCommand(ElevatorConstants::kElevatorPower));
 	controlBoard.AxisLessThan(ControlsConstants::kManualElevatorAxis, -0.5).WhileTrue(elevator.SetMotorsCommand(-ElevatorConstants::kElevatorPower));
 

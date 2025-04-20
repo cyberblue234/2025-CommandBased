@@ -16,6 +16,7 @@ void Robot::RobotInit()
 void Robot::RobotPeriodic()
 {
 	frc2::CommandScheduler::GetInstance().Run();
+	frc::SmartDashboard::PutNumber("Voltage", frc::RobotController::GetBatteryVoltage().value());
 }
 
 void Robot::DisabledInit() {}
@@ -26,11 +27,11 @@ void Robot::DisabledExit() {}
 
 void Robot::AutonomousInit()
 {
-	m_autonomousCommand = m_container.GetAutonomousCommand();
+	autonCommand = container.GetAutonomousCommand();
 
-	if (m_autonomousCommand)
+	if (autonCommand)
 	{
-		m_autonomousCommand->Schedule();
+		autonCommand->Schedule();
 	}
 }
 
@@ -38,9 +39,9 @@ void Robot::AutonomousPeriodic() {}
 
 void Robot::AutonomousExit()
 {
-	if (m_autonomousCommand)
+	if (autonCommand)
 	{
-		m_autonomousCommand->Cancel();
+		autonCommand->Cancel();
 	}
 }
 
@@ -60,6 +61,20 @@ void Robot::TestInit()
 void Robot::TestPeriodic() {}
 
 void Robot::TestExit() {}
+
+void Robot::SimulationPeriodic()
+{
+	// Drivetrain *swerve = container.GetSwerve();
+	// std::vector<units::ampere_t> totalCurrents;
+	// for (auto &module : swerve->GetModules())
+	// {
+	// 	totalCurrents.push_back(module->GetDriveMotor().GetSimState().GetSupplyCurrent());
+	// }
+	// Elevator *elevator = container.GetElevator();
+	// totalCurrents.push_back(elevator->GetMotor1()->GetSimState().GetSupplyCurrent());
+	// totalCurrents.push_back(elevator->GetMotor2()->GetSimState().GetSupplyCurrent());
+	// frc::sim::RoboRioSim::SetVInVoltage(frc::sim::BatterySim::Calculate(13_V, 0.02_Ohm, totalCurrents));
+}
 
 #ifndef RUNNING_FRC_TESTS
 int main()

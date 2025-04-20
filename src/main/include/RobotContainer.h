@@ -24,6 +24,9 @@ public:
 
     std::optional<frc2::CommandPtr> GetAutonomousCommand();
 
+    Drivetrain *GetSwerve() { return &swerve; }
+    Elevator *GetElevator() { return &elevator; }
+
 private:
     void ConfigureBindings();
 

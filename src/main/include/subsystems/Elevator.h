@@ -1,7 +1,7 @@
 #pragma once
 
 #include <frc2/command/SubsystemBase.h>
-
+#include <frc2/command/button/Trigger.h>
 #include <frc/filter/Debouncer.h>
 
 #include <ctre/phoenix6/TalonFX.hpp>
@@ -20,6 +20,8 @@
 
 #include <frc/Timer.h>
 
+#include <unordered_map>
+
 #include "Constants.h"
 
 using namespace ElevatorConstants;
@@ -31,67 +33,15 @@ public:
     /// @brief Constructs the elevator
     Elevator();
 
-    void StopMotors()
-    {
-        motor1.StopMotor(); 
-        motor2.StopMotor(); 
-    }
+    void StopMotors();
 
-    frc2::CommandPtr StopMotorsCommand()
-    {
-        return RunOnce
-        (
-            [this] 
-            { 
-                StopMotors();
-            }
-        );
-    }
+    frc2::CommandPtr StopMotorsCommand();
 
-    frc2::CommandPtr SetMotorsCommand(double power)
-    {
-        return Run
-        (   
-            [this, power] 
-            {
-                motor1.SetControl(controls::DutyCycleOut{power}
-                    .WithLimitForwardMotion(GetEncoder() > kMaxEncoderValue || IsTopLimitSwitchClosed())
-                    .WithLimitReverseMotion(IsBottomLimitSwitchClosed()));
-            }
-        ).Unless
-        (
-            [this, power] 
-            {
-                return isElevatorRegistered == false && power > 0;
-            }
-        );
-    }
+    frc2::CommandPtr SetMotorsCommand(double power);
 
-    frc2::CommandPtr GoToHeightCommand(units::meter_t desiredHeight)
-    {
-        return StartRun
-        (
-            [this, desiredHeight]
-            {
-                this->desiredHeight = desiredHeight;
-                StopMotors();
-            },
-            [this]
-            {
-                motor1.SetControl(controls::MotionMagicVoltage{(this->desiredHeight - kHeightOffset) / kMetersPerMotorTurn}
-                        .WithLimitForwardMotion(GetEncoder() > kMaxEncoderValue || IsTopLimitSwitchClosed())
-                        .WithLimitReverseMotion(IsBottomLimitSwitchClosed()));
-            }
-        ).OnlyIf([this] { return isElevatorRegistered; });
-    }
+    frc2::CommandPtr GoToHeightCommand(units::meter_t desiredHeight);
 
-    frc2::CommandPtr GoToPositionCommand(Position desiredPosition)
-    {
-        return GoToHeightCommand(desiredPosition.height).BeforeStarting([this, desiredPosition]
-        {
-            this->desiredPosition = desiredPosition;
-        });
-    }
+    frc2::CommandPtr GoToPositionCommand(Position desiredPosition);
     
     /// @brief Gets the greater of the two motors' encoder values
     /// @return The greater encoder value
@@ -123,76 +73,26 @@ public:
         bypassTopLimit = set;
     }
 
-    void InitSendable(wpi::SendableBuilder &builder) override
-    {
-        frc2::SubsystemBase::InitSendable(builder);
+    void InitSendable(wpi::SendableBuilder &builder) override;
 
-        builder.AddDoubleProperty("height",
-            [this] { return GetHeight().convert<units::feet>().value(); },
-            {}
-        );
-        builder.AddBooleanProperty("bottomLimitSwitch",
-            [this] { return IsBottomLimitSwitchClosed(); },
-            {}
-        );
-        builder.AddBooleanProperty("topLimitSwitch",
-            [this] { return IsTopLimitSwitchClosed(); },
-            {}
-        );
-        builder.AddBooleanProperty("isElevatorRegistered",
-            [this] { return isElevatorRegistered; },
-            {}
-        );
-    }
+    void Periodic() override;
 
-    frc2::CommandPtr RegisterElevatorCommand()
-    {
-        return frc2::cmd::RunOnce([this]
-        {
-            ResetEncoders();
-            isElevatorRegistered = true;
-        });
-    }
-
-    void Periodic() override 
-    {
-        if (bottomLimitDebouncer.Calculate(IsBottomLimitSwitchClosed()))
-        {
-            
-        }
-
-        stage1Publisher.Set(frc::Pose3d{0_m, 0_m, (GetHeight() - kHeightOffset) / 2, frc::Rotation3d{0_deg, 0_deg, 0_deg}});
-        carriagePublisher.Set(frc::Pose3d{0_m, 0_m, GetHeight() - kHeightOffset, frc::Rotation3d{0_deg, 0_deg, 0_deg}});
-
-        if (frc::RobotBase::IsSimulation())
-        {
-            ctre::phoenix6::sim::TalonFXSimState& motor1Sim = motor1.GetSimState();
-            ctre::phoenix6::sim::TalonFXSimState& motor2Sim = motor2.GetSimState();
-            motor1Sim.SetSupplyVoltage(frc::RobotController::GetBatteryVoltage());
-            motor2Sim.SetSupplyVoltage(frc::RobotController::GetBatteryVoltage());
-            elevatorSim.SetInputVoltage(motor1Sim.GetMotorVoltage());
-            elevatorSim.Update(20_ms);
-
-            motor1Sim.SetRawRotorPosition((elevatorSim.GetPosition() - kHeightOffset) / kMetersPerMotorTurn);
-            motor2Sim.SetRawRotorPosition((elevatorSim.GetPosition() - kHeightOffset) / kMetersPerMotorTurn);
-            motor1Sim.SetRotorVelocity(elevatorSim.GetVelocity() / kMetersPerMotorTurn);
-            motor2Sim.SetRotorVelocity(elevatorSim.GetVelocity() / kMetersPerMotorTurn);
-
-            bottomLimitSim.SetValue(elevatorSim.WouldHitLowerLimit(GetHeight()));
-        }
-    }
+    hardware::TalonFX *GetMotor1() { return &motor1; }
+    hardware::TalonFX *GetMotor2() { return &motor2; }
 
 private:
     // Creates the motor objects
     hardware::TalonFX motor1{RobotMap::Elevator::kMotor1ID, "rio"};
     hardware::TalonFX motor2{RobotMap::Elevator::kMotor2ID, "rio"};
 
+    configs::TalonFXConfiguration motorConfig{};
+
     units::meter_t desiredHeight;
     Position desiredPosition;
 
     // Creates the limit switch - it is a digital (true or false) input
     frc::DigitalInput bottomLimitSwitch{RobotMap::Elevator::kBottomLimitSwitchID};
-    frc::Debouncer bottomLimitDebouncer{100_ms, frc::Debouncer::DebounceType::kBoth};
+    frc2::Trigger bottomLimitTrigger{[this] { return IsBottomLimitSwitchClosed(); }};
     frc::DigitalInput topLimitSwitch{RobotMap::Elevator::kTopLimitSwitchID};
     bool bypassTopLimit = false;
     // Simulated representation of the limit switch
@@ -210,8 +110,8 @@ private:
     // If followerInverted is true, the input will be the opposite (5 volts -> -5 volts)
     controls::Follower follower{RobotMap::Elevator::kMotor1ID, followerInverted};
 
-    nt::StructPublisher<frc::Pose3d> stage1Publisher = nt::NetworkTableInstance::GetDefault().GetTable("Robot")->GetStructTopic<frc::Pose3d>("stage_1").Publish();
-    nt::StructPublisher<frc::Pose3d> carriagePublisher = nt::NetworkTableInstance::GetDefault().GetTable("Robot")->GetStructTopic<frc::Pose3d>("carriage").Publish();
+    nt::StructPublisher<frc::Pose3d> stage1Publisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructTopic<frc::Pose3d>("stage_1").Publish();
+    nt::StructPublisher<frc::Pose3d> carriagePublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructTopic<frc::Pose3d>("carriage").Publish();
 
     frc::sim::ElevatorSim elevatorSim
     {

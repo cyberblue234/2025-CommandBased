@@ -9,6 +9,9 @@
 #include <frc/TimedRobot.h>
 #include <frc2/command/CommandPtr.h>
 
+#include <frc/simulation/BatterySim.h>
+#include <frc/simulation/RoboRioSim.h>
+
 #include "RobotContainer.h"
 
 class Robot : public frc::TimedRobot
@@ -29,9 +32,10 @@ public:
     void TestInit() override;
     void TestPeriodic() override;
     void TestExit() override;
+    void SimulationPeriodic() override;
 
 private:
-    std::optional<frc2::CommandPtr> m_autonomousCommand;
+    std::optional<frc2::CommandPtr> autonCommand;
 
-    RobotContainer m_container;
+    RobotContainer container;
 };

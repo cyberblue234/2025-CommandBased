@@ -453,16 +453,22 @@ namespace ElevatorConstants
     constexpr units::meters_per_turn_t kMetersPerMotorTurn = 2 * (kSprocketPitchDiameter * std::numbers::pi) / units::turn_t{kMotorGearing};
 
     // PIDs and feedforward values
-    constexpr double kP = 40.0;
-    constexpr double kI = 0.0;
-    constexpr double kD = 0.1;
-    constexpr double kS = 0.0;
-    constexpr double kG = 0.0;
-    constexpr double kV = 9.0;
-    constexpr double kA = 0.3;
-    constexpr units::turns_per_second_t kCruiseVelocity = 80_tps;
-    constexpr units::turns_per_second_squared_t kAcceleration = 160_tr_per_s_sq;
-    constexpr units::turns_per_second_cubed_t kJerk = 1600_tr_per_s_cu;
+    namespace Gains
+    {
+        constexpr double kP = 1.3;
+        constexpr double kI = 0.0;
+        constexpr double kD = 0.01;
+        constexpr double kS = 0.0;
+        constexpr double kG = 0.0;
+        constexpr double kV = 0.135;
+        constexpr double kA = 0.005;
+    }
+    namespace MotionMagic
+    {
+        constexpr units::turns_per_second_t kCruiseVelocity = 200_tps;
+        constexpr units::turns_per_second_squared_t kAcceleration = 400_tr_per_s_sq;
+        constexpr units::turns_per_second_cubed_t kJerk = 4000_tr_per_s_cu;
+    }
 
     // The distance from the ground to the bottom of the carriage
     constexpr units::meter_t kHeightOffset = 6.5_in;
