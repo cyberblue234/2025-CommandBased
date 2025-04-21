@@ -486,19 +486,19 @@ namespace ClawConstants
 {
     namespace Gains
     {
-        constexpr double kP = 1.3;
+        constexpr double kP = 100;
         constexpr double kI = 0.0;
-        constexpr double kD = 0.01;
+        constexpr double kD = 0.0;
         constexpr double kS = 0.0;
         constexpr double kG = 0.0;
-        constexpr double kV = 0.135;
-        constexpr double kA = 0.005;
+        constexpr double kV = 33;
+        constexpr double kA = 0.5;
     }
     namespace MotionMagic
     {
-        constexpr units::turns_per_second_t kCruiseVelocity = 200_tps;
-        constexpr units::turns_per_second_squared_t kAcceleration = 400_tr_per_s_sq;
-        constexpr units::turns_per_second_cubed_t kJerk = 4000_tr_per_s_cu;
+        constexpr units::turns_per_second_t kCruiseVelocity = 0.5_tps;
+        constexpr units::turns_per_second_squared_t kAcceleration = 2_tr_per_s_sq;
+        constexpr units::turns_per_second_cubed_t kJerk = 6_tr_per_s_cu;
     }
 
     // Intake and output powers for coral and algae

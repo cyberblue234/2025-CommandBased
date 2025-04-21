@@ -21,63 +21,21 @@ class Wrist : public frc2::SubsystemBase
 public:
     Wrist();
 
-    void StopWristMotor()
-    {
-        wristMotor.StopMotor();
-    }
+    void StopWristMotor();
 
     /// @brief Stops the wrist motor until Set is called
-    frc2::CommandPtr StopWristMotorCommand()
-    {
-        return RunOnce
-        (
-            [this]
-            {
-                StopWristMotor();
-            }
-        );
-    }
+    frc2::CommandPtr StopWristMotorCommand();
 
     /// @brief Manually sets the power to the wrist motor
     /// @param power Power to set to the motor
-    frc2::CommandPtr SetWristPowerCommand(double power)
-    {
-        return Run
-        (
-            [this, power]
-            {
-                wristMotor.SetControl(controls::DutyCycleOut{power}
-                            .WithLimitForwardMotion(GetCurrentAngle() <= 1_deg));
-            }
-        );
-    }
+    frc2::CommandPtr SetWristPowerCommand(double power);
 
     /// @brief Uses PID control to go to a desired angle
     /// @param desiredAngle Desired angle to travel to
-    frc2::CommandPtr GoToAngleCommand(units::degree_t desiredAngle)
-    {
-        return StartRun
-        (
-            [this, desiredAngle]
-            {
-                this->desiredAngle = desiredAngle;
-                StopWristMotor();
-
-            },
-            [this, desiredAngle]
-            {
-                wristMotor.SetControl(controls::MotionMagicVoltage(desiredAngle)
-                                .WithLimitReverseMotion(GetCurrentAngle() >= kHighLimit)
-                                .WithLimitForwardMotion(GetCurrentAngle() <= kLowLimit));
-            }
-        ).WithName("WristGoToAngle");
-    }
+    frc2::CommandPtr GoToAngleCommand(units::degree_t desiredAngle);
     /// @brief Sets the angle of the claw to a Position
     /// @param pos Position object
-    frc2::CommandPtr GoToPositionCommand(Position desiredPosition)
-    {
-        return GoToAngleCommand(desiredPosition.angle).WithName("WristGoToPosition");
-    }
+    frc2::CommandPtr GoToPositionCommand(Position desiredPosition);
 
     /// @brief Gets the current angle of the claw
     /// @return The absolute value of the CANcoder in degrees
@@ -85,45 +43,14 @@ public:
 
     bool IsAtPosition() { return units::math::abs<units::degree_t>(GetCurrentAngle() - desiredAngle) < ClawConstants::kTolerance; }
 
-    void InitSendable(wpi::SendableBuilder &builder) override
-    {
-        frc2::SubsystemBase::InitSendable(builder);
-        
-        builder.AddDoubleProperty("desiredAngle",
-            [this] { return desiredAngle.value(); },
-            {}
-        );
-        builder.AddDoubleProperty("angle",
-            [this] { return GetCurrentAngle().value(); },
-            {}
-        );
-        builder.AddDoubleProperty("angleSetpoint",
-            [this] { return wristMotor.GetClosedLoopReference().GetValue(); },
-            {}
-        );
-    }
+    void InitSendable(wpi::SendableBuilder &builder) override;
 
-    void Periodic() override
-    {
-        if (frc::RobotBase::IsSimulation())
-        {
-            ctre::phoenix6::sim::TalonFXSimState& wristMotorSim = wristMotor.GetSimState();
-            ctre::phoenix6::sim::CANcoderSimState& canCoderSim = canCoderWrist.GetSimState();
-            wristMotorSim.SetSupplyVoltage(frc::RobotController::GetBatteryVoltage());
-            canCoderSim.SetSupplyVoltage(frc::RobotController::GetBatteryVoltage());
-            wristSim.SetInputVoltage(wristMotorSim.GetMotorVoltage());
-            wristSim.Update(20_ms);
-            frc::SmartDashboard::PutNumber("Wrist/simAngle", wristSim.GetAngle().convert<units::degree>().value());
-            wristMotorSim.SetRawRotorPosition(-wristSim.GetAngle() * kWristGearRatio);
-            wristMotorSim.SetRotorVelocity(-wristSim.GetVelocity() * kWristGearRatio);
-            canCoderSim.SetRawPosition(-wristSim.GetAngle());
-            canCoderSim.SetVelocity(-wristSim.GetVelocity());
-        }
-    }
+    void Periodic() override;
 
 private:
     // Creates the motors, CANcoder, and proximity sensor
     hardware::TalonFX wristMotor{RobotMap::Claw::kWristMotorID, "rio"};
+    configs::TalonFXConfiguration wristMotorConfig{};
     hardware::CANcoder canCoderWrist{RobotMap::Claw::kCanCoderID,"rio"};
 
     units::degree_t desiredAngle;
@@ -139,7 +66,7 @@ private:
         frc::DCMotor::KrakenX60(1),
         kWristGearRatio,
         1_ft,
-        0_deg,
+        -10_deg,
         180_deg,
         false,
         13.5_deg
@@ -152,24 +79,9 @@ public:
     IO();
     /// @brief Sets the power of the IO (intake/output) motor
     /// @param power Power to set to the motor
-    frc2::CommandPtr SetIOPowerCommand(double power)
-    {
-        return Run
-        (
-            [this, power]
-            {
-                ioMotor.SetControl(controls::DutyCycleOut(power));
-            }
-        ).WithName("IOSetPower");
-    }
+    frc2::CommandPtr SetIOPowerCommand(double power);
 
-    frc2::CommandPtr StopIOMotorCommand()
-    {
-        return RunOnce
-        (
-            [this] { ioMotor.StopMotor(); }
-        );
-    }
+    frc2::CommandPtr StopIOMotorCommand();
 
     /// @brief Gets whether the proximity sensor detects a coral
     /// @return True if the proximity sensor detects a coral, false if not
