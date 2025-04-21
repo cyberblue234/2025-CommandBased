@@ -18,6 +18,8 @@
 #include "subsystems/Elevator.h"
 #include "subsystems/Claw.h"
 
+#include <stdio.h>
+
 class RobotContainer
 {
 public:
@@ -30,11 +32,18 @@ public:
     Wrist *GetWrist() { return &wrist; }
     IO *GetIO() { return &io; }
 
-    frc2::CommandPtr SetDesiredPositionCommand(Position desiredPosition)
+    frc2::CommandPtr GoToPositionCommand(const Position &desiredPosition)
     {
-        return frc2::cmd::RunOnce
+        return frc2::cmd::Parallel
         (
-            [this, desiredPosition] { this->desiredPosition = desiredPosition; }
+            elevator.GoToPositionCommand(desiredPosition),
+            wrist.GoToPositionCommand(desiredPosition)
+        ).BeforeStarting
+        (
+            [this, desiredPosition]
+            {
+                this->desiredPosition = &desiredPosition;
+            }
         );
     }
 
@@ -43,6 +52,11 @@ public:
         stage1Publisher.Set(frc::Pose3d{0_m, 0_m, (elevator.GetHeight() - ElevatorConstants::kHeightOffset) / 2, frc::Rotation3d{0_deg, 0_deg, 0_deg}});
         carriagePublisher.Set(frc::Pose3d{0_m, 0_m, elevator.GetHeight() - ElevatorConstants::kHeightOffset, frc::Rotation3d{0_deg, 0_deg, 0_deg}});
         clawPublisher.Set(frc::Pose3d{0.265_m, 0_m, elevator.GetHeight() - ElevatorConstants::kHeightOffset + 0.4354_m, frc::Rotation3d{0_deg, wrist.GetCurrentAngle(), 0_deg}});
+    }
+
+    void UpdateTelemetry()
+    {
+        frc::SmartDashboard::PutString("Robot/desiredPosition", desiredPosition ? desiredPosition->to_string() : "null");
     }
 
 private:
@@ -61,10 +75,18 @@ private:
 
     frc::SendableChooser<std::string> autoChooser;
 
-    Position desiredPosition;
+    const Position *desiredPosition;
 
     void AddTeleopButtonControl(const int button, frc2::CommandPtr command)
     {
         controlBoard.Button(button).Debounce(100_ms).WhileTrue(std::move(command).OnlyIf(frc::DriverStation::IsTeleop));
+    }
+    void AddPositionButtonControl(const Position &position)
+    {
+        AddTeleopButtonControl
+        (
+            position.button,
+            GoToPositionCommand(position)
+        );
     }
 };

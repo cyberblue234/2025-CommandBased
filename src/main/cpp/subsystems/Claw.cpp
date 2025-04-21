@@ -93,7 +93,7 @@ frc2::CommandPtr Wrist::GoToAngleCommand(units::degree_t desiredAngle)
     ).WithName("WristGoToAngle");
 }
 
-frc2::CommandPtr Wrist::GoToPositionCommand(Position desiredPosition)
+frc2::CommandPtr Wrist::GoToPositionCommand(const Position &desiredPosition)
 {
     return GoToAngleCommand(desiredPosition.angle).WithName("WristGoToPosition");
 }
@@ -120,6 +120,10 @@ void Wrist::InitSendable(wpi::SendableBuilder &builder)
     );
     builder.AddDoubleProperty("turnSetpoint",
         [this] { return wristMotor.GetClosedLoopReference().GetValue(); },
+        {}
+    );
+    builder.AddBooleanProperty("isAtPosition",
+        [this] { return IsAtPosition(); },
         {}
     );
     builder.AddDoubleProperty("Gains/kP",
@@ -275,6 +279,18 @@ IO::IO()
     proxSensorConfig.ProximityParams.ProximityThreshold = 2_in;
 
     proxSensor.GetConfigurator().Apply(proxSensorConfig);
+
+    frc::SmartDashboard::PutBoolean("IO/SimCoralInClaw", false);
+}
+
+void IO::SetIOPower(double power)
+{
+    ioMotor.SetControl(controls::DutyCycleOut(power));
+}
+
+void IO::StopIOMotor()
+{
+    ioMotor.StopMotor();
 }
 
 frc2::CommandPtr IO::SetIOPowerCommand(double power)
@@ -283,7 +299,7 @@ frc2::CommandPtr IO::SetIOPowerCommand(double power)
     (
         [this, power]
         {
-            ioMotor.SetControl(controls::DutyCycleOut(power));
+            SetIOPower(power);
         }
     ).WithName("IOSetPower");
 }
@@ -292,6 +308,26 @@ frc2::CommandPtr IO::StopIOMotorCommand()
 {
     return RunOnce
     (
-        [this] { ioMotor.StopMotor(); }
-    );
+        [this] { StopIOMotor(); }
+    ).WithName("IOStopMotor");
+}
+
+frc2::CommandPtr IO::IOAtPosition(std::function<const Position*()> positionSupplier)
+{
+    return Run
+    (
+        [this, positionSupplier]
+        {
+            SetIOPower(positionSupplier()->ioMotorPower);
+        }
+    ).Until
+    (
+        [this, positionSupplier]
+        {
+            return IsCoralInClaw() == positionSupplier()->isForCoralIntake;
+        }
+    ).AndThen
+    (
+        [this] { StopIOMotor(); }
+    ).WithName("IOAtPosition");
 }

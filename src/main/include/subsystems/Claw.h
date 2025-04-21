@@ -35,7 +35,7 @@ public:
     frc2::CommandPtr GoToAngleCommand(units::degree_t desiredAngle);
     /// @brief Sets the angle of the claw to a Position
     /// @param pos Position object
-    frc2::CommandPtr GoToPositionCommand(Position desiredPosition);
+    frc2::CommandPtr GoToPositionCommand(const Position &desiredPosition);
 
     /// @brief Gets the current angle of the claw
     /// @return The absolute value of the CANcoder in degrees
@@ -77,15 +77,17 @@ class IO : public frc2::SubsystemBase
 {
 public:
     IO();
+    void SetIOPower(double power);
+    void StopIOMotor();
     /// @brief Sets the power of the IO (intake/output) motor
     /// @param power Power to set to the motor
     frc2::CommandPtr SetIOPowerCommand(double power);
-
     frc2::CommandPtr StopIOMotorCommand();
+    frc2::CommandPtr IOAtPosition(std::function<const Position*()> positionSupplier);
 
     /// @brief Gets whether the proximity sensor detects a coral
     /// @return True if the proximity sensor detects a coral, false if not
-    bool IsCoralInClaw() { return proxSensor.GetIsDetected().GetValue(); };
+    bool IsCoralInClaw() { return frc::RobotBase::IsReal() ? proxSensor.GetIsDetected().GetValue() : frc::SmartDashboard::GetBoolean("IO/SimCoralInClaw", false); };
     /// @brief Gets the distance to the closest object from the proximity sensor
     /// @return Distance from the closest object
     units::meter_t GetDistance() { return proxSensor.GetDistance().GetValue(); }

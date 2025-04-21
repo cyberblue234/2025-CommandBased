@@ -44,13 +44,13 @@
       }
     },
     {
-      "name": "Score",
+      "name": "IO",
       "waypointRelativePos": 0.8955223880597015,
       "endWaypointRelativePos": 1.0,
       "command": {
         "type": "named",
         "data": {
-          "name": "Score"
+          "name": "IO"
         }
       }
     }
@@ -71,7 +71,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -178.36342295838324
+    "rotation": -178.36342295838327
   },
   "useDefaultConstraints": true
 }

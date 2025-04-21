@@ -3,16 +3,32 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 12.576498287671233,
-        "y": 5.227054794520548
+        "x": 12.499525368206328,
+        "y": 5.238931026044937
       },
       "prevControl": null,
       "nextControl": {
-        "x": 12.713385826771653,
-        "y": 6.470944881889763
+        "x": 12.56905414508062,
+        "y": 5.4790679644496
       },
       "isLocked": false,
       "linkedName": "E"
+    },
+    {
+      "anchor": {
+        "x": 12.935507646933686,
+        "y": 5.712316277615464
+      },
+      "prevControl": {
+        "x": 12.603363427038648,
+        "y": 5.5057472763410225
+      },
+      "nextControl": {
+        "x": 14.230762474995329,
+        "y": 6.517868445023774
+      },
+      "isLocked": false,
+      "linkedName": null
     },
     {
       "anchor": {
@@ -20,32 +36,23 @@
         "y": 6.819777397260274
       },
       "prevControl": {
-        "x": 15.539821983093857,
-        "y": 5.968324201031511
+        "x": 14.224143754532273,
+        "y": 5.947400538888927
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": "RightCoralStation"
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 0.15,
-      "rotationDegrees": -59.99999999999999
-    },
-    {
-      "waypointRelativePos": 0.642512077294686,
-      "rotationDegrees": 55.0
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [
     {
       "name": "Constraints Zone",
       "minWaypointRelativePos": 0.08135593220338981,
-      "maxWaypointRelativePos": 0.9462686567164182,
+      "maxWaypointRelativePos": 2.0,
       "constraints": {
-        "maxVelocity": 1.5,
-        "maxAcceleration": 0.6,
+        "maxVelocity": 2.0,
+        "maxAcceleration": 1.5,
         "maxAngularVelocity": 360.0,
         "maxAngularAcceleration": 360.0,
         "nominalVoltage": 12.0,
@@ -56,20 +63,20 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "Home",
-      "waypointRelativePos": 0,
-      "endWaypointRelativePos": 0.4474576271186442,
+      "name": "CoralHome",
+      "waypointRelativePos": 0.0,
+      "endWaypointRelativePos": 0.8007181328545834,
       "command": {
         "type": "named",
         "data": {
-          "name": "Home"
+          "name": "CoralHome"
         }
       }
     },
     {
       "name": "CoralStation",
-      "waypointRelativePos": 0.46440677966101734,
-      "endWaypointRelativePos": 1.0,
+      "waypointRelativePos": 0.8043087971274693,
+      "endWaypointRelativePos": 2.0,
       "command": {
         "type": "parallel",
         "data": {
@@ -83,7 +90,7 @@
             {
               "type": "named",
               "data": {
-                "name": "Intake"
+                "name": "IO"
               }
             }
           ]

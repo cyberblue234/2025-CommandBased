@@ -537,15 +537,17 @@ struct Position
     /// @brief Set to true when intaking coral - will be used to stop the IO motor when we have a coral in the claw
     const bool isForCoralIntake = false;
 
-    const Position operator=(const Position &rhs)
+    const int button = -1;
+
+    const Position& operator=(const Position &rhs)
     {
-        return {rhs.name, rhs.height, rhs.angle, rhs.ioMotorPower, rhs.isForCoralIntake};
+        return {rhs.name, rhs.height, rhs.angle, rhs.ioMotorPower, rhs.isForCoralIntake, rhs.button};
     }
     bool operator==(const Position &rhs)
     {
         return this->name == rhs.name;
     }
-    std::string to_string()
+    std::string to_string() const
     {
         return name + "; Height: " + units::to_string(height.convert<units::feet>()) + "; Angle: " + units::to_string(angle) + "; IO Power: " + std::to_string(ioMotorPower);
     }
@@ -553,15 +555,15 @@ struct Position
 
 namespace Positions
 {    
-    const Position L1           = Position("L1", 1.6_ft, 150.0_deg,  ClawConstants::kCoralOutputPower, false);
-    const Position L2           = Position("L2", 1.1_ft, 13.5_deg,  -ClawConstants::kCoralOutputPower, false);
-    const Position L3           = Position("L3", 2.5_ft, 13.5_deg,  -ClawConstants::kCoralOutputPower, false);
-    const Position L4           = Position("L4", 4.55_ft, 13.5_deg, -ClawConstants::kCoralOutputPower, false);
-    const Position AlgaeLow     = Position("AlgaeLow", 2.2_ft, 170.0_deg,  ClawConstants::kAlgaeIntakePower, false);
-    const Position AlgaeHigh    = Position("AlgaeHigh", 3.4_ft, 170.0_deg,  ClawConstants::kAlgaeIntakePower, false);
-    const Position CoralStation = Position("CoralStation", 1.915_ft, 110.0_deg,  ClawConstants::kCoralIntakePower, true);
-    const Position Processor    = Position("Processor", ElevatorConstants::kHeightOffset, 160.0_deg,  ClawConstants::kProcessorPower, false);
-    const Position Barge        = Position("Barge", ElevatorConstants::kMaxElevatorHeight, 63.0_deg,  ClawConstants::kBargePower, false);
-    const Position CoralHome    = Position("CoralHome", ElevatorConstants::kHeightOffset, 15.0_deg,  ClawConstants::kCoralIntakePower, false);
-    const Position AlgaeHome    = Position("AlgaeHome", ElevatorConstants::kHeightOffset, 75.0_deg,  0.0, false);
+    const Position L1           = Position("L1", 1.6_ft, 150.0_deg,  ClawConstants::kCoralOutputPower, false, ControlsConstants::kL1Button);
+    const Position L2           = Position("L2", 1.1_ft, 13.5_deg,  -ClawConstants::kCoralOutputPower, false, ControlsConstants::kL2Button);
+    const Position L3           = Position("L3", 2.5_ft, 13.5_deg,  -ClawConstants::kCoralOutputPower, false, ControlsConstants::kL3Button);
+    const Position L4           = Position("L4", 4.55_ft, 13.5_deg, -ClawConstants::kCoralOutputPower, false, ControlsConstants::kL4Button);
+    const Position AlgaeLow     = Position("AlgaeLow", 2.2_ft, 170.0_deg,  ClawConstants::kAlgaeIntakePower, false, ControlsConstants::kAlgaeLowButton);
+    const Position AlgaeHigh    = Position("AlgaeHigh", 3.4_ft, 170.0_deg,  ClawConstants::kAlgaeIntakePower, false, ControlsConstants::kAlgaeHighButton);
+    const Position CoralStation = Position("CoralStation", 1.915_ft, 110.0_deg,  ClawConstants::kCoralIntakePower, true, ControlsConstants::kCoralStationButton);
+    const Position Processor    = Position("Processor", ElevatorConstants::kHeightOffset, 160.0_deg,  ClawConstants::kProcessorPower, false, ControlsConstants::kProcessorButton);
+    const Position Barge        = Position("Barge", ElevatorConstants::kMaxElevatorHeight, 63.0_deg,  ClawConstants::kBargePower, false, ControlsConstants::kBargeButton);
+    const Position CoralHome    = Position("CoralHome", ElevatorConstants::kHeightOffset, 15.0_deg,  ClawConstants::kCoralIntakePower, true, ControlsConstants::kCoralHomeButton);
+    const Position AlgaeHome    = Position("AlgaeHome", ElevatorConstants::kHeightOffset, 75.0_deg,  0.0, false, ControlsConstants::kAlgaeHomeButton);
 }

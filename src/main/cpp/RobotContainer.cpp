@@ -15,6 +15,18 @@ RobotContainer::RobotContainer()
 		autoChooser.AddOption(*i, *i);
 	}
 
+	NamedCommands::registerCommand("L1", GoToPositionCommand(Positions::L1));
+	NamedCommands::registerCommand("L2", GoToPositionCommand(Positions::L2));
+	NamedCommands::registerCommand("L3", GoToPositionCommand(Positions::L3));
+	NamedCommands::registerCommand("L4", GoToPositionCommand(Positions::L4));
+	NamedCommands::registerCommand("AlgaeLow", GoToPositionCommand(Positions::AlgaeLow));
+	NamedCommands::registerCommand("AlgaeHigh", GoToPositionCommand(Positions::AlgaeHigh));
+	NamedCommands::registerCommand("CoralStation", GoToPositionCommand(Positions::CoralStation));
+	NamedCommands::registerCommand("Processor", GoToPositionCommand(Positions::Processor));
+	NamedCommands::registerCommand("Barge", GoToPositionCommand(Positions::Barge));
+	NamedCommands::registerCommand("CoralHome", GoToPositionCommand(Positions::CoralHome));
+	NamedCommands::registerCommand("AlgaeHome", GoToPositionCommand(Positions::AlgaeHome));
+
 	frc::SmartDashboard::PutData("Auto Chooser", &autoChooser);
 	frc::SmartDashboard::PutData("Swerve", &swerve);
 	frc::SmartDashboard::PutData("Elevator", &elevator);
@@ -51,18 +63,19 @@ void RobotContainer::ConfigureBindings()
 		io.StopIOMotorCommand()
 	);
 
-	AddTeleopButtonControl
-	(
-		ControlsConstants::kL1Button,
-		frc2::cmd::Parallel
-		(
-			SetDesiredPositionCommand(Positions::L1),
-			elevator.GoToPositionCommand(Positions::L1),
-			wrist.GoToPositionCommand(Positions::L1),
-			io.SetIOPowerCommand(Positions::L1.ioMotorPower).OnlyIf([this] { return elevator.IsAtPosition() && wrist.IsAtPosition(); })
-		)
-	);
-	
+	AddPositionButtonControl(Positions::L1);
+	AddPositionButtonControl(Positions::L2);
+	AddPositionButtonControl(Positions::L3);
+	AddPositionButtonControl(Positions::L4);
+	AddPositionButtonControl(Positions::AlgaeLow);
+	AddPositionButtonControl(Positions::AlgaeHigh);
+	AddPositionButtonControl(Positions::CoralStation);
+	AddPositionButtonControl(Positions::Processor);
+	AddPositionButtonControl(Positions::Barge);
+	AddPositionButtonControl(Positions::CoralHome);
+	AddPositionButtonControl(Positions::AlgaeHome);
+
+	AddTeleopButtonControl(ControlsConstants::kIOButton, io.IOAtPosition([this] { return desiredPosition; }).OnlyWhile([this] { return elevator.IsAtPosition() && wrist.IsAtPosition(); }));
 
 	// Manual elevator controls
 	controlBoard.AxisGreaterThan(ControlsConstants::kManualElevatorAxis, 0.5).WhileTrue(elevator.SetMotorsCommand(ElevatorConstants::kElevatorPower).OnlyIf(frc::DriverStation::IsTeleop));

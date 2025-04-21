@@ -8,42 +8,37 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 14.281742082670283,
-        "y": 5.532260467503626
+        "x": 15.743338742268909,
+        "y": 6.021131587413483
       },
       "isLocked": false,
       "linkedName": "RightCoralStation"
     },
     {
       "anchor": {
-        "x": 13.583219178082192,
-        "y": 5.257106164383561
+        "x": 13.628112107569818,
+        "y": 5.27338626252634
       },
       "prevControl": {
-        "x": 13.910076612096265,
-        "y": 5.850928224462098
+        "x": 14.882889749224152,
+        "y": 5.7820371929481
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": "D"
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 0.28342245989304765,
-      "rotationDegrees": -119.99999999999999
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [
     {
       "name": "Constraints Zone",
       "minWaypointRelativePos": 0,
-      "maxWaypointRelativePos": 0.8029850746268644,
+      "maxWaypointRelativePos": 1.0,
       "constraints": {
-        "maxVelocity": 1.25,
-        "maxAcceleration": 0.6,
-        "maxAngularVelocity": 240.0,
-        "maxAngularAcceleration": 240.0,
+        "maxVelocity": 2.0,
+        "maxAcceleration": 1.5,
+        "maxAngularVelocity": 720.0,
+        "maxAngularAcceleration": 720.0,
         "nominalVoltage": 12.0,
         "unlimited": false
       }
@@ -52,13 +47,13 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "Home",
+      "name": "CoralHome",
       "waypointRelativePos": 0,
       "endWaypointRelativePos": 0.49830508474576557,
       "command": {
         "type": "named",
         "data": {
-          "name": "Home"
+          "name": "CoralHome"
         }
       }
     },
@@ -83,7 +78,7 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0.25,
+    "velocity": 1.0,
     "rotation": -119.99999999999999
   },
   "reversed": false,

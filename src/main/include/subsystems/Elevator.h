@@ -41,7 +41,7 @@ public:
 
     frc2::CommandPtr GoToHeightCommand(units::meter_t desiredHeight);
 
-    frc2::CommandPtr GoToPositionCommand(Position desiredPosition);
+    frc2::CommandPtr GoToPositionCommand(const Position &desiredPosition);
     
     /// @brief Gets the greater of the two motors' encoder values
     /// @return The greater encoder value

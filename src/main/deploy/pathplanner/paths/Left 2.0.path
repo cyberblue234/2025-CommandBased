@@ -58,13 +58,13 @@
       }
     },
     {
-      "name": "Score",
+      "name": "IO",
       "waypointRelativePos": 0.9559322033898315,
       "endWaypointRelativePos": 1.0,
       "command": {
         "type": "named",
         "data": {
-          "name": "Score"
+          "name": "IO"
         }
       }
     }

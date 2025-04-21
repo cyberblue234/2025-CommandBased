@@ -109,7 +109,7 @@ frc2::CommandPtr Elevator::GoToHeightCommand(units::meter_t desiredHeight)
     ).OnlyIf([this] { return isElevatorRegistered; }).WithName("ElevatorGoToHeight");
 }
 
-frc2::CommandPtr Elevator::GoToPositionCommand(Position desiredPosition)
+frc2::CommandPtr Elevator::GoToPositionCommand(const Position &desiredPosition)
 {
     return GoToHeightCommand(desiredPosition.height).WithName("ElevatorGoToPosition");
 }
@@ -128,6 +128,10 @@ void Elevator::InitSendable(wpi::SendableBuilder &builder)
     );
     builder.AddDoubleProperty("heightSetpoint",
         [this] { return (units::turn_t{motor1.GetClosedLoopReference().GetValueAsDouble()} * kMetersPerMotorTurn + kHeightOffset).convert<units::feet>().value(); },
+        {}
+    );
+    builder.AddBooleanProperty("isAtPosition",
+        [this] { return IsAtPosition(); },
         {}
     );
     builder.AddBooleanProperty("bottomLimitSwitch",

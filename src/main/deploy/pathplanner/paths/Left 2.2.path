@@ -52,13 +52,13 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "Home",
+      "name": "CoralHome",
       "waypointRelativePos": 0,
       "endWaypointRelativePos": 0.49830508474576557,
       "command": {
         "type": "named",
         "data": {
-          "name": "Home"
+          "name": "CoralHome"
         }
       }
     },
