@@ -211,12 +211,6 @@ namespace units
     using radians_per_turn_t = unit_t<radians_per_turn>;
     using degrees_per_turn = compound_unit<degree, inverse<turn>>;
     using degrees_per_turn_t = unit_t<degrees_per_turn>;
-
-    using kv_meters_t = unit_t<frc::SimpleMotorFeedforward<meters>::kv_unit>;
-    using ka_meters_t = unit_t<frc::SimpleMotorFeedforward<meters>::ka_unit>;
-
-    using kv_degrees_t = unit_t<frc::SimpleMotorFeedforward<degrees>::kv_unit>;
-    using ka_degrees_t = unit_t<frc::SimpleMotorFeedforward<degrees>::ka_unit>;
 }
 
 namespace RobotConstants
@@ -502,25 +496,32 @@ namespace ClawConstants
     }
 
     // Intake and output powers for coral and algae
-    const double kCoralIntakePower = -0.35;
-    const double kAlgaeIntakePower = 0.5;
+    constexpr double kCoralIntakePower = -0.35;
+    constexpr double kAlgaeIntakePower = 0.5;
     // Outputting should be negative compared to intaking
-    const double kCoralOutputPower = 0.5;
-    const double kProcessorPower = -0.3;
-    const double kBargePower = -1.0;
-    const double kManualIOPower = 0.2;
+    constexpr double kCoralOutputPower = 0.5;
+    constexpr double kProcessorPower = -0.3;
+    constexpr double kBargePower = -1.0;
+    constexpr double kManualIOPower = 0.2;
 
-    const units::turn_t kCanCoderMagnetOffset = 0.1582_tr;
+    constexpr units::turn_t kCanCoderMagnetOffset = 0.1582_tr;
 
-    const units::degree_t kTolerance = 2.0_deg;
+    constexpr units::degree_t kTolerance = 2.0_deg;
 
-    const units::degree_t kLowLimit = -10.0_deg;
-    const units::degree_t kHighLimit = 180_deg;
+    constexpr units::degree_t kLowLimit = -10.0_deg;
+    constexpr units::degree_t kHighLimit = 180_deg;
 
-    const double kWristGearRatio = 233.45;
-    const units::degrees_per_turn_t kDegreesPerMotorTurn = 360_deg / units::turn_t{kWristGearRatio};
+    constexpr double kWristGearRatio = 233.45;
+    constexpr units::degrees_per_turn_t kDegreesPerMotorTurn = 360_deg / units::turn_t{kWristGearRatio};
 
-    const double kWristPower = 0.2;
+    constexpr double kWristPower = 0.2;
+    
+    constexpr units::meter_t kProximityThreshold = 2.0_in;
+}
+
+namespace ClimberConstants
+{
+    const double kClimberPower = 0.4;
 }
 
 

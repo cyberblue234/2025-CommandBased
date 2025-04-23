@@ -88,7 +88,6 @@ frc2::CommandPtr Wrist::GoToAngleCommand(units::degree_t desiredAngle)
             wristMotor.SetControl(controls::MotionMagicVoltage{desiredAngle}
                             .WithLimitReverseMotion(frc::RobotBase::IsReal() ? GetCurrentAngle() >= kHighLimit : GetCurrentAngle() <= kLowLimit)
                             .WithLimitForwardMotion(frc::RobotBase::IsReal() ? GetCurrentAngle() <= kLowLimit : GetCurrentAngle() >= kHighLimit));
-            frc::SmartDashboard::PutNumber("Wrist/test", wristMotor.GetClosedLoopError().GetValue());
         }
     ).WithName("WristGoToAngle");
 }
@@ -248,7 +247,6 @@ void Wrist::Periodic()
         canCoderSim.SetSupplyVoltage(frc::RobotController::GetBatteryVoltage());
         wristSim.SetInputVoltage(wristMotorSim.GetMotorVoltage());
         wristSim.Update(20_ms);
-        frc::SmartDashboard::PutNumber("Wrist/simAngle", wristSim.GetAngle().convert<units::degree>().value());
         wristMotorSim.SetRawRotorPosition(wristSim.GetAngle() * kWristGearRatio);
         wristMotorSim.SetRotorVelocity(wristSim.GetVelocity() * kWristGearRatio);
         canCoderSim.SetRawPosition(wristSim.GetAngle());
@@ -276,11 +274,9 @@ IO::IO()
     configs::CANrangeConfiguration proxSensorConfig{};
 
     // If an object is detected by the proximity sensor within this value, the .GetIsDetected() will return true
-    proxSensorConfig.ProximityParams.ProximityThreshold = 2_in;
+    proxSensorConfig.ProximityParams.ProximityThreshold = kProximityThreshold;
 
     proxSensor.GetConfigurator().Apply(proxSensorConfig);
-
-    frc::SmartDashboard::PutBoolean("IO/SimCoralInClaw", false);
 }
 
 void IO::SetIOPower(double power)

@@ -17,6 +17,7 @@
 #include "subsystems/Drivetrain.h"
 #include "subsystems/Elevator.h"
 #include "subsystems/Claw.h"
+#include "subsystems/Climber.h"
 
 #include <stdio.h>
 
@@ -31,6 +32,7 @@ public:
     Elevator *GetElevator() { return &elevator; }
     Wrist *GetWrist() { return &wrist; }
     IO *GetIO() { return &io; }
+    Climber *GetClimber() { return &climber; }
 
     frc2::CommandPtr GoToPositionCommand(const Position &desiredPosition)
     {
@@ -72,6 +74,7 @@ private:
     Wrist wrist{};
     nt::StructPublisher<frc::Pose3d> clawPublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructTopic<frc::Pose3d>("claw").Publish();
     IO io{};
+    Climber climber{};
 
     frc::SendableChooser<std::string> autoChooser;
 

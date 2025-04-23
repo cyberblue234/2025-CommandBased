@@ -62,6 +62,11 @@ void RobotContainer::ConfigureBindings()
 	(
 		io.StopIOMotorCommand()
 	);
+	
+	climber.SetDefaultCommand
+	(
+		climber.StopMotorCommand()
+	);
 
 	AddPositionButtonControl(Positions::L1);
 	AddPositionButtonControl(Positions::L2);
@@ -86,7 +91,9 @@ void RobotContainer::ConfigureBindings()
 	// Manual IO controls
 	controlBoard.AxisGreaterThan(ControlsConstants::kManualIntakeAxis, 0.5).WhileTrue(io.SetIOPowerCommand(ClawConstants::kManualIOPower).OnlyIf(frc::DriverStation::IsTeleop));
 	controlBoard.AxisLessThan(ControlsConstants::kManualIntakeAxis, -0.5).WhileTrue(io.SetIOPowerCommand(-ClawConstants::kManualIOPower).OnlyIf(frc::DriverStation::IsTeleop));
-	
+	// Climber controls
+	controlBoard.AxisGreaterThan(ControlsConstants::kClimberAxis, 0.5).WhileTrue(climber.SetPowerCommand(ClimberConstants::kClimberPower).OnlyIf(frc::DriverStation::IsTeleop));
+	controlBoard.AxisLessThan(ControlsConstants::kClimberAxis, -0.5).WhileTrue(climber.SetPowerCommand(-ClimberConstants::kClimberPower).OnlyIf(frc::DriverStation::IsTeleop));
 
 	// Sys Id triggers. Only works during Test mode.
 	gamepad.Back().OnTrue(frc2::cmd::RunOnce(SignalLogger::Start).OnlyIf(frc::DriverStation::IsTest));

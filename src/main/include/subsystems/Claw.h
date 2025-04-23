@@ -87,7 +87,7 @@ public:
 
     /// @brief Gets whether the proximity sensor detects a coral
     /// @return True if the proximity sensor detects a coral, false if not
-    bool IsCoralInClaw() { return frc::RobotBase::IsReal() ? proxSensor.GetIsDetected().GetValue() : frc::SmartDashboard::GetBoolean("IO/SimCoralInClaw", false); };
+    bool IsCoralInClaw() { return proxSensor.GetIsDetected().GetValue(); };
     /// @brief Gets the distance to the closest object from the proximity sensor
     /// @return Distance from the closest object
     units::meter_t GetDistance() { return proxSensor.GetDistance().GetValue(); }
@@ -95,6 +95,19 @@ public:
     void InitSendable(wpi::SendableBuilder &builder) override
     {
         frc2::SubsystemBase::InitSendable(builder);
+
+        builder.AddBooleanProperty("coralInClaw",
+            [this] { return IsCoralInClaw(); },
+            [this] (bool setCoralInClaw)
+            {
+                if (frc::RobotBase::IsSimulation())
+                {
+                    sim::CANrangeSimState &proxSim = proxSensor.GetSimState();
+                    proxSim.SetSupplyVoltage(frc::RobotController::GetBatteryVoltage());
+                    proxSim.SetDistance(kProximityThreshold);
+                }
+            }
+        );
     }
 private:
     hardware::CANrange proxSensor{RobotMap::Claw::kCanRangeID, "rio"};
