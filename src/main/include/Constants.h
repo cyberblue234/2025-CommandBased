@@ -524,6 +524,15 @@ namespace ClimberConstants
     const double kClimberPower = 0.4;
 }
 
+namespace LimelightConstants
+{
+    // Forward, Right, Up, Roll, Pitch, Yaw
+    const frc::Pose3d kHighOffset{6.75_in, 12_in, 38.125_in, frc::Rotation3d{0_deg, 0_deg, -2.29_deg}};
+    const frc::Pose3d kLowOffset{11.25_in, -0.125_in, 7.625_in, frc::Rotation3d{0_deg, 20_deg, 0_deg}};
+
+    const wpi::array<double, 3> autonStdDevs{1.8, 1.8, 1.8};
+    const wpi::array<double, 3> teleopStdDevs{0.9, 0.9, 0.9};
+}
 
 /// @brief Struct for the different possible positions
 struct Position
@@ -567,4 +576,42 @@ namespace Positions
     const Position Barge        = Position("Barge", ElevatorConstants::kMaxElevatorHeight, 63.0_deg,  ClawConstants::kBargePower, false, ControlsConstants::kBargeButton);
     const Position CoralHome    = Position("CoralHome", ElevatorConstants::kHeightOffset, 15.0_deg,  ClawConstants::kCoralIntakePower, true, ControlsConstants::kCoralHomeButton);
     const Position AlgaeHome    = Position("AlgaeHome", ElevatorConstants::kHeightOffset, 75.0_deg,  0.0, false, ControlsConstants::kAlgaeHomeButton);
+}
+
+/// @brief Clamps the input to a specifed range
+/// @param val Value to clamp
+/// @param low Lower bound
+/// @param high Higher bound
+/// @retval val if within range
+/// @retval low if below range
+/// @retval high if above range
+template <typename T>
+static T clamp(T val, T low, T high) 
+{
+    return val > low && val < high ? val : val <= low ? low : high; 
+}
+
+/// @brief Returns the sign of the input
+/// @param val Input to determine sign of
+/// @retval 0 if val == 0
+/// @retval -1 if val < 0
+/// @retval 1 if val > 0
+template <typename T>
+inline static T sgn(T val)
+{
+    return val == T{0} ? T{0} : val > T{0} ? T{1} : T{-1};
+}
+
+/// @brief Returns the value at the index
+/// @param inData Array
+/// @param position Index
+/// @retval Default value of the type if position is not within bounds of the array
+/// @retval Value at position
+template <typename T>
+inline static T ExtractArrayEntry(const std::vector<T>& inData, int position) 
+{
+    if (inData.size() < static_cast<size_t>(position + 1)) {
+        return T{};
+    }
+    return inData[position];
 }

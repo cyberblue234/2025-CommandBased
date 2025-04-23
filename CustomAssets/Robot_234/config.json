@@ -1,0 +1,82 @@
+{
+    "name": "Cyber Blue 234",
+    "disableSimplification": false,
+    "cameras": [
+        {
+            "name": "Limelight High",
+            "rotations": [
+                {
+                    "axis": "z",
+                    "degrees": -2.29
+                }
+            ],
+            "position": [0.17145, 0.3048, 0.968375],
+            "resolution": [960, 720],
+            "fov": 60
+          },
+          {
+            "name": "Limelight Low",
+            "rotations": [
+                {
+                    "axis": "x",
+                    "degrees": 20.0
+                }
+            ],
+            "position": [0.28575, -0.003175, 0.5],
+            "resolution": [960, 720],
+            "fov": 60
+          }
+    ],
+    "rotations": [
+        {
+            "axis": "x",
+            "degrees": 180
+        },
+        {
+            "axis": "z",
+            "degrees": 90
+        }
+    ],
+    "position": [0, 0, 0.04],
+    "components": [
+        {
+            "zeroedRotations": [
+                {
+                    "axis": "x",
+                    "degrees": 180
+                },
+                {
+                    "axis": "z",
+                    "degrees": 90
+                }
+            ],
+            "zeroedPosition": [0.1015, 0, 0.095]
+        },
+        {
+            "zeroedRotations": [
+                {
+                    "axis": "x",
+                    "degrees": 180
+                },
+                {
+                    "axis": "z",
+                    "degrees": 90
+                }
+            ],
+            "zeroedPosition": [0, 0, 0.065]
+        },
+        {
+            "zeroedRotations": [
+                {
+                    "axis": "x",
+                    "degrees": 250
+                },
+                {
+                    "axis": "z",
+                    "degrees": -90
+                }
+            ],
+            "zeroedPosition": [0.0, 0.0, 0.0]
+        }
+    ]
+  }
