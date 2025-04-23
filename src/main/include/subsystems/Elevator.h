@@ -52,6 +52,9 @@ public:
     /// @brief Sets both encoders to 0
     void ResetEncoders();
 
+    const units::turn_t GetMotorSetpoint() { return units::turn_t{motor1.GetClosedLoopReference().GetValue()}; }
+    const units::meter_t GetHeightSetpoint() { return GetMotorSetpoint() * kMetersPerMotorTurn; }
+
     /// @brief Gets the state of the bottom limit switch
     /// @retval true if the limit switch is closed (pressed)
     /// @retval false if the limit switch is open

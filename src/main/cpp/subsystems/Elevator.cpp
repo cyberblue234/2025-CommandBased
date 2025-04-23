@@ -119,7 +119,7 @@ void Elevator::InitSendable(wpi::SendableBuilder &builder)
     frc2::SubsystemBase::InitSendable(builder);
     
     builder.AddDoubleProperty("desiredHeight",
-        [this] { return desiredHeight.value(); },
+        [this] { return desiredHeight.convert<units::feet>().value(); },
         {}
     );
     builder.AddDoubleProperty("height",
@@ -127,7 +127,7 @@ void Elevator::InitSendable(wpi::SendableBuilder &builder)
         {}
     );
     builder.AddDoubleProperty("heightSetpoint",
-        [this] { return (units::turn_t{motor1.GetClosedLoopReference().GetValueAsDouble()} * kMetersPerMotorTurn + kHeightOffset).convert<units::feet>().value(); },
+        [this] { return (GetHeightSetpoint() + kHeightOffset).convert<units::feet>().value(); },
         {}
     );
     builder.AddBooleanProperty("isAtPosition",

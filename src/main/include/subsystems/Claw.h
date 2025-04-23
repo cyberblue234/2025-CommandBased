@@ -41,6 +41,8 @@ public:
     /// @return The absolute value of the CANcoder in degrees
     const units::degree_t GetCurrentAngle() { return canCoderWrist.GetAbsolutePosition().GetValue(); }
 
+    const units::turn_t GetAngleSetpoint() { return units::turn_t{wristMotor.GetClosedLoopReference().GetValue()}; }
+
     bool IsAtPosition() { return units::math::abs<units::degree_t>(GetCurrentAngle() - desiredAngle) < ClawConstants::kTolerance; }
 
     void InitSendable(wpi::SendableBuilder &builder) override;

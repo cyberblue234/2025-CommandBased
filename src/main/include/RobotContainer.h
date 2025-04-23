@@ -53,7 +53,14 @@ public:
     {
         stage1Publisher.Set(frc::Pose3d{0_m, 0_m, (elevator.GetHeight() - ElevatorConstants::kHeightOffset) / 2, frc::Rotation3d{0_deg, 0_deg, 0_deg}});
         carriagePublisher.Set(frc::Pose3d{0_m, 0_m, elevator.GetHeight() - ElevatorConstants::kHeightOffset, frc::Rotation3d{0_deg, 0_deg, 0_deg}});
-        clawPublisher.Set(frc::Pose3d{0.265_m, 0_m, elevator.GetHeight() - ElevatorConstants::kHeightOffset + 0.4354_m, frc::Rotation3d{0_deg, wrist.GetCurrentAngle(), 0_deg}});
+        // Need to do it like this because otherwise the wrist pivots around a different point
+        units::meter_t x = 0.265_m;
+        units::meter_t y = 0.4354_m;
+        clawPublisher.Set(frc::Pose3d{x, 0_m, elevator.GetHeight() - ElevatorConstants::kHeightOffset + y, frc::Rotation3d{0_deg, wrist.GetCurrentAngle(), 0_deg}});
+        stage1DesiredPublisher.Set(frc::Pose3d{0_m, 0_m, elevator.GetHeightSetpoint() / 2, frc::Rotation3d{0_deg, 0_deg, 0_deg}});
+        carriageDesiredPublisher.Set(frc::Pose3d{0_m, 0_m, elevator.GetHeightSetpoint(), frc::Rotation3d{0_deg, 0_deg, 0_deg}});
+        clawDesiredPublisher.Set(frc::Pose3d{x, 0_m, elevator.GetHeightSetpoint() + y, frc::Rotation3d{0_deg, wrist.GetAngleSetpoint(), 0_deg}});
+        
     }
 
     void UpdateTelemetry()
@@ -71,8 +78,11 @@ private:
     Elevator elevator{};
     nt::StructPublisher<frc::Pose3d> stage1Publisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructTopic<frc::Pose3d>("stage_1").Publish();
     nt::StructPublisher<frc::Pose3d> carriagePublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructTopic<frc::Pose3d>("carriage").Publish();
+    nt::StructPublisher<frc::Pose3d> stage1DesiredPublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructTopic<frc::Pose3d>("stage_1-desired").Publish();
+    nt::StructPublisher<frc::Pose3d> carriageDesiredPublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructTopic<frc::Pose3d>("carriage-desired").Publish();
     Wrist wrist{};
     nt::StructPublisher<frc::Pose3d> clawPublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructTopic<frc::Pose3d>("claw").Publish();
+    nt::StructPublisher<frc::Pose3d> clawDesiredPublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructTopic<frc::Pose3d>("claw-desired").Publish();
     IO io{};
     Climber climber{};
 
