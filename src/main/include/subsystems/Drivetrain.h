@@ -89,6 +89,8 @@ public:
             );
         }
     }
+
+    frc::Field2d *GetField() { return &field; }
     
 private:
     bool hasAppliedDriverPerspective = false;

@@ -44,7 +44,7 @@ public:
         (
             [this, desiredPosition]
             {
-                this->desiredPosition = &desiredPosition;
+                this->desiredPosition = desiredPosition;
             }
         );
     }
@@ -65,7 +65,7 @@ public:
 
     void UpdateTelemetry()
     {
-        frc::SmartDashboard::PutString("Robot/desiredPosition", desiredPosition ? desiredPosition->to_string() : "null");
+        frc::SmartDashboard::PutString("Robot/desiredPosition", desiredPosition.to_string());
     }
 
 private:
@@ -87,8 +87,9 @@ private:
     Climber climber{};
 
     frc::SendableChooser<std::string> autoChooser;
+    nt::StructArrayPublisher<frc::Pose2d> autoPath = nt::NetworkTableInstance::GetDefault().GetTable("Auto")->GetStructArrayTopic<frc::Pose2d>("autoPath").Publish();
 
-    const Position *desiredPosition;
+    Position desiredPosition;
 
     void AddTeleopButtonControl(const int button, frc2::CommandPtr command)
     {

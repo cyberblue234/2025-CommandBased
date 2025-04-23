@@ -85,7 +85,7 @@ public:
     /// @param power Power to set to the motor
     frc2::CommandPtr SetIOPowerCommand(double power);
     frc2::CommandPtr StopIOMotorCommand();
-    frc2::CommandPtr IOAtPosition(std::function<const Position*()> positionSupplier);
+    frc2::CommandPtr IOAtPosition(std::function<const Position()> positionSupplier);
 
     /// @brief Gets whether the proximity sensor detects a coral
     /// @return True if the proximity sensor detects a coral, false if not

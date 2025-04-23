@@ -308,19 +308,19 @@ frc2::CommandPtr IO::StopIOMotorCommand()
     ).WithName("IOStopMotor");
 }
 
-frc2::CommandPtr IO::IOAtPosition(std::function<const Position*()> positionSupplier)
+frc2::CommandPtr IO::IOAtPosition(std::function<const Position()> positionSupplier)
 {
     return Run
     (
         [this, positionSupplier]
         {
-            SetIOPower(positionSupplier()->ioMotorPower);
+            SetIOPower(positionSupplier().ioMotorPower);
         }
     ).Until
     (
         [this, positionSupplier]
         {
-            return IsCoralInClaw() == positionSupplier()->isForCoralIntake;
+            return IsCoralInClaw() == positionSupplier().isForCoralIntake;
         }
     ).AndThen
     (

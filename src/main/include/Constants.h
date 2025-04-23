@@ -537,26 +537,23 @@ namespace LimelightConstants
 /// @brief Struct for the different possible positions
 struct Position
 {
-    const std::string name = "null";
+    std::string name = "null";
     /// @brief The height of the elevator
-    const units::meter_t height = 0_m;
+    units::meter_t height = 0_m;
     /// @brief The angle of the claw
-    const units::degree_t angle = 0_deg;
+    units::degree_t angle = 0_deg;
     /// @brief What power to set to the IO motor
-    const double ioMotorPower = 0.0;
+    double ioMotorPower = 0.0;
     /// @brief Set to true when intaking coral - will be used to stop the IO motor when we have a coral in the claw
-    const bool isForCoralIntake = false;
+    bool isForCoralIntake = false;
 
-    const int button = -1;
+    int button = -1;
 
-    const Position& operator=(const Position &rhs)
-    {
-        return {rhs.name, rhs.height, rhs.angle, rhs.ioMotorPower, rhs.isForCoralIntake, rhs.button};
-    }
     bool operator==(const Position &rhs)
     {
-        return this->name == rhs.name;
+        return name == rhs.name;
     }
+
     std::string to_string() const
     {
         return name + "; Height: " + units::to_string(height.convert<units::feet>()) + "; Angle: " + units::to_string(angle) + "; IO Power: " + std::to_string(ioMotorPower);
