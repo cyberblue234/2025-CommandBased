@@ -54,18 +54,64 @@ public:
         stage1Publisher.Set(frc::Pose3d{0_m, 0_m, (elevator.GetHeight() - ElevatorConstants::kHeightOffset) / 2, frc::Rotation3d{0_deg, 0_deg, 0_deg}});
         carriagePublisher.Set(frc::Pose3d{0_m, 0_m, elevator.GetHeight() - ElevatorConstants::kHeightOffset, frc::Rotation3d{0_deg, 0_deg, 0_deg}});
         // Need to do it like this because otherwise the wrist pivots around a different point
-        units::meter_t x = 0.265_m;
-        units::meter_t y = 0.4354_m;
-        clawPublisher.Set(frc::Pose3d{x, 0_m, elevator.GetHeight() - ElevatorConstants::kHeightOffset + y, frc::Rotation3d{0_deg, wrist.GetCurrentAngle(), 0_deg}});
+        units::meter_t clawX = 0.265_m;
+        units::meter_t clawY = 0.4354_m;
+        clawPublisher.Set(frc::Pose3d{clawX, 0_m, elevator.GetHeight() - ElevatorConstants::kHeightOffset + clawY, frc::Rotation3d{0_deg, wrist.GetCurrentAngle(), 0_deg}});
         stage1DesiredPublisher.Set(frc::Pose3d{0_m, 0_m, elevator.GetHeightSetpoint() / 2, frc::Rotation3d{0_deg, 0_deg, 0_deg}});
         carriageDesiredPublisher.Set(frc::Pose3d{0_m, 0_m, elevator.GetHeightSetpoint(), frc::Rotation3d{0_deg, 0_deg, 0_deg}});
-        clawDesiredPublisher.Set(frc::Pose3d{x, 0_m, elevator.GetHeightSetpoint() + y, frc::Rotation3d{0_deg, wrist.GetAngleSetpoint(), 0_deg}});
-        
+        clawDesiredPublisher.Set(frc::Pose3d{clawX, 0_m, elevator.GetHeightSetpoint() + clawY, frc::Rotation3d{0_deg, wrist.GetAngleSetpoint(), 0_deg}});
+        if (io.IsCoralInClaw())
+        {
+            frc::Pose2d robotPose = swerve.GetState().Pose;
+            coralPublisher.Set(frc::Pose3d{robotPose.X() + 1.806_ft, robotPose.Y(), elevator.GetHeight() + 1.38_ft, frc::Rotation3d{0_deg, wrist.GetCurrentAngle() + 20_deg, robotPose.Rotation().Degrees()}});
+        }
+        else
+        {
+            coralPublisher.Set(frc::Pose3d{});
+        }
     }
 
     void UpdateTelemetry()
     {
         frc::SmartDashboard::PutString("Robot/desiredPosition", desiredPosition.to_string());
+    }
+
+    std::string GetAutoPathName()
+    {
+        return autoChooser.GetSelected();
+    }
+
+    void SetAutoPathPublisher(std::string auton="")
+    {
+        if (frc::DriverStation::IsDisabled())
+        {
+            if (auton == "")
+            {
+                auton = GetAutoPathName();
+            }
+
+            if (auton == "Nothing")
+            {
+                ClearAutoPathPublisher();
+                return;
+            }
+            std::vector<std::shared_ptr<pathplanner::PathPlannerPath>> paths = pathplanner::PathPlannerAuto::getPathGroupFromAutoFile(auton);
+            
+            std::vector<frc::Pose2d> allPathsPoses{};
+            for (std::shared_ptr<pathplanner::PathPlannerPath> path : paths)
+            {
+                for (frc::Pose2d pose : path->getPathPoses())
+                {
+                    allPathsPoses.push_back(FlipPose(pose));
+                }
+            }
+            autoPathPublisher.Set(allPathsPoses);
+        }
+    }
+
+    void ClearAutoPathPublisher()
+    {
+        autoPathPublisher.Set(std::vector<frc::Pose2d>{});
     }
 
 private:
@@ -83,11 +129,12 @@ private:
     Wrist wrist{};
     nt::StructPublisher<frc::Pose3d> clawPublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructTopic<frc::Pose3d>("claw").Publish();
     nt::StructPublisher<frc::Pose3d> clawDesiredPublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructTopic<frc::Pose3d>("claw-desired").Publish();
+    nt::StructPublisher<frc::Pose3d> coralPublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructTopic<frc::Pose3d>("coral").Publish();
     IO io{};
     Climber climber{};
 
     frc::SendableChooser<std::string> autoChooser;
-    nt::StructArrayPublisher<frc::Pose2d> autoPath = nt::NetworkTableInstance::GetDefault().GetTable("Auto")->GetStructArrayTopic<frc::Pose2d>("autoPath").Publish();
+    nt::StructArrayPublisher<frc::Pose2d> autoPathPublisher = nt::NetworkTableInstance::GetDefault().GetTable("Auto")->GetStructArrayTopic<frc::Pose2d>("autoPath").Publish();
 
     Position desiredPosition;
 

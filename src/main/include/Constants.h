@@ -59,6 +59,9 @@
 #include <frc/RobotController.h>
 #include <frc/RobotBase.h>
 
+#include <frc/DriverStation.h>
+#include <pathplanner/lib/util/FlippingUtil.h>
+
 #include <frc/smartdashboard/SmartDashboard.h>
 
 #include "networktables/NetworkTable.h"
@@ -611,4 +614,21 @@ inline static T ExtractArrayEntry(const std::vector<T>& inData, int position)
         return T{};
     }
     return inData[position];
+}
+
+/// @brief Flips the given pose if the alliance is blue
+/// @param pose Pose to flip based on conditional
+/// @return Pose2d of the possibly flipped pose - std::nullopt if the alliance doesn't exist
+inline static frc::Pose2d FlipPose(frc::Pose2d pose)
+{
+    auto alliance = frc::DriverStation::GetAlliance();
+    if (alliance) 
+    {
+        if (alliance.value() == frc::DriverStation::Alliance::kBlue)
+        {
+            return pathplanner::FlippingUtil::flipFieldPose(pose);
+        }
+        return pose;
+    }
+    else return pose;
 }

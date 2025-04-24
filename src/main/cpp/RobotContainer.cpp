@@ -15,6 +15,14 @@ RobotContainer::RobotContainer()
 		autoChooser.AddOption(*i, *i);
 	}
 
+	autoChooser.OnChange
+	(
+		[this] (std::string auton)
+		{
+			SetAutoPathPublisher(auton);
+		}
+	);
+
 	NamedCommands::registerCommand("L1", GoToPositionCommand(Positions::L1));
 	NamedCommands::registerCommand("L2", GoToPositionCommand(Positions::L2));
 	NamedCommands::registerCommand("L3", GoToPositionCommand(Positions::L3));
@@ -26,6 +34,7 @@ RobotContainer::RobotContainer()
 	NamedCommands::registerCommand("Barge", GoToPositionCommand(Positions::Barge));
 	NamedCommands::registerCommand("CoralHome", GoToPositionCommand(Positions::CoralHome));
 	NamedCommands::registerCommand("AlgaeHome", GoToPositionCommand(Positions::AlgaeHome));
+	NamedCommands::registerCommand("IO", io.IOAtPosition([this] { return desiredPosition; }).OnlyWhile([this] { return elevator.IsAtPosition() && wrist.IsAtPosition();}));
 
 	frc::SmartDashboard::PutData("Auto Chooser", &autoChooser);
 	frc::SmartDashboard::PutData("Swerve", &swerve);
@@ -106,7 +115,7 @@ void RobotContainer::ConfigureBindings()
 
 std::optional<frc2::CommandPtr> RobotContainer::GetAutonomousCommand()
 {
-	std::string auton = autoChooser.GetSelected();
+	std::string auton = GetAutoPathName();
     if (auton == "Nothing") return {};
     return pathplanner::PathPlannerAuto(auton).ToPtr();
 }

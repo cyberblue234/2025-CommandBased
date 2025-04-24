@@ -79,12 +79,6 @@
               "data": {
                 "name": "CoralStation"
               }
-            },
-            {
-              "type": "named",
-              "data": {
-                "name": null
-              }
             }
           ]
         }

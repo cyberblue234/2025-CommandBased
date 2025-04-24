@@ -71,7 +71,7 @@ private:
         -10_deg,
         180_deg,
         false,
-        13.5_deg
+        90_deg
     };
 };    
 
@@ -106,9 +106,13 @@ public:
                 {
                     sim::CANrangeSimState &proxSim = proxSensor.GetSimState();
                     proxSim.SetSupplyVoltage(frc::RobotController::GetBatteryVoltage());
-                    proxSim.SetDistance(kProximityThreshold);
+                    proxSim.SetDistance(setCoralInClaw ? 0_m : kProximityThreshold + 1_in);
                 }
             }
+        );
+        builder.AddDoubleProperty("distance",
+            [this] { return GetDistance().convert<units::inch>().value(); },
+            {}
         );
     }
 private:

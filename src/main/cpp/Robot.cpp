@@ -21,11 +21,17 @@ void Robot::RobotPeriodic()
 	container.UpdateTelemetry();
 }
 
-void Robot::DisabledInit() {}
+void Robot::DisabledInit() 
+{
+	container.SetAutoPathPublisher();
+}
 
 void Robot::DisabledPeriodic() {}
 
-void Robot::DisabledExit() {}
+void Robot::DisabledExit() 
+{
+	container.ClearAutoPathPublisher();
+}
 
 void Robot::AutonomousInit()
 {

@@ -68,8 +68,7 @@ frc2::CommandPtr Wrist::SetWristPowerCommand(double power)
     (
         [this, power]
         {
-            wristMotor.SetControl(controls::DutyCycleOut{power}
-                        .WithLimitForwardMotion(GetCurrentAngle() <= 1_deg));
+            wristMotor.SetControl(controls::DutyCycleOut{power});
         }
     );
 }
