@@ -524,17 +524,35 @@ namespace ClawConstants
 
 namespace ClimberConstants
 {
-    const double kClimberPower = 0.4;
+    constexpr double kClimberPower = 0.4;
 }
 
 namespace LimelightConstants
 {
     // Forward, Right, Up, Roll, Pitch, Yaw
-    const frc::Pose3d kHighOffset{6.75_in, 12_in, 38.125_in, frc::Rotation3d{0_deg, 0_deg, -2.29_deg}};
-    const frc::Pose3d kLowOffset{11.25_in, -0.125_in, 7.625_in, frc::Rotation3d{0_deg, 20_deg, 0_deg}};
+    constexpr frc::Pose3d kHighOffset{6.75_in, 12_in, 38.125_in, frc::Rotation3d{0_deg, 0_deg, -2.29_deg}};
+    constexpr frc::Pose3d kLowOffset{11.25_in, -0.125_in, 7.625_in, frc::Rotation3d{0_deg, 20_deg, 0_deg}};
 
-    const wpi::array<double, 3> autonStdDevs{1.8, 1.8, 1.8};
-    const wpi::array<double, 3> teleopStdDevs{0.9, 0.9, 0.9};
+    constexpr wpi::array<double, 3> autonStdDevs{1.8, 1.8, 1.8};
+    constexpr wpi::array<double, 3> teleopStdDevs{0.9, 0.9, 0.9};
+}
+
+namespace RobotSim
+{
+    namespace DigitalRobot
+    {
+        // Need to do it like this because otherwise the wrist pivots around a different point
+        constexpr units::meter_t kClawX = 0.265_m;
+        constexpr units::meter_t kClawY = 0.4354_m;
+
+        constexpr frc::Translation2d kCoralP1{0.475_ft, 1.84_ft};
+        constexpr frc::Translation2d kCoralP2{1.3_ft, -0.09_ft};
+        constexpr units::meter_t kCoralRadius = units::math::sqrt(units::math::pow<2>(kCoralP2.X() - kCoralP1.X()) + units::math::pow<2>(kCoralP2.Y() - kCoralP1.Y())) / 2;
+        constexpr units::meter_t kCoralXMidpoint = (kCoralP1.X() + kCoralP2.X()) / 2;
+        constexpr units::meter_t kCoralYMidpoint = (kCoralP1.Y() + kCoralP2.Y()) / 2;
+        constexpr units::degree_t kCoralThetaOffset = units::math::acos((kCoralP1.X() - kCoralXMidpoint) / kCoralRadius);
+        
+    }
 }
 
 /// @brief Struct for the different possible positions

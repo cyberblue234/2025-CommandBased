@@ -71,7 +71,7 @@ private:
         -10_deg,
         180_deg,
         false,
-        90_deg
+        100_deg
     };
 };    
 

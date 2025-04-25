@@ -53,17 +53,17 @@ public:
     {
         stage1Publisher.Set(frc::Pose3d{0_m, 0_m, (elevator.GetHeight() - ElevatorConstants::kHeightOffset) / 2, frc::Rotation3d{0_deg, 0_deg, 0_deg}});
         carriagePublisher.Set(frc::Pose3d{0_m, 0_m, elevator.GetHeight() - ElevatorConstants::kHeightOffset, frc::Rotation3d{0_deg, 0_deg, 0_deg}});
-        // Need to do it like this because otherwise the wrist pivots around a different point
-        units::meter_t clawX = 0.265_m;
-        units::meter_t clawY = 0.4354_m;
-        clawPublisher.Set(frc::Pose3d{clawX, 0_m, elevator.GetHeight() - ElevatorConstants::kHeightOffset + clawY, frc::Rotation3d{0_deg, wrist.GetCurrentAngle(), 0_deg}});
+        clawPublisher.Set(frc::Pose3d{RobotSim::DigitalRobot::kClawX, 0_m, elevator.GetHeight() - ElevatorConstants::kHeightOffset + RobotSim::DigitalRobot::kClawY, frc::Rotation3d{0_deg, wrist.GetCurrentAngle(), 0_deg}});
         stage1DesiredPublisher.Set(frc::Pose3d{0_m, 0_m, elevator.GetHeightSetpoint() / 2, frc::Rotation3d{0_deg, 0_deg, 0_deg}});
         carriageDesiredPublisher.Set(frc::Pose3d{0_m, 0_m, elevator.GetHeightSetpoint(), frc::Rotation3d{0_deg, 0_deg, 0_deg}});
-        clawDesiredPublisher.Set(frc::Pose3d{clawX, 0_m, elevator.GetHeightSetpoint() + clawY, frc::Rotation3d{0_deg, wrist.GetAngleSetpoint(), 0_deg}});
+        clawDesiredPublisher.Set(frc::Pose3d{RobotSim::DigitalRobot::kClawX, 0_m, elevator.GetHeightSetpoint() + RobotSim::DigitalRobot::kClawY, frc::Rotation3d{0_deg, wrist.GetAngleSetpoint(), 0_deg}});
         if (io.IsCoralInClaw())
         {
             frc::Pose2d robotPose = swerve.GetState().Pose;
-            coralPublisher.Set(frc::Pose3d{robotPose.X() + 1.806_ft, robotPose.Y(), elevator.GetHeight() + 1.38_ft, frc::Rotation3d{0_deg, wrist.GetCurrentAngle() + 20_deg, robotPose.Rotation().Degrees()}});
+            units::meter_t xOffset = units::math::cos(RobotSim::DigitalRobot::kCoralThetaOffset - wrist.GetCurrentAngle()) * RobotSim::DigitalRobot::kCoralRadius + RobotSim::DigitalRobot::kCoralXMidpoint;
+            coralPublisher.Set(frc::Pose3d{robotPose.X() + xOffset * units::math::cos(robotPose.Rotation().Degrees()), 
+                robotPose.Y() + units::math::sin(robotPose.Rotation().Degrees()) * xOffset , elevator.GetHeight() + units::math::sin(RobotSim::DigitalRobot::kCoralThetaOffset- wrist.GetCurrentAngle()) * RobotSim::DigitalRobot::kCoralRadius + RobotSim::DigitalRobot::kCoralYMidpoint, 
+                frc::Rotation3d{0_deg, wrist.GetCurrentAngle() + 20_deg, robotPose.Rotation().Degrees()}});
         }
         else
         {
