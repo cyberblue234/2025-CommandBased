@@ -9,6 +9,7 @@
 
 #include <frc/system/plant/DCMotor.h>
 #include <frc/simulation/SingleJointedArmSim.h>
+#include <frc/simulation/FlywheelSim.h>
 #include <frc/system/plant/LinearSystemId.h>
 
 #include "Constants.h"
@@ -71,7 +72,7 @@ private:
         -10_deg,
         180_deg,
         false,
-        100_deg
+        13.5_deg
     };
 };    
 
@@ -94,6 +95,8 @@ public:
     /// @return Distance from the closest object
     units::meter_t GetDistance() { return proxSensor.GetDistance().GetValue(); }
 
+    units::turns_per_second_t GetMotorVelocity() { return ioMotor.GetVelocity().GetValue(); }
+
     void InitSendable(wpi::SendableBuilder &builder) override
     {
         frc2::SubsystemBase::InitSendable(builder);
@@ -115,7 +118,32 @@ public:
             {}
         );
     }
+
+    void Periodic() override
+    {
+        if (frc::RobotBase::IsSimulation())
+        {
+            ctre::phoenix6::sim::TalonFXSimState& ioMotorSim = ioMotor.GetSimState();
+            ioMotorSim.SetSupplyVoltage(frc::RobotController::GetBatteryVoltage());
+            ioSim.SetInputVoltage(ioMotorSim.GetMotorVoltage());
+            ioSim.Update(20_ms);
+            ioMotorSim.AddRotorPosition(ioSim.GetAngularVelocity() * 0.02_s * kIOGearRatio);
+            ioMotorSim.SetRotorVelocity(ioSim.GetAngularVelocity() * kIOGearRatio);
+            ioMotorSim.SetRotorAcceleration(ioSim.GetAngularAcceleration() * kIOGearRatio);
+        }
+    }
 private:
     hardware::CANrange proxSensor{RobotMap::Claw::kCanRangeID, "rio"};
     hardware::TalonFX ioMotor{RobotMap::Claw::kIOMotorID, "rio"};
+
+    frc::sim::FlywheelSim ioSim
+    {
+        frc::LinearSystemId::FlywheelSystem
+        (
+            frc::DCMotor::KrakenX60(1),
+            units::kilogram_square_meter_t{0.01},
+            kIOGearRatio
+        ),
+        frc::DCMotor::KrakenX60(1)
+    };
 };

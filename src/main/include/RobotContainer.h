@@ -19,6 +19,8 @@
 #include "subsystems/Claw.h"
 #include "subsystems/Climber.h"
 
+#include "sim/Gamepieces.h"
+
 #include <stdio.h>
 
 class RobotContainer
@@ -57,18 +59,19 @@ public:
         stage1DesiredPublisher.Set(frc::Pose3d{0_m, 0_m, elevator.GetHeightSetpoint() / 2, frc::Rotation3d{0_deg, 0_deg, 0_deg}});
         carriageDesiredPublisher.Set(frc::Pose3d{0_m, 0_m, elevator.GetHeightSetpoint(), frc::Rotation3d{0_deg, 0_deg, 0_deg}});
         clawDesiredPublisher.Set(frc::Pose3d{RobotSim::DigitalRobot::kClawX, 0_m, elevator.GetHeightSetpoint() + RobotSim::DigitalRobot::kClawY, frc::Rotation3d{0_deg, wrist.GetAngleSetpoint(), 0_deg}});
-        if (io.IsCoralInClaw())
-        {
-            frc::Pose2d robotPose = swerve.GetState().Pose;
-            units::meter_t xOffset = units::math::cos(RobotSim::DigitalRobot::kCoralThetaOffset - wrist.GetCurrentAngle()) * RobotSim::DigitalRobot::kCoralRadius + RobotSim::DigitalRobot::kCoralXMidpoint;
-            coralPublisher.Set(frc::Pose3d{robotPose.X() + xOffset * units::math::cos(robotPose.Rotation().Degrees()), 
-                robotPose.Y() + units::math::sin(robotPose.Rotation().Degrees()) * xOffset , elevator.GetHeight() + units::math::sin(RobotSim::DigitalRobot::kCoralThetaOffset- wrist.GetCurrentAngle()) * RobotSim::DigitalRobot::kCoralRadius + RobotSim::DigitalRobot::kCoralYMidpoint, 
-                frc::Rotation3d{0_deg, wrist.GetCurrentAngle() + 20_deg, robotPose.Rotation().Degrees()}});
-        }
-        else
-        {
-            coralPublisher.Set(frc::Pose3d{});
-        }
+        // if (io.IsCoralInClaw())
+        // {
+        //     frc::Pose2d robotPose = swerve.GetState().Pose;
+        //     units::meter_t xOffset = units::math::cos(RobotSim::DigitalRobot::kCoralThetaOffset - wrist.GetCurrentAngle()) * RobotSim::DigitalRobot::kCoralRadius + RobotSim::DigitalRobot::kCoralXMidpoint;
+        //     coralPublisher.Set(frc::Pose3d{robotPose.X() + xOffset * units::math::cos(robotPose.Rotation().Degrees()), 
+        //         robotPose.Y() + units::math::sin(robotPose.Rotation().Degrees()) * xOffset , elevator.GetHeight() + units::math::sin(RobotSim::DigitalRobot::kCoralThetaOffset- wrist.GetCurrentAngle()) * RobotSim::DigitalRobot::kCoralRadius + RobotSim::DigitalRobot::kCoralYMidpoint, 
+        //         frc::Rotation3d{0_deg, wrist.GetCurrentAngle() + 20_deg, robotPose.Rotation().Degrees()}});
+        // }
+        // else
+        // {
+        //     coralPublisher.Set(frc::Pose3d{});
+        // }
+        coralManager.UpdateCoral(io.GetMotorVelocity(), swerve.GetState().Pose, elevator.GetHeight(), wrist.GetCurrentAngle());
     }
 
     void UpdateTelemetry()
@@ -132,6 +135,9 @@ private:
     nt::StructPublisher<frc::Pose3d> coralPublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructTopic<frc::Pose3d>("coral").Publish();
     IO io{};
     Climber climber{};
+
+    CoralManager coralManager{};
+    frc2::Trigger addCoral{[this] { return io.IsCoralInClaw(); }};
 
     frc::SendableChooser<std::string> autoChooser;
     nt::StructArrayPublisher<frc::Pose2d> autoPathPublisher = nt::NetworkTableInstance::GetDefault().GetTable("Auto")->GetStructArrayTopic<frc::Pose2d>("autoPath").Publish();

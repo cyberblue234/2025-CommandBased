@@ -507,6 +507,9 @@ namespace ClawConstants
     constexpr double kBargePower = -1.0;
     constexpr double kManualIOPower = 0.2;
 
+    constexpr double kIOGearRatio = 5.0; // may not be exact
+    constexpr units::meter_t kFlywheelRadius = 1_in;
+
     constexpr units::turn_t kCanCoderMagnetOffset = 0.1582_tr;
 
     constexpr units::degree_t kTolerance = 2.0_deg;
@@ -546,12 +549,12 @@ namespace RobotSim
         constexpr units::meter_t kClawY = 0.4354_m;
 
         constexpr frc::Translation2d kCoralP1{0.475_ft, 1.84_ft};
-        constexpr frc::Translation2d kCoralP2{1.3_ft, -0.09_ft};
+        constexpr frc::Translation2d kCoralP2{1.28_ft, -0.0432_ft};
         constexpr units::meter_t kCoralRadius = units::math::sqrt(units::math::pow<2>(kCoralP2.X() - kCoralP1.X()) + units::math::pow<2>(kCoralP2.Y() - kCoralP1.Y())) / 2;
         constexpr units::meter_t kCoralXMidpoint = (kCoralP1.X() + kCoralP2.X()) / 2;
         constexpr units::meter_t kCoralYMidpoint = (kCoralP1.Y() + kCoralP2.Y()) / 2;
         constexpr units::degree_t kCoralThetaOffset = units::math::acos((kCoralP1.X() - kCoralXMidpoint) / kCoralRadius);
-        
+        constexpr units::degree_t kCoralVisualOffset = 20_deg;
     }
 }
 

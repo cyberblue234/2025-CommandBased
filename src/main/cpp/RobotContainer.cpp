@@ -41,6 +41,14 @@ RobotContainer::RobotContainer()
 	frc::SmartDashboard::PutData("Elevator", &elevator);
 	frc::SmartDashboard::PutData("Wrist", &wrist);
 	frc::SmartDashboard::PutData("IO", &io);
+
+	addCoral.Debounce(100_ms).OnTrue(frc2::cmd::RunOnce([this] 
+	{
+		if (coralManager.AreAnyCoralInClaw() == false) 
+		{
+			coralManager.InstantiateCoral();
+		} 
+	}).IgnoringDisable(true));
 }
 
 void RobotContainer::ConfigureBindings() 
