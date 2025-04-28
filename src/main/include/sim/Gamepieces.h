@@ -69,7 +69,7 @@ public:
         return {xSpeed, ySpeed, zSpeed};
     }
 
-    const bool IsInClaw() { return isInClaw; }
+    bool IsInClaw() { return isInClaw; }
 
 private:
     frc::Pose3d pose;
