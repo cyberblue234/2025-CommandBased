@@ -9,6 +9,12 @@ class Coral
 public:
     const frc::Pose3d &UpdatePhysics(const units::turns_per_second_t &ioMotorSpeed, const frc::Pose2d &robotPose, const units::meter_t &elevatorHeight, const units::degree_t &wristAngle)
     {
+        units::second_t currentTime = utils::GetCurrentTime();
+        if (lastTime == -1_s)
+        {
+            lastTime = currentTime - 20_ms;
+        }
+        units::second_t deltaTime = currentTime - lastTime;
         units::meter_t xOffset = units::math::cos(RobotSim::DigitalRobot::kCoralThetaOffset - wristAngle) * RobotSim::DigitalRobot::kCoralRadius + RobotSim::DigitalRobot::kCoralXMidpoint;
         units::meter_t yOffset = units::math::sin(RobotSim::DigitalRobot::kCoralThetaOffset - wristAngle) * RobotSim::DigitalRobot::kCoralRadius + RobotSim::DigitalRobot::kCoralYMidpoint;
         units::meter_t xPose = robotPose.X() + units::math::cos(robotPose.Rotation().Degrees()) * xOffset;
@@ -20,15 +26,15 @@ public:
             xSpeed = speeds[0];
             ySpeed = speeds[1];
             zSpeed = speeds[2];
-            frc::SmartDashboard::PutNumber("coralsim/xSpeed", xSpeed.value());
-            frc::SmartDashboard::PutNumber("coralsim/ySpeed", ySpeed.value());
-            frc::SmartDashboard::PutNumber("coralsim/zSpeed", zSpeed.value());
         }
+        frc::SmartDashboard::PutNumber("coralsim/xSpeed", xSpeed.convert<units::feet_per_second>().value() * 12);
+        frc::SmartDashboard::PutNumber("coralsim/ySpeed", ySpeed.convert<units::feet_per_second>().value() * 12);
+        frc::SmartDashboard::PutNumber("coralsim/zSpeed", zSpeed.convert<units::feet_per_second>().value() * 12);
         
-        units::meter_t xTranslation = xSpeed * 0.02_s;
-        units::meter_t yTranslation = ySpeed * 0.02_s;
-        units::meter_t zTranslation = zSpeed * 0.02_s;
-        if (!isInClaw && !isDead) zSpeed -= units::standard_gravity_t{1} * 0.02_s;
+        units::meter_t xTranslation = xSpeed * deltaTime;
+        units::meter_t yTranslation = ySpeed * deltaTime;
+        units::meter_t zTranslation = zSpeed * deltaTime;
+        if (!isInClaw && !isDead) zSpeed -= 9.8_mps_sq * deltaTime;
 
         frc::Rotation3d rotation;
         if (isInClaw)
@@ -47,6 +53,7 @@ public:
         oldZPose = zPose;
        
         units::meter_t distance = units::math::sqrt(units::math::pow<2>(pose.X() - xPose) + units::math::pow<2>(pose.Y() - yPose) + units::math::pow<2>(pose.Z() - zPose));
+        frc::SmartDashboard::PutNumber("coralsim/distance", distance.convert<units::inch>().value());
         if (distance > 9.5_in) isInClaw = false;
 
         if (pose.Z() <= 0_m)
@@ -55,7 +62,10 @@ public:
             ySpeed = 0_mps;
             zSpeed = 0_mps;
             isDead = true;
-        } 
+        }
+
+        lastTime = currentTime;
+        frc::SmartDashboard::PutNumber("coralsim/deltaTime", deltaTime.value());
         
         return pose;
     }
@@ -82,6 +92,8 @@ private:
     units::meter_t oldXPose;
     units::meter_t oldYPose;
     units::meter_t oldZPose;
+
+    units::second_t lastTime = -1_s;
 };
 
 class CoralManager
@@ -110,7 +122,7 @@ public:
         coralPublisher.Set(poses);
     }
 
-    const bool AreAnyCoralInClaw()
+    bool AreAnyCoralInClaw()
     {
         for (Coral coral : coralHolder)
         {
