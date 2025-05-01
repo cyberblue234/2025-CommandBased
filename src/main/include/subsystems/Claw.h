@@ -141,7 +141,7 @@ private:
         frc::LinearSystemId::FlywheelSystem
         (
             frc::DCMotor::KrakenX60(1),
-            units::kilogram_square_meter_t{0.01},
+            units::kilogram_square_meter_t{0.001},
             kIOGearRatio
         ),
         frc::DCMotor::KrakenX60(1)

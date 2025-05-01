@@ -507,7 +507,7 @@ namespace ClawConstants
     constexpr double kBargePower = -1.0;
     constexpr double kManualIOPower = 0.2;
 
-    constexpr double kIOGearRatio = 5.0; // may not be exact
+    constexpr double kIOGearRatio = 3.0; // may not be exact
     constexpr units::meter_t kFlywheelRadius = 1_in;
 
     constexpr units::turn_t kCanCoderMagnetOffset = 0.1582_tr;
