@@ -1,6 +1,7 @@
 #pragma once
 
 #include <frc/smartdashboard/SmartDashboard.h>
+#include <frc/apriltag/AprilTagFieldLayout.h>
 
 #include "Constants.h"
 
@@ -10,21 +11,23 @@ enum States
     InClaw, FreeFall, L4, L3, L2, L1, Dead
 };
 
-const std::vector<frc::Pose2d> reefPoses
-{
-    frc::Pose2d{14.40_m, 3.87_m, frc::Rotation2d(180_deg)},
-    frc::Pose2d{14.40_m, 4.16_m, frc::Rotation2d(180_deg)},
-    frc::Pose2d{11.74_m, 4.16_m, frc::Rotation2d(0_deg)},
-    frc::Pose2d{11.74_m, 3.87_m, frc::Rotation2d(0_deg)},
-    frc::Pose2d{13.85_m, 5.05_m, frc::Rotation2d(-120_deg)},
-    frc::Pose2d{13.59_m, 5.22_m, frc::Rotation2d(-120_deg)},
-    frc::Pose2d{12.58_m, 5.22_m, frc::Rotation2d(-60_deg)},
-    frc::Pose2d{12.28_m, 5.06_m, frc::Rotation2d(-60_deg)},
-    frc::Pose2d{12.28_m, 2.97_m, frc::Rotation2d(60_deg)},
-    frc::Pose2d{12.58_m, 2.84_m, frc::Rotation2d(60_deg)},
-    frc::Pose2d{13.58_m, 2.84_m, frc::Rotation2d(120_deg)},
-    frc::Pose2d{13.85_m, 2.97_m, frc::Rotation2d(120_deg)} 
-};
+// const std::vector<frc::Pose2d> reefPoses
+// {
+//     frc::Pose2d{14.40_m, 3.87_m, frc::Rotation2d(180_deg)},
+//     frc::Pose2d{14.40_m, 4.16_m, frc::Rotation2d(180_deg)},
+//     frc::Pose2d{11.74_m, 4.16_m, frc::Rotation2d(0_deg)},
+//     frc::Pose2d{11.74_m, 3.87_m, frc::Rotation2d(0_deg)},
+//     frc::Pose2d{13.85_m, 5.05_m, frc::Rotation2d(-120_deg)},
+//     frc::Pose2d{13.59_m, 5.22_m, frc::Rotation2d(-120_deg)},
+//     frc::Pose2d{12.58_m, 5.22_m, frc::Rotation2d(-60_deg)},
+//     frc::Pose2d{12.28_m, 5.06_m, frc::Rotation2d(-60_deg)},
+//     frc::Pose2d{12.28_m, 2.97_m, frc::Rotation2d(60_deg)},
+//     frc::Pose2d{12.58_m, 2.84_m, frc::Rotation2d(60_deg)},
+//     frc::Pose2d{13.58_m, 2.84_m, frc::Rotation2d(120_deg)},
+//     frc::Pose2d{13.85_m, 2.97_m, frc::Rotation2d(120_deg)} 
+// };
+
+
 
 constexpr units::meter_t l4Height = 1.72_m;
 constexpr units::meter_t l3Height = 1.15_m;
@@ -46,7 +49,7 @@ public:
         if (state == FreeFall)
         {
             bool flip = robotPose.X() < pathplanner::FlippingUtil::fieldSizeX / 2;
-            frc::Pose2d nearestPose = pose.ToPose2d().Nearest(flip ? FlipFieldPoses(reefPoses) : reefPoses);
+            frc::Pose2d nearestPose = {};//pose.ToPose2d().Nearest(flip ? FlipFieldPoses(reefPoses) : reefPoses);
             units::meter_t distanceToNearestPose = units::math::sqrt(units::math::pow<2>(pose.X() - nearestPose.X()) + units::math::pow<2>(pose.Y() - nearestPose.Y()));
             if (distanceToNearestPose < 2_in)
             {
@@ -202,6 +205,7 @@ public:
     void InstantiateCoral()
     {
         coralHolder.push_back(Coral{});
+        printtags();
     }
 
     void UpdateCoral(const units::turns_per_second_t &ioMotorSpeed, const frc::Pose2d &robotPose, const units::meter_t &elevatorHeight, const units::degree_t &wristAngle)
@@ -240,4 +244,19 @@ private:
 
     nt::StructArrayPublisher<frc::Pose3d> coralPublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructArrayTopic<frc::Pose3d>("coralHolder").Publish();
     nt::StructArrayPublisher<frc::Pose3d> coralEndsPublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructArrayTopic<frc::Pose3d>("coralEnds").Publish();
+
+    const frc::AprilTagFieldLayout aprilTagLocations{frc::AprilTagFieldLayout::LoadField(frc::AprilTagField::k2025ReefscapeAndyMark)};
+    void printtag(int id)
+    {
+        frc::Pose2d pose = aprilTagLocations.GetTagPose(id).value().ToPose2d();
+        std::cout << "frc::Pose2d{" + std::to_string(pose.X().value()) + "_m, " + std::to_string(pose.Y().value()) + "_m, frc::Rotation2d{" + std::to_string(pose.Rotation().Degrees().value()) + "_deg}}," << std::endl;
+    }
+
+    void printtags()
+    {
+        for (int i = 17; i <= 22; i++)
+        {
+            printtag(i);
+        }
+    }
 };
