@@ -37,5 +37,7 @@ public:
 private:
     std::optional<frc2::CommandPtr> autonCommand;
 
+    nt::StructPublisher<frc::Pose3d> testPoint = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructTopic<frc::Pose3d>("testPoint").Publish();
+
     RobotContainer container;
 };

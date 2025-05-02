@@ -29,6 +29,7 @@ const std::vector<frc::Pose2d> reefPoses
 constexpr units::meter_t l4Height = 1.72_m;
 constexpr units::meter_t l3Height = 1.15_m;
 constexpr units::meter_t l2Height = 0.75_m;
+constexpr units::meter_t coralLength = 11.875_in;
 
 class Coral
 {
@@ -40,6 +41,7 @@ public:
         {
             lastTime = currentTime - 20_ms;
         }
+        units::second_t deltaTime = currentTime - lastTime;
 
         if (state == FreeFall)
         {
@@ -48,6 +50,7 @@ public:
             units::meter_t distanceToNearestPose = units::math::sqrt(units::math::pow<2>(pose.X() - nearestPose.X()) + units::math::pow<2>(pose.Y() - nearestPose.Y()));
             if (distanceToNearestPose < 2_in)
             {
+                std::cout << "Attached to reef" << std::endl;
                 units::meter_t dL4 = units::math::abs(pose.Z() - l4Height);
                 units::meter_t dL3 = units::math::abs(pose.Z() - l3Height);
                 units::meter_t dL2 = units::math::abs(pose.Z() - l2Height);
@@ -61,18 +64,21 @@ public:
                         state = L4;
                         newPoseZ = l4Height;
                         newPosePitch = 90_deg;
+                        std::cout << "l4" << std::endl;
                     }
                     else if (dL3 == dist)
                     {
                         state = L3;
                         newPoseZ = l3Height;
                         newPosePitch = 35_deg;
+                        std::cout << "l3" << std::endl;
                     }
                     else
                     {
                         state = L2;
                         newPoseZ = l2Height;
                         newPosePitch = 35_deg;
+                        std::cout << "l2" << std::endl;
                     }
                     pose = frc::Pose3d{nearestPose.X(), nearestPose.Y(), newPoseZ, frc::Rotation3d{0_deg, newPosePitch, nearestPose.Rotation().Degrees()}};
                     xSpeed = 0_mps;
@@ -82,7 +88,6 @@ public:
             }
         }
 
-        units::second_t deltaTime;
         units::meter_t xOffset;
         units::meter_t yOffset;
         units::meter_t xPose;
@@ -91,7 +96,6 @@ public:
 
         if (state == InClaw)
         {
-            deltaTime = currentTime - lastTime;
             xOffset = units::math::cos(RobotSim::DigitalRobot::kCoralThetaOffset - wristAngle) * RobotSim::DigitalRobot::kCoralRadius + RobotSim::DigitalRobot::kCoralXMidpoint;
             yOffset = units::math::sin(RobotSim::DigitalRobot::kCoralThetaOffset - wristAngle) * RobotSim::DigitalRobot::kCoralRadius + RobotSim::DigitalRobot::kCoralYMidpoint;
             xPose = robotPose.X() + units::math::cos(robotPose.Rotation().Degrees()) * xOffset;
@@ -104,34 +108,38 @@ public:
             zSpeed = speeds[2];
         }
         
-        units::meter_t xTranslation = xSpeed * deltaTime;
-        units::meter_t yTranslation = ySpeed * deltaTime;
-        units::meter_t zTranslation = zSpeed * deltaTime;
-        if (state == FreeFall) zSpeed -= units::standard_gravity_t(1) * deltaTime;
+        if (state == InClaw || state == FreeFall)
+        {
+            units::meter_t xTranslation = xSpeed * deltaTime;
+            units::meter_t yTranslation = ySpeed * deltaTime;
+            units::meter_t zTranslation = zSpeed * deltaTime;
+            if (state == FreeFall) zSpeed -= units::standard_gravity_t(1) * deltaTime;
 
-        frc::Rotation3d rotation;
-        if (state == InClaw)
-        {
-            rotation = {0_deg, wristAngle + RobotSim::DigitalRobot::kCoralVisualOffset, robotPose.Rotation().Degrees()};
-            pose = {(xPose - oldXPose) + pose.X() + xTranslation, (yPose - oldYPose) + pose.Y() + yTranslation, (zPose - oldZPose) + pose.Z() + zTranslation, rotation};
+            frc::Rotation3d rotation;
+            if (state == InClaw)
+            {
+                rotation = {0_deg, wristAngle + RobotSim::DigitalRobot::kCoralVisualOffset, robotPose.Rotation().Degrees()};
+                pose = {(xPose - oldXPose) + pose.X() + xTranslation, (yPose - oldYPose) + pose.Y() + yTranslation, (zPose - oldZPose) + pose.Z() + zTranslation, rotation};
+            }
+            else
+            {
+                rotation = pose.Rotation();
+                pose = {pose.X() + xTranslation, pose.Y() + yTranslation, pose.Z() + zTranslation, rotation};
+            }
+            
+            oldXPose = xPose;
+            oldYPose = yPose;
+            oldZPose = zPose;
         }
-        else
-        {
-            rotation = pose.Rotation();
-            pose = {pose.X() + xTranslation, pose.Y() + yTranslation, pose.Z() + zTranslation, rotation};
-        }
-        
-        oldXPose = xPose;
-        oldYPose = yPose;
-        oldZPose = zPose;
 
         if (state == InClaw)
         {
             units::meter_t distanceFromClaw = units::math::sqrt(units::math::pow<2>(pose.X() - xPose) + units::math::pow<2>(pose.Y() - yPose) + units::math::pow<2>(pose.Z() - zPose));
-            if (distanceFromClaw > 9.5_in) state = FreeFall;
+            if (distanceFromClaw > 9.5_in) 
+                state = FreeFall;
         }
 
-        if (pose.Z() <= 0_m)
+        if (state == FreeFall && pose.Z() <= 0_m)
         {
             xSpeed = 0_mps;
             ySpeed = 0_mps;
@@ -140,6 +148,11 @@ public:
         }
 
         lastTime = currentTime;
+
+        units::meter_t endX = pose.X() + units::math::cos(pose.Rotation().Y()) * units::math::cos(pose.Rotation().Z()) * (coralLength / 2);
+        units::meter_t endY = pose.Y() + units::math::cos(pose.Rotation().Y()) * units::math::sin(pose.Rotation().Z()) * (coralLength / 2);
+        units::meter_t endZ = pose.Z() - units::math::sin(pose.Rotation().Y()) * (coralLength / 2);
+        endPose = frc::Pose3d{endX, endY, endZ, pose.Rotation()};
         
         return pose;
     }
@@ -165,8 +178,12 @@ public:
 
     States GetState() { return state; }
 
+    const frc::Pose3d &GetPose() { return pose; }
+    const frc::Pose3d &GetEndPose() { return endPose; }
+
 private:
     frc::Pose3d pose;
+    frc::Pose3d endPose;
     States state = InClaw;
 
     units::meters_per_second_t xSpeed;
@@ -190,6 +207,7 @@ public:
     void UpdateCoral(const units::turns_per_second_t &ioMotorSpeed, const frc::Pose2d &robotPose, const units::meter_t &elevatorHeight, const units::degree_t &wristAngle)
     {
         std::vector<frc::Pose3d> poses;
+        std::vector<frc::Pose3d> endPoses;
         for (auto i = coralHolder.begin(); i != coralHolder.end();)
         {
             Coral &coral = *i;
@@ -200,9 +218,12 @@ public:
                 continue;
             }
             poses.push_back(pose);
+            endPoses.push_back(coral.GetEndPose());
             ++i;
         }
         coralPublisher.Set(poses);
+        coralEndsPublisher.Set(endPoses);
+
     }
 
     bool AreAnyCoralInClaw()
@@ -218,4 +239,5 @@ private:
     std::vector<Coral> coralHolder;
 
     nt::StructArrayPublisher<frc::Pose3d> coralPublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructArrayTopic<frc::Pose3d>("coralHolder").Publish();
+    nt::StructArrayPublisher<frc::Pose3d> coralEndsPublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructArrayTopic<frc::Pose3d>("coralEnds").Publish();
 };

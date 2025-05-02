@@ -62,11 +62,32 @@ void Drivetrain::Periodic()
     moduleTargetsPublisher.Set(state.ModuleTargets);
 }
 
-frc2::CommandPtr Drivetrain::DriveWithSpeedsCommand(std::function<frc::ChassisSpeeds()> speedsSupplier)
+frc2::CommandPtr Drivetrain::DriveWithSpeedsCommand(std::function<frc::ChassisSpeeds()> speedsSupplier, bool fieldCentric, bool slow)
 {
-    return Run([this, speedsSupplier]
+    return Run([this, speedsSupplier, fieldCentric, slow]
     {
         frc::ChassisSpeeds speeds = speedsSupplier();
-        SetControl(drive.WithVelocityX(speeds.vx).WithVelocityY(speeds.vy).WithRotationalRate(speeds.omega));
+        if (fieldCentric)
+        {
+            if (slow)
+            {
+                SetControl(driveFieldCentricSlow.WithVelocityX(speeds.vx).WithVelocityY(speeds.vy).WithRotationalRate(speeds.omega));
+            }
+            else
+            {
+                SetControl(driveFieldCentric.WithVelocityX(speeds.vx).WithVelocityY(speeds.vy).WithRotationalRate(speeds.omega));
+            }
+        }
+        else
+        {
+            if (slow)
+            {
+                SetControl(driveRobotCentricSlow.WithVelocityX(speeds.vx).WithVelocityY(speeds.vy).WithRotationalRate(speeds.omega));
+            }
+            else
+            {
+                SetControl(driveRobotCentric.WithVelocityX(speeds.vx).WithVelocityY(speeds.vy).WithRotationalRate(speeds.omega));
+            }
+        }
     }).WithName("DriveWithSpeeds");
 }

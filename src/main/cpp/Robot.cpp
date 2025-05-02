@@ -11,6 +11,12 @@ Robot::Robot() {}
 void Robot::RobotInit()
 {
 	ctre::phoenix6::SignalLogger::Start();
+	frc::SmartDashboard::PutNumber("testPoint/X", 0);
+	frc::SmartDashboard::PutNumber("testPoint/Y", 0);
+	frc::SmartDashboard::PutNumber("testPoint/Z", 0);
+	frc::SmartDashboard::PutNumber("testPoint/Roll", 0);
+	frc::SmartDashboard::PutNumber("testPoint/Pitch", 0);
+	frc::SmartDashboard::PutNumber("testPoint/Yaw", 0);
 }
 
 void Robot::RobotPeriodic()
@@ -19,6 +25,19 @@ void Robot::RobotPeriodic()
 	frc::SmartDashboard::PutNumber("Voltage", frc::RobotController::GetBatteryVoltage().value());
 	container.UpdateSimulatedRobotComponents();
 	container.UpdateTelemetry();
+
+	testPoint.Set(frc::Pose3d
+	(
+		frc::SmartDashboard::GetNumber("testPoint/X", 0) * 1_m,
+		frc::SmartDashboard::GetNumber("testPoint/Y", 0) * 1_m,
+		frc::SmartDashboard::GetNumber("testPoint/Z", 0) * 1_m,
+		frc::Rotation3d
+		(
+			frc::SmartDashboard::GetNumber("testPoint/Roll", 0)  * 1_deg,
+			frc::SmartDashboard::GetNumber("testPoint/Pitch", 0) * 1_deg,
+			frc::SmartDashboard::GetNumber("testPoint/Yaw", 0)   * 1_deg
+		)
+	));
 }
 
 void Robot::DisabledInit() 
