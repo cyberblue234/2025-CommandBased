@@ -11,27 +11,47 @@ enum States
     InClaw, FreeFall, L4, L3, L2, L1, Dead
 };
 
-// const std::vector<frc::Pose2d> reefPoses
-// {
-//     frc::Pose2d{14.40_m, 3.87_m, frc::Rotation2d(180_deg)},
-//     frc::Pose2d{14.40_m, 4.16_m, frc::Rotation2d(180_deg)},
-//     frc::Pose2d{11.74_m, 4.16_m, frc::Rotation2d(0_deg)},
-//     frc::Pose2d{11.74_m, 3.87_m, frc::Rotation2d(0_deg)},
-//     frc::Pose2d{13.85_m, 5.05_m, frc::Rotation2d(-120_deg)},
-//     frc::Pose2d{13.59_m, 5.22_m, frc::Rotation2d(-120_deg)},
-//     frc::Pose2d{12.58_m, 5.22_m, frc::Rotation2d(-60_deg)},
-//     frc::Pose2d{12.28_m, 5.06_m, frc::Rotation2d(-60_deg)},
-//     frc::Pose2d{12.28_m, 2.97_m, frc::Rotation2d(60_deg)},
-//     frc::Pose2d{12.58_m, 2.84_m, frc::Rotation2d(60_deg)},
-//     frc::Pose2d{13.58_m, 2.84_m, frc::Rotation2d(120_deg)},
-//     frc::Pose2d{13.85_m, 2.97_m, frc::Rotation2d(120_deg)} 
-// };
+constexpr std::array<frc::Pose2d, 6> blueReefTagPoses
+{
+    frc::Pose2d{4.073906_m, 3.301238_m, frc::Rotation2d{-120.000000_deg}},
+    frc::Pose2d{3.657600_m, 4.020820_m, frc::Rotation2d{180.000000_deg}},
+    frc::Pose2d{4.073906_m, 4.740402_m, frc::Rotation2d{120.000000_deg}},
+    frc::Pose2d{4.904740_m, 4.740402_m, frc::Rotation2d{60.000000_deg}},
+    frc::Pose2d{5.321046_m, 4.020820_m, frc::Rotation2d{0.000000_deg}},
+    frc::Pose2d{4.904740_m, 3.301238_m, frc::Rotation2d{-60.000000_deg}}
+};
 
+constexpr units::meter_t deltaParallel = 0.165_m;
+constexpr units::meter_t deltaPerpendicular = 0.0525_m;
+constexpr units::degree_t angleBetweenTagAndBranch = units::math::atan(deltaPerpendicular / deltaParallel);
+constexpr units::degree_t angleBetweenBranches = 180_deg - 2 * angleBetweenTagAndBranch;
+constexpr units::meter_t deltaTotal = units::math::sqrt(units::math::pow<2>(deltaParallel) + units::math::pow<2>(deltaPerpendicular));
+constexpr std::array<frc::Pose2d, 2> GetBranchPoses(const frc::Pose2d &pose)
+{
+    const units::degree_t rightAngle = 90_deg + angleBetweenTagAndBranch + pose.Rotation().Degrees();
+    const units::degree_t leftAngle = rightAngle + angleBetweenBranches;
+    frc::Pose2d left{pose.X() + deltaTotal * units::math::cos(leftAngle), pose.Y() + deltaTotal * units::math::sin(leftAngle), pose.Rotation()};
+    frc::Pose2d right{pose.X() + deltaTotal * units::math::cos(rightAngle), pose.Y() + deltaTotal * units::math::sin(rightAngle), pose.Rotation()};
+    return {left, right};
+}
 
+constexpr std::array<frc::Pose2d, 12> GetAllBranchPoses(std::array<frc::Pose2d, 6> reefPoses)
+{
+    std::array<frc::Pose2d, 12> poses;
+    for (int i = 0; i < 6; i++)
+    {
+        const std::array<frc::Pose2d, 2> branchPoses = GetBranchPoses(reefPoses[i]);
+        poses[2 * i] = branchPoses[0];
+        poses[2 * i + 1] = branchPoses[1];
+    }
+    return poses;
+}
+
+constexpr std::array<frc::Pose2d, 12> branchPoses = GetAllBranchPoses(blueReefTagPoses);
 
 constexpr units::meter_t l4Height = 1.72_m;
-constexpr units::meter_t l3Height = 1.15_m;
-constexpr units::meter_t l2Height = 0.75_m;
+constexpr units::meter_t l3Height = 1.2_m;
+constexpr units::meter_t l2Height = 0.77_m;
 constexpr units::meter_t coralLength = 11.875_in;
 
 class Coral
@@ -46,44 +66,42 @@ public:
         }
         units::second_t deltaTime = currentTime - lastTime;
 
-        if (state == FreeFall)
+        if (state == FreeFall || (state == InClaw && units::math::sqrt(units::math::pow<2>(xSpeed) + units::math::pow<2>(ySpeed) + units::math::pow<2>(zSpeed)) > 0_mps))
         {
-            bool flip = robotPose.X() < pathplanner::FlippingUtil::fieldSizeX / 2;
-            frc::Pose2d nearestPose = {};//pose.ToPose2d().Nearest(flip ? FlipFieldPoses(reefPoses) : reefPoses);
-            units::meter_t distanceToNearestPose = units::math::sqrt(units::math::pow<2>(pose.X() - nearestPose.X()) + units::math::pow<2>(pose.Y() - nearestPose.Y()));
-            if (distanceToNearestPose < 2_in)
+            bool flip = robotPose.X() > pathplanner::FlippingUtil::fieldSizeX / 2;
+            frc::Pose2d nearestPose = endPose.ToPose2d().Nearest(flip ? FlipFieldPoses(std::vector<frc::Pose2d>{branchPoses.begin(), branchPoses.end()}) : std::vector<frc::Pose2d>{branchPoses.begin(), branchPoses.end()});
+            units::meter_t distanceToNearestPose = units::math::sqrt(units::math::pow<2>(endPose.X() - nearestPose.X()) + units::math::pow<2>(endPose.Y() - nearestPose.Y()));
+            if (distanceToNearestPose < 3_in)
             {
-                std::cout << "Attached to reef" << std::endl;
-                units::meter_t dL4 = units::math::abs(pose.Z() - l4Height);
-                units::meter_t dL3 = units::math::abs(pose.Z() - l3Height);
-                units::meter_t dL2 = units::math::abs(pose.Z() - l2Height);
+                units::meter_t dL4 = units::math::abs(endPose.Z() - l4Height);
+                units::meter_t dL3 = units::math::abs(endPose.Z() - l3Height);
+                units::meter_t dL2 = units::math::abs(endPose.Z() - l2Height);
                 units::meter_t dist = units::math::min(units::math::min(dL4, dL3), dL2);
+                States newState;
+                units::meter_t newZ;
+                units::degree_t newPitch;
+                if (dL4 == dist)
+                {
+                    newState = L4;
+                    newZ = l4Height;
+                    newPitch = 90_deg;
+                }
+                else if (dL3 == dist)
+                {
+                    newState = L3;
+                    newZ = l3Height;
+                    newPitch = sgn(units::math::cos(nearestPose.Rotation().Degrees())) * 35_deg;
+                }
+                else
+                {
+                    newState = L2;
+                    newZ = l2Height;
+                    newPitch = sgn(units::math::cos(nearestPose.Rotation().Degrees())) * 35_deg;
+                }
                 if (dist < 1_in)
                 {
-                    units::meter_t newPoseZ = 0_m;
-                    units::degree_t newPosePitch = 0_deg;
-                    if (dL4 == dist)
-                    {
-                        state = L4;
-                        newPoseZ = l4Height;
-                        newPosePitch = 90_deg;
-                        std::cout << "l4" << std::endl;
-                    }
-                    else if (dL3 == dist)
-                    {
-                        state = L3;
-                        newPoseZ = l3Height;
-                        newPosePitch = 35_deg;
-                        std::cout << "l3" << std::endl;
-                    }
-                    else
-                    {
-                        state = L2;
-                        newPoseZ = l2Height;
-                        newPosePitch = 35_deg;
-                        std::cout << "l2" << std::endl;
-                    }
-                    pose = frc::Pose3d{nearestPose.X(), nearestPose.Y(), newPoseZ, frc::Rotation3d{0_deg, newPosePitch, nearestPose.Rotation().Degrees()}};
+                    state = newState;
+                    pose = frc::Pose3d{nearestPose.X(), nearestPose.Y(), newZ, frc::Rotation3d{0_deg, newPitch, nearestPose.Rotation().Degrees()}};
                     xSpeed = 0_mps;
                     ySpeed = 0_mps;
                     zSpeed = 0_mps;
@@ -205,7 +223,6 @@ public:
     void InstantiateCoral()
     {
         coralHolder.push_back(Coral{});
-        printtags();
     }
 
     void UpdateCoral(const units::turns_per_second_t &ioMotorSpeed, const frc::Pose2d &robotPose, const units::meter_t &elevatorHeight, const units::degree_t &wristAngle)
@@ -244,19 +261,4 @@ private:
 
     nt::StructArrayPublisher<frc::Pose3d> coralPublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructArrayTopic<frc::Pose3d>("coralHolder").Publish();
     nt::StructArrayPublisher<frc::Pose3d> coralEndsPublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructArrayTopic<frc::Pose3d>("coralEnds").Publish();
-
-    const frc::AprilTagFieldLayout aprilTagLocations{frc::AprilTagFieldLayout::LoadField(frc::AprilTagField::k2025ReefscapeAndyMark)};
-    void printtag(int id)
-    {
-        frc::Pose2d pose = aprilTagLocations.GetTagPose(id).value().ToPose2d();
-        std::cout << "frc::Pose2d{" + std::to_string(pose.X().value()) + "_m, " + std::to_string(pose.Y().value()) + "_m, frc::Rotation2d{" + std::to_string(pose.Rotation().Degrees().value()) + "_deg}}," << std::endl;
-    }
-
-    void printtags()
-    {
-        for (int i = 17; i <= 22; i++)
-        {
-            printtag(i);
-        }
-    }
 };
