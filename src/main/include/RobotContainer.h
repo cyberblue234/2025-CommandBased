@@ -138,6 +138,7 @@ private:
 
     CoralManager coralManager{};
     frc2::Trigger addCoral{[this] { return io.IsCoralInClaw(); }};
+    frc2::Trigger simChangeCoralState{[this] { return coralManager.AreAnyCoralInClaw(); }};
 
     frc::SendableChooser<std::string> autoChooser;
     nt::StructArrayPublisher<frc::Pose2d> autoPathPublisher = nt::NetworkTableInstance::GetDefault().GetTable("Auto")->GetStructArrayTopic<frc::Pose2d>("autoPath").Publish();

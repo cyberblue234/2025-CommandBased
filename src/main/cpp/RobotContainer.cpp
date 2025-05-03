@@ -49,6 +49,22 @@ RobotContainer::RobotContainer()
 			coralManager.InstantiateCoral();
 		} 
 	}).IgnoringDisable(true));
+	addCoral.Debounce(100_ms).OnFalse(frc2::cmd::RunOnce([this] 
+	{
+		if (coralManager.AreAnyCoralInClaw() == true)
+		{
+			coralManager.DeleteCoralInClaw();
+		}
+	}).IgnoringDisable(true));
+	
+	simChangeCoralState.OnTrue(frc2::cmd::RunOnce([this] 
+	{
+		io.SetSimProximitySensorDistance(0_m);
+	}).IgnoringDisable(true).OnlyIf(frc::RobotBase::IsSimulation));
+	simChangeCoralState.OnFalse(frc2::cmd::RunOnce([this] 
+	{
+		io.SetSimProximitySensorDistance(kProximityThreshold + 1_in);
+	}).IgnoringDisable(true).OnlyIf(frc::RobotBase::IsSimulation));
 }
 
 void RobotContainer::ConfigureBindings() 

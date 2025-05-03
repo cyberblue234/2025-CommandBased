@@ -107,9 +107,7 @@ public:
             {
                 if (frc::RobotBase::IsSimulation())
                 {
-                    sim::CANrangeSimState &proxSim = proxSensor.GetSimState();
-                    proxSim.SetSupplyVoltage(frc::RobotController::GetBatteryVoltage());
-                    proxSim.SetDistance(setCoralInClaw ? 0_m : kProximityThreshold + 1_in);
+                    SetSimProximitySensorDistance(setCoralInClaw ? 0_m : kProximityThreshold + 1_in);
                 }
             }
         );
@@ -132,6 +130,16 @@ public:
             ioMotorSim.SetRotorAcceleration(ioSim.GetAngularAcceleration() * kIOGearRatio);
         }
     }
+
+    void SetSimProximitySensorDistance(units::meter_t dist)
+    {
+        sim::CANrangeSimState &proxSim = proxSensor.GetSimState();
+		proxSim.SetSupplyVoltage(frc::RobotController::GetBatteryVoltage());
+		proxSim.SetDistance(dist);
+    }
+
+    hardware::CANrange &GetProximitySensor() { return proxSensor; }
+    hardware::TalonFX &GetIOMotor() { return ioMotor; }
 private:
     hardware::CANrange proxSensor{RobotMap::Claw::kCanRangeID, "rio"};
     hardware::TalonFX ioMotor{RobotMap::Claw::kIOMotorID, "rio"};

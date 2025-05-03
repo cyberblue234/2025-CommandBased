@@ -123,7 +123,7 @@ public:
             yPose = robotPose.Y() + units::math::sin(robotPose.Rotation().Degrees()) * xOffset;
             zPose = elevatorHeight + yOffset;
 
-            const std::vector<units::meters_per_second_t> speeds = DecomposeSpeed(ioMotorSpeed * (1_in / 1_tr) / ClawConstants::kIOGearRatio, wristAngle, robotPose.Rotation().Degrees());
+            const std::vector<units::meters_per_second_t> speeds = DecomposeSpeed(ioMotorSpeed * ((2 * ClawConstants::kFlywheelRadius * std::numbers::pi) / 1_tr) / ClawConstants::kIOGearRatio, wristAngle, robotPose.Rotation().Degrees());
             xSpeed = speeds[0];
             ySpeed = speeds[1];
             zSpeed = speeds[2];
@@ -224,12 +224,17 @@ public:
     {
         coralHolder.push_back(Coral{});
     }
+    void DeleteCoralInClaw()
+    {
+        coralHolder.pop_back();
+    }
 
     void UpdateCoral(const units::turns_per_second_t &ioMotorSpeed, const frc::Pose2d &robotPose, const units::meter_t &elevatorHeight, const units::degree_t &wristAngle)
     {
         std::vector<frc::Pose3d> poses;
         std::vector<frc::Pose3d> endPoses;
-        for (auto i = coralHolder.begin(); i != coralHolder.end();)
+        int count = 0;
+        for (std::vector<Coral>::iterator i = coralHolder.begin(); i != coralHolder.end();)
         {
             Coral &coral = *i;
             const frc::Pose3d &pose = coral.UpdatePhysics(ioMotorSpeed, robotPose, elevatorHeight, wristAngle);
@@ -241,6 +246,7 @@ public:
             poses.push_back(pose);
             endPoses.push_back(coral.GetEndPose());
             ++i;
+            count++;
         }
         coralPublisher.Set(poses);
         coralEndsPublisher.Set(endPoses);
@@ -249,11 +255,9 @@ public:
 
     bool AreAnyCoralInClaw()
     {
-        for (Coral coral : coralHolder)
-        {
-            if (coral.GetState() == InClaw) return true;
-        }
-        return false;
+        if (coralHolder.size() == 0) return false;
+        // Assumes the last coral in the vector is the only one to be in the claw
+        return coralHolder.back().GetState() == InClaw;
     }
 
 private:
