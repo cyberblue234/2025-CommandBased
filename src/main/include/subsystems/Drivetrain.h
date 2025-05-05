@@ -117,7 +117,7 @@ private:
     bool hasAppliedDriverPerspective = false;
 
     ctre::phoenix6::swerve::requests::FieldCentric driveFieldCentric = ctre::phoenix6::swerve::requests::FieldCentric() 
-        .WithDeadband(DrivetrainConstants::kMaxSpeed * 0.1).WithRotationalDeadband(DrivetrainConstants::kMaxAngularSpeed * 0.1)
+        .WithDeadband(DrivetrainConstants::kMaxSpeed * 0.2).WithRotationalDeadband(DrivetrainConstants::kMaxAngularSpeed * 0.2)
         .WithDriveRequestType(ctre::phoenix6::swerve::impl::DriveRequestType::OpenLoopVoltage);
     ctre::phoenix6::swerve::requests::FieldCentric driveFieldCentricSlow = ctre::phoenix6::swerve::requests::FieldCentric() 
         .WithDriveRequestType(ctre::phoenix6::swerve::impl::DriveRequestType::OpenLoopVoltage);
