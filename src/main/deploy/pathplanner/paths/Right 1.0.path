@@ -56,17 +56,6 @@
           "name": "L4"
         }
       }
-    },
-    {
-      "name": "IO",
-      "waypointRelativePos": 0.9515260323159785,
-      "endWaypointRelativePos": 1.0,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "IO"
-        }
-      }
     }
   ],
   "globalConstraints": {
@@ -78,11 +67,11 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 1.0,
+    "velocity": 0.0,
     "rotation": -59.99999999999999
   },
   "reversed": false,
-  "folder": "Right 2",
+  "folder": "Right 1",
   "idealStartingState": {
     "velocity": 0,
     "rotation": -59.99999999999999

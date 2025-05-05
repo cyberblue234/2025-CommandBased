@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 10.508855320500997,
-        "y": 6.184499298704968
+        "x": 16.152611301369863,
+        "y": 6.819777397260274
       },
       "prevControl": null,
       "nextControl": {
-        "x": 11.588610416660945,
-        "y": 5.689896808788032
+        "x": 15.911757681006293,
+        "y": 5.868593698565942
       },
       "isLocked": false,
-      "linkedName": "Right1"
+      "linkedName": "RightCoralStation"
     },
     {
       "anchor": {
-        "x": 12.503313264953297,
-        "y": 5.268583595896607
+        "x": 13.628112107569818,
+        "y": 5.27338626252634
       },
       "prevControl": {
-        "x": 12.27384186998498,
-        "y": 5.367794879989164
+        "x": 14.179136027943548,
+        "y": 6.132621299723086
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "E"
+      "linkedName": "D"
     }
   ],
   "rotationTargets": [],
@@ -38,7 +38,7 @@
         "maxVelocity": 2.0,
         "maxAcceleration": 1.5,
         "maxAngularVelocity": 720.0,
-        "maxAngularAcceleration": 240.0,
+        "maxAngularAcceleration": 720.0,
         "nominalVoltage": 12.0,
         "unlimited": false
       }
@@ -47,24 +47,24 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
+      "name": "CoralHome",
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": 0.49830508474576557,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "CoralHome"
+        }
+      }
+    },
+    {
       "name": "L4",
-      "waypointRelativePos": 0.1526032315978457,
+      "waypointRelativePos": 0.49551166965888704,
       "endWaypointRelativePos": 1.0,
       "command": {
         "type": "named",
         "data": {
           "name": "L4"
-        }
-      }
-    },
-    {
-      "name": "IO",
-      "waypointRelativePos": 0.9515260323159785,
-      "endWaypointRelativePos": 1.0,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "IO"
         }
       }
     }
@@ -78,14 +78,14 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 1.0,
-    "rotation": -59.99999999999999
+    "velocity": 0.0,
+    "rotation": -119.99999999999999
   },
   "reversed": false,
-  "folder": "Right 2",
+  "folder": "Right 1",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -59.99999999999999
+    "rotation": 55.0
   },
   "useDefaultConstraints": true
 }

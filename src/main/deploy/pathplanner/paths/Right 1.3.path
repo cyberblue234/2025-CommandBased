@@ -3,42 +3,42 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 10.508855320500997,
-        "y": 6.184499298704968
+        "x": 13.628112107569818,
+        "y": 5.27338626252634
       },
       "prevControl": null,
       "nextControl": {
-        "x": 11.588610416660945,
-        "y": 5.689896808788032
+        "x": 13.893326291265588,
+        "y": 6.293567920050226
       },
       "isLocked": false,
-      "linkedName": "Right1"
+      "linkedName": "D"
     },
     {
       "anchor": {
-        "x": 12.503313264953297,
-        "y": 5.268583595896607
+        "x": 16.152611301369863,
+        "y": 6.819777397260274
       },
       "prevControl": {
-        "x": 12.27384186998498,
-        "y": 5.367794879989164
+        "x": 15.374423683250754,
+        "y": 5.77754670010445
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "E"
+      "linkedName": "RightCoralStation"
     }
   ],
   "rotationTargets": [],
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 0,
+      "minWaypointRelativePos": 0.0,
       "maxWaypointRelativePos": 1.0,
       "constraints": {
         "maxVelocity": 2.0,
         "maxAcceleration": 1.5,
         "maxAngularVelocity": 720.0,
-        "maxAngularAcceleration": 240.0,
+        "maxAngularAcceleration": 720.0,
         "nominalVoltage": 12.0,
         "unlimited": false
       }
@@ -47,24 +47,31 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "L4",
-      "waypointRelativePos": 0.1526032315978457,
-      "endWaypointRelativePos": 1.0,
+      "name": "CoralHome",
+      "waypointRelativePos": 0.0,
+      "endWaypointRelativePos": 0.23518850987432666,
       "command": {
         "type": "named",
         "data": {
-          "name": "L4"
+          "name": "CoralHome"
         }
       }
     },
     {
-      "name": "IO",
-      "waypointRelativePos": 0.9515260323159785,
+      "name": "CoralStation",
+      "waypointRelativePos": 0.504488330341113,
       "endWaypointRelativePos": 1.0,
       "command": {
-        "type": "named",
+        "type": "parallel",
         "data": {
-          "name": "IO"
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "CoralStation"
+              }
+            }
+          ]
         }
       }
     }
@@ -78,14 +85,14 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 1.0,
-    "rotation": -59.99999999999999
+    "velocity": 0.0,
+    "rotation": 55.0
   },
   "reversed": false,
-  "folder": "Right 2",
+  "folder": "Right 1",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -59.99999999999999
+    "rotation": -119.99999999999999
   },
   "useDefaultConstraints": true
 }

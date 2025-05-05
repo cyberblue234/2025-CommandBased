@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 12.57284204182759,
-        "y": 5.50872053430127
+        "x": 12.587650549083413,
+        "y": 5.50392849706414
       },
       "isLocked": false,
       "linkedName": "E"
@@ -20,12 +20,12 @@
         "y": 5.712316277615464
       },
       "prevControl": {
-        "x": 12.603363427038648,
-        "y": 5.5057472763410225
+        "x": 12.593406233068636,
+        "y": 5.511039837609588
       },
       "nextControl": {
-        "x": 14.230762474995329,
-        "y": 6.517868445023774
+        "x": 14.307565466868537,
+        "y": 6.519570800064322
       },
       "isLocked": false,
       "linkedName": null
@@ -36,8 +36,8 @@
         "y": 6.819777397260274
       },
       "prevControl": {
-        "x": 14.224143754532273,
-        "y": 5.947400538888927
+        "x": 14.015065215127736,
+        "y": 5.9198540976032685
       },
       "nextControl": null,
       "isLocked": false,
@@ -86,12 +86,6 @@
               "data": {
                 "name": "CoralStation"
               }
-            },
-            {
-              "type": "named",
-              "data": {
-                "name": "IO"
-              }
             }
           ]
         }
@@ -111,7 +105,7 @@
     "rotation": 55.0
   },
   "reversed": false,
-  "folder": "Right 2",
+  "folder": "Right 1",
   "idealStartingState": {
     "velocity": 0,
     "rotation": -59.99999999999999
