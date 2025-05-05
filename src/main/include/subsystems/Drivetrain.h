@@ -24,6 +24,7 @@
 
 #include <frc/smartdashboard/Field2d.h>
 
+#include "subsystems/Limelight.h"
 #include "Constants.h"
 
 
@@ -88,9 +89,29 @@ public:
                 nullptr
             );
         }
+
+        builder.AddStringProperty("sysIdRoutineToApply",
+            [this] { return sysIdRoutineToApplyName; },
+            {}
+        );
     }
 
     frc::Field2d *GetField() { return &field; }
+
+    frc2::sysid::SysIdRoutine &GetTranslationRoutine() { return sysIdRoutineTranslation; }
+    frc2::sysid::SysIdRoutine &GetSteerRoutine() { return sysIdRoutineSteer; }
+    frc2::sysid::SysIdRoutine &GetRotationRoutine() { return sysIdRoutineRotation; }
+
+    void SetSysIdRoutineToApply(frc2::sysid::SysIdRoutine &routine, const std::string &name)
+    {
+        sysIdRoutineToApply = std::move(routine);
+        sysIdRoutineToApplyName = name;
+    }
+    
+    const std::string &GetSysIdRoutineToApply()
+    {
+        return sysIdRoutineToApplyName;
+    }
     
 private:
     bool hasAppliedDriverPerspective = false;
@@ -186,6 +207,7 @@ private:
     };
 
     frc2::sysid::SysIdRoutine sysIdRoutineToApply = std::move(sysIdRoutineTranslation);
+    std::string sysIdRoutineToApplyName = "translation";
 
     const PIDConstants translationPIDs{PathPlannerConstants::Translation::kP, PathPlannerConstants::Translation::kI, PathPlannerConstants::Translation::kD};
     const PIDConstants rotationPIDs{PathPlannerConstants::Rotation::kP, PathPlannerConstants::Rotation::kI, PathPlannerConstants::Rotation::kD};

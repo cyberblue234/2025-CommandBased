@@ -229,7 +229,6 @@ namespace RobotConstants
     inline constexpr units::kilogram_t kBatteryMass = 12.89_lb;
     inline constexpr units::kilogram_t kBumperMass = 20.0_lb;
     inline constexpr units::kilogram_t kMass = 115_lb + kBumperMass + kBatteryMass; 
-    inline constexpr units::kilogram_square_meter_t kMOI = (1.0 / 12.0) * kMass * (kRobotWidthWithBumper * kRobotWidthWithBumper + kRobotLengthWithBumper * kRobotLengthWithBumper);
 }
 
 namespace DrivetrainConstants
@@ -292,13 +291,13 @@ namespace DrivetrainConstants
         // Gearing between the drive motor and wheel in turns - how many turns of the drive motor does it take to drive the wheel one full revolution
         constexpr double kGearRatio = 6.39;
 
-        constexpr double kP = 0.1;
+        constexpr double kP = 0.13571;
         constexpr double kI = 0.0;
         constexpr double kD = 0.0;
 
-        constexpr double kS = 0.24;
-        constexpr double kV = 5;
-        constexpr double kA = 0.20;
+        constexpr double kS = 0.17851;
+        constexpr double kV = 0.12454;
+        constexpr double kA = 0.004383;
 
         // This stator current limit ensures we don't damage the motor by pushing too much current
         constexpr units::ampere_t kStatorCurrentLimit = 100_A;
@@ -308,7 +307,17 @@ namespace DrivetrainConstants
 
         // Simulation values
         constexpr units::kilogram_square_meter_t kInertia{0.01}; // Moment of inertia of driving the wheels
-        constexpr units::volt_t kFrictionVoltage = 0.2_V; // Simulated voltage necessary to overcome friction
+        constexpr units::volt_t kFrictionVoltage = units::volt_t{kS}; // Simulated voltage necessary to overcome friction
+    }
+    namespace Rotation
+    {
+        constexpr double kP = 0.17581;
+        constexpr double kI = 0.0;
+        constexpr double kD = 0.0;
+
+        constexpr double kS = 0.11705;
+        constexpr double kV = 0.12673;
+        constexpr double kA = 0.011775;
     }
     // PIDs of the steer motor
     namespace Steer
@@ -316,13 +325,13 @@ namespace DrivetrainConstants
         // Gearing between the steer motor and wheel in turns - how many turns of the steer motor does it take to turn the wheel one full revolution
         constexpr double kGearRatio = 12.1;
 
-        constexpr double kP = 100.0;
+        constexpr double kP = 34.598;
         constexpr double kI = 0.0;
-        constexpr double kD = 0.5;
+        constexpr double kD = 0.78363;
 
-        constexpr double kS = 0.24;
-        constexpr double kV = 2.3;
-        constexpr double kA = 0.20;
+        constexpr double kS = 0.20447;
+        constexpr double kV = 1.4975;
+        constexpr double kA = 0.014988;
         
         // Swerve azimuth does not require much torque output, so we can set a relatively low
         // stator current limit to help avoid brownouts without impacting performance.
@@ -333,7 +342,7 @@ namespace DrivetrainConstants
 
         // Simulation values
         constexpr units::kilogram_square_meter_t kInertia{0.01}; // Moment of inertia of driving the wheels
-        constexpr units::volt_t kFrictionVoltage = 0.2_V; // Simulated voltage necessary to overcome friction
+        constexpr units::volt_t kFrictionVoltage = units::volt_t{kS}; // Simulated voltage necessary to overcome friction
     }
 
     constexpr ctre::phoenix6::configs::Slot0Configs driveGains = ctre::phoenix6::configs::Slot0Configs()
@@ -384,28 +393,28 @@ namespace DrivetrainConstants
     constexpr ctre::phoenix6::swerve::SwerveModuleConstants<ctre::phoenix6::configs::TalonFXConfiguration, ctre::phoenix6::configs::TalonFXConfiguration, ctre::phoenix6::configs::CANcoderConfiguration> frontLeft = 
         swerveModuleConstantsCreator.CreateModuleConstants
         (
-            RobotMap::Drivetrain::FrontLeft::kDriveID, RobotMap::Drivetrain::FrontLeft::kSteerID, RobotMap::Drivetrain::FrontLeft::kCANcoderID,
+            RobotMap::Drivetrain::FrontLeft::kSteerID, RobotMap::Drivetrain::FrontLeft::kDriveID, RobotMap::Drivetrain::FrontLeft::kCANcoderID,
             FrontLeft::kMagnetOffset, FrontLeft::kLocation.X(), FrontLeft::kLocation.Y(), 
             FrontLeft::kDriveMotorInverted, FrontLeft::kSteerMotorInverted, FrontLeft::kCANcoderInverted
         );
     constexpr ctre::phoenix6::swerve::SwerveModuleConstants<ctre::phoenix6::configs::TalonFXConfiguration, ctre::phoenix6::configs::TalonFXConfiguration, ctre::phoenix6::configs::CANcoderConfiguration> frontRight = 
         swerveModuleConstantsCreator.CreateModuleConstants
         (
-            RobotMap::Drivetrain::FrontRight::kDriveID, RobotMap::Drivetrain::FrontRight::kSteerID, RobotMap::Drivetrain::FrontRight::kCANcoderID,
+            RobotMap::Drivetrain::FrontRight::kSteerID, RobotMap::Drivetrain::FrontRight::kDriveID, RobotMap::Drivetrain::FrontRight::kCANcoderID,
             FrontRight::kMagnetOffset, FrontRight::kLocation.X(), FrontRight::kLocation.Y(), 
             FrontRight::kDriveMotorInverted, FrontRight::kSteerMotorInverted, FrontRight::kCANcoderInverted
         );
     constexpr ctre::phoenix6::swerve::SwerveModuleConstants<ctre::phoenix6::configs::TalonFXConfiguration, ctre::phoenix6::configs::TalonFXConfiguration, ctre::phoenix6::configs::CANcoderConfiguration> backLeft = 
         swerveModuleConstantsCreator.CreateModuleConstants
         (
-            RobotMap::Drivetrain::BackLeft::kDriveID, RobotMap::Drivetrain::BackLeft::kSteerID, RobotMap::Drivetrain::BackLeft::kCANcoderID,
+            RobotMap::Drivetrain::BackLeft::kSteerID, RobotMap::Drivetrain::BackLeft::kDriveID, RobotMap::Drivetrain::BackLeft::kCANcoderID,
             BackLeft::kMagnetOffset, BackLeft::kLocation.X(), BackLeft::kLocation.Y(), 
             BackLeft::kDriveMotorInverted, BackLeft::kSteerMotorInverted, BackLeft::kCANcoderInverted
         );
     constexpr ctre::phoenix6::swerve::SwerveModuleConstants<ctre::phoenix6::configs::TalonFXConfiguration, ctre::phoenix6::configs::TalonFXConfiguration, ctre::phoenix6::configs::CANcoderConfiguration> backRight = 
         swerveModuleConstantsCreator.CreateModuleConstants
         (
-            RobotMap::Drivetrain::BackRight::kDriveID, RobotMap::Drivetrain::BackRight::kSteerID, RobotMap::Drivetrain::BackRight::kCANcoderID,
+            RobotMap::Drivetrain::BackRight::kSteerID, RobotMap::Drivetrain::BackRight::kDriveID, RobotMap::Drivetrain::BackRight::kCANcoderID,
             BackRight::kMagnetOffset, BackRight::kLocation.X(), BackRight::kLocation.Y(), 
             BackRight::kDriveMotorInverted, BackRight::kSteerMotorInverted, BackRight::kCANcoderInverted
         );
@@ -414,6 +423,11 @@ namespace DrivetrainConstants
     constexpr frc::Rotation2d kRedAlliancePersepctiveRotation{180_deg};
 
     inline pathplanner::ModuleConfig moduleConfigs{kWheelRadius, DrivetrainConstants::kMaxSpeed, kWheelCOF, frc::DCMotor::KrakenX60(1), Drive::kGearRatio, Drive::kStatorCurrentLimit, 1};
+}
+
+namespace RobotConstants
+{
+    inline constexpr units::kilogram_square_meter_t kMOI = kMass * (kTrackWidth / 2) * units::meter_t{DrivetrainConstants::Rotation::kA / DrivetrainConstants::Drive::kA};
 }
 
 /// @brief Constants for PathPlanner

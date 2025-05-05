@@ -147,7 +147,7 @@ private:
 
     void AddTeleopButtonControl(const int button, frc2::CommandPtr command)
     {
-        controlBoard.Button(button).Debounce(100_ms).WhileTrue(std::move(command).OnlyIf(frc::DriverStation::IsTeleop));
+        controlBoard.Button(button).Debounce(100_ms).WhileTrue(std::move(command).OnlyIf(frc::DriverStation::IsTeleopEnabled));
     }
     void AddPositionButtonControl(const Position &position)
     {
