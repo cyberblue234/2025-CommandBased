@@ -1,0 +1,428 @@
+{
+  "hubs": [
+    {
+      "x": -1608,
+      "y": -8,
+      "width": 1616,
+      "height": 1216,
+      "state": {
+        "sidebar": {
+          "width": 262,
+          "expanded": [
+            "/limelight/robot_orientation_set",
+            "/SmartDashboard/Field/Robot",
+            "/limelight",
+            "/datatable",
+            "/PathPlanner",
+            "/SmartDashboard/Mech2d/elevator-claw",
+            "/SmartDashboard/Mech2d/dims",
+            "/SmartDashboard/Mech2d/elevator-claw/elevator",
+            "/SmartDashboard/Mech2d/elevator-claw/elevator/claw",
+            "/Swerve",
+            "/limelight-high",
+            "/SmartDashboard/Mech2d",
+            "/NT",
+            "/NT/SmartDashboard",
+            "/NT/FMSInfo",
+            "/DS",
+            "/NT/PathPlanner",
+            "/swerve",
+            "/swerve/speeds",
+            "/SmartDashboard",
+            "/Phoenix6",
+            "/Robot",
+            "/SimRobot",
+            "/Auto",
+            "/SimRobot/coralHolder",
+            "/SimRobot/coralHolder/3",
+            "/SimRobot/coralHolder/3/translation",
+            "/SimRobot/coralHolder/3/rotation",
+            "/SmartDashboard/Swerve",
+            "/SmartDashboard/Swerve/odometry",
+            "/SmartDashboard/Swerve/odometry/translation",
+            "/SimRobot/endPoseTranslation",
+            "/SimRobot/coralEnds",
+            "/SimRobot/coralEnds/0",
+            "/SimRobot/coralEnds/0/translation",
+            "/SimRobot/testPoint/translation",
+            "/SimRobot/coralEnds/4",
+            "/SimRobot/coralEnds/4/rotation/q",
+            "/Phoenix6/TalonFX-2",
+            "/Phoenix6/TalonFX-1"
+          ]
+        },
+        "tabs": {
+          "selected": 5,
+          "tabs": [
+            {
+              "type": 0,
+              "title": "",
+              "controller": null,
+              "controllerUUID": "r7lmh6nxgiikch7bvae5vx4ivxxgw5kk",
+              "renderer": "#/",
+              "controlsHeight": 0
+            },
+            {
+              "type": 1,
+              "title": "Elevator",
+              "controller": {
+                "leftSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/SmartDashboard/Elevator/height",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/SmartDashboard/Elevator/heightSetpoint",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#e5b31b",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "rightSources": [],
+                "discreteSources": [],
+                "leftLockedRange": null,
+                "rightLockedRange": null,
+                "leftUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "rightUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "leftFilter": 0,
+                "rightFilter": 0
+              },
+              "controllerUUID": "8ln30b7gcqqap7pf5xamepdfs0r8d7vv",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 1,
+              "title": "Wrist",
+              "controller": {
+                "leftSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/SmartDashboard/Wrist/angleSetpoint",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/SmartDashboard/Wrist/angle",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#e5b31b",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "rightSources": [],
+                "discreteSources": [],
+                "leftLockedRange": null,
+                "rightLockedRange": null,
+                "leftUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "rightUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "leftFilter": 0,
+                "rightFilter": 0
+              },
+              "controllerUUID": "b8hgaxp7h0204jqv5r5dvb92yz3evmhn",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 1,
+              "title": "Voltage",
+              "controller": {
+                "leftSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/SmartDashboard/Voltage",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "rightSources": [],
+                "discreteSources": [],
+                "leftLockedRange": null,
+                "rightLockedRange": null,
+                "leftUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "rightUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "leftFilter": 0,
+                "rightFilter": 0
+              },
+              "controllerUUID": "g5zse2ex36wwvpu5psqdmkwpqkssrglx",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 2,
+              "title": "Odometry",
+              "controller": {
+                "sources": [
+                  {
+                    "type": "robot",
+                    "logKey": "NT:/SmartDashboard/Swerve/odometry",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "swerveStates",
+                    "logKey": "NT:/SmartDashboard/Swerve/moduleStates",
+                    "logType": "SwerveModuleState[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff0000",
+                      "arrangement": "0,1,2,3"
+                    }
+                  },
+                  {
+                    "type": "swerveStates",
+                    "logKey": "NT:/SmartDashboard/Swerve/moduleTargets",
+                    "logType": "SwerveModuleState[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00",
+                      "arrangement": "0,1,2,3"
+                    }
+                  },
+                  {
+                    "type": "trajectory",
+                    "logKey": "NT:/Auto/autoPath",
+                    "logType": "Pose2d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "trajectory",
+                    "logKey": "NT:/PathPlanner/activePath",
+                    "logType": "Pose2d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "game": "2025 Field (Welded)",
+                "bumpers": "red",
+                "origin": "blue",
+                "orientation": 0,
+                "size": 30
+              },
+              "controllerUUID": "ssdvw5zyv63lpxeuwguq0xms0o14ysic",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 3,
+              "title": "3D Field",
+              "controller": {
+                "sources": [
+                  {
+                    "type": "robot",
+                    "logKey": "NT:/SmartDashboard/Swerve/odometry",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {
+                      "model": "Cyber Blue 234"
+                    }
+                  },
+                  {
+                    "type": "swerveStates",
+                    "logKey": "NT:/SmartDashboard/Swerve/moduleStates",
+                    "logType": "SwerveModuleState[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff0000",
+                      "arrangement": "0,1,2,3"
+                    }
+                  },
+                  {
+                    "type": "swerveStates",
+                    "logKey": "NT:/SmartDashboard/Swerve/moduleTargets",
+                    "logType": "SwerveModuleState[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00",
+                      "arrangement": "0,1,2,3"
+                    }
+                  },
+                  {
+                    "type": "component",
+                    "logKey": "NT:/SimRobot/stage_1",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "component",
+                    "logKey": "NT:/SimRobot/carriage",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "component",
+                    "logKey": "NT:/SimRobot/claw",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "NT:/PathPlanner/targetPose",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {
+                      "model": "Cyber Blue 234",
+                      "color": "#0000ff"
+                    }
+                  },
+                  {
+                    "type": "component",
+                    "logKey": "NT:/SimRobot/stage_1-desired",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "component",
+                    "logKey": "NT:/SimRobot/carriage-desired",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "component",
+                    "logKey": "NT:/SimRobot/claw-desired",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "trajectory",
+                    "logKey": "NT:/Auto/autoPath",
+                    "logType": "Pose2d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#0000ff",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "trajectory",
+                    "logKey": "NT:/PathPlanner/activePath",
+                    "logType": "Pose2d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#0000ff",
+                      "size": "bold"
+                    }
+                  },
+                  {
+                    "type": "gamePiece",
+                    "logKey": "NT:/SimRobot/coralHolder",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "variant": "Coral"
+                    }
+                  },
+                  {
+                    "type": "axes",
+                    "logKey": "NT:/SimRobot/testPoint",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {}
+                  }
+                ],
+                "game": "2025 Field (AndyMark)",
+                "origin": "blue"
+              },
+              "controllerUUID": "5g0tc3siofdb7hlade2xc6w0yecv5ubh",
+              "renderer": {
+                "cameraIndex": -2,
+                "orbitFov": 70,
+                "cameraPosition": [
+                  0.6777515267619145,
+                  1.3129004033750857,
+                  -1.9349966097582494
+                ],
+                "cameraTarget": [
+                  -0.055316352977274885,
+                  0.9286550383356077,
+                  -0.1345098404396441
+                ]
+              },
+              "controlsHeight": 241
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "satellites": [
+    {
+      "x": -8,
+      "y": -8,
+      "width": 1936,
+      "height": 1096,
+      "state": {
+        "type": 3,
+        "visualizer": {
+          "cameraIndex": -1,
+          "orbitFov": 50,
+          "cameraPosition": [
+            -4.1832241964896575,
+            4.91863750491034,
+            -5.304487506393732
+          ],
+          "cameraTarget": [
+            -4.5427843276369675,
+            3.021191244660666,
+            -1.7585108885821041
+          ]
+        }
+      },
+      "uuid": "5g0tc3siofdb7hlade2xc6w0yecv5ubh"
+    }
+  ],
+  "version": "4.1.1"
+}
