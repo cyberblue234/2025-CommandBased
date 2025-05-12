@@ -40,9 +40,6 @@ Elevator::Elevator()
 
     motor2.GetConfigurator().Apply(motor2Config);
 
-    // Makes the second elevator motor a follower to the first elevator motor
-    motor2.SetControl(follower);
-
     bottomLimitTrigger.Debounce(100_ms).OnTrue(frc2::cmd::RunOnce([this]
     {
         ResetEncoders();
@@ -81,6 +78,8 @@ frc2::CommandPtr Elevator::SetMotorsCommand(double power)
             motor1.SetControl(controls::DutyCycleOut{power}
                 .WithLimitForwardMotion(GetEncoder() > kMaxEncoderValue || IsTopLimitSwitchClosed())
                 .WithLimitReverseMotion(IsBottomLimitSwitchClosed()));
+            // Makes the second elevator motor a follower to the first elevator motor
+            motor2.SetControl(follower);
         }
     ).Unless
     (
@@ -105,6 +104,8 @@ frc2::CommandPtr Elevator::GoToHeightCommand(units::meter_t desiredHeight)
             motor1.SetControl(controls::MotionMagicVoltage{(this->desiredHeight - kHeightOffset) / kMetersPerMotorTurn}
                     .WithLimitForwardMotion(GetEncoder() > kMaxEncoderValue || IsTopLimitSwitchClosed())
                     .WithLimitReverseMotion(IsBottomLimitSwitchClosed()));
+            // Makes the second elevator motor a follower to the first elevator motor
+            motor2.SetControl(follower);
         }
     ).OnlyIf([this] { return isElevatorRegistered; }).WithName("ElevatorGoToHeight");
 }

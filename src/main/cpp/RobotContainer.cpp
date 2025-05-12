@@ -110,9 +110,24 @@ void RobotContainer::ConfigureBindings()
 	AddPositionButtonControl(Positions::AlgaeHigh);
 	AddPositionButtonControl(Positions::CoralStation);
 	AddPositionButtonControl(Positions::Processor);
-	AddPositionButtonControl(Positions::Barge);
 	AddPositionButtonControl(Positions::CoralHome);
 	AddPositionButtonControl(Positions::AlgaeHome);
+
+	AddTeleopButtonControl(Positions::Barge.button, 
+		frc2::cmd::Parallel
+		(
+			elevator.GoToPositionCommand(Positions::Barge),
+			wrist.GoToPositionCommand(Positions::Barge).OnlyIf([this] { return elevator.GetHeight() > 2.5_ft; }),
+			io.SetIOPowerCommand(ClawConstants::kManualIOPower).OnlyWhile([this] { return elevator.GetHeight() > 3.5_ft; })
+		).BeforeStarting
+		(
+			[this]
+			{
+				this->desiredPosition = Positions::Barge;
+			}
+		)
+	);
+
 
 	AddTeleopButtonControl(ControlsConstants::kIOButton, io.IOAtPosition([this] { return desiredPosition; }).OnlyWhile([this] { return elevator.IsAtPosition() && wrist.IsAtPosition(); }).OnlyIf(frc::DriverStation::IsTeleopEnabled));
 

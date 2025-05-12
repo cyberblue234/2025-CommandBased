@@ -8,7 +8,7 @@ Wrist::Wrist()
 
     // Stops the motor if there is no input - desirable for ensuring the wrist stays at the desired position
     wristMotorConfig.MotorOutput.NeutralMode = signals::NeutralModeValue::Brake;
-    // if (frc::RobotBase::IsReal()) wristMotorConfig.MotorOutput.Inverted = signals::InvertedValue::Clockwise_Positive;
+    if (frc::RobotBase::IsReal()) wristMotorConfig.MotorOutput.Inverted = signals::InvertedValue::CounterClockwise_Positive;
 
     wristMotorConfig.Slot0.kP = Gains::kP;
     wristMotorConfig.Slot0.kI = Gains::kI;
@@ -41,7 +41,7 @@ Wrist::Wrist()
     if (frc::RobotBase::IsReal()) canCoderWristConfig.MagnetSensor.MagnetOffset = kCanCoderMagnetOffset;
     // Sets the range of the CANcoder. When it is at 0.5 turn, the CANcoders range is from [-0.2, 0.8)
     canCoderWristConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0.8_tr;
-    // if (frc::RobotBase::IsReal()) canCoderWristConfig.MagnetSensor.SensorDirection = signals::SensorDirectionValue::Clockwise_Positive;
+    if (frc::RobotBase::IsReal()) canCoderWristConfig.MagnetSensor.SensorDirection = signals::SensorDirectionValue::Clockwise_Positive;
 
     canCoderWrist.GetConfigurator().Apply(canCoderWristConfig);
 }
@@ -319,6 +319,7 @@ frc2::CommandPtr IO::IOAtPosition(std::function<const Position()> positionSuppli
     (
         [this, positionSupplier]
         {
+            if (IsForAlgae(positionSupplier())) return false;
             return IsCoralInClaw() == positionSupplier().isForCoralIntake;
         }
     ).AndThen
