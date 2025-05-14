@@ -567,8 +567,9 @@ namespace RobotSim
         constexpr units::meter_t kCoralRadius = units::math::sqrt(units::math::pow<2>(kCoralP2.X() - kCoralP1.X()) + units::math::pow<2>(kCoralP2.Y() - kCoralP1.Y())) / 2;
         constexpr units::meter_t kCoralXMidpoint = (kCoralP1.X() + kCoralP2.X()) / 2;
         constexpr units::meter_t kCoralYMidpoint = (kCoralP1.Y() + kCoralP2.Y()) / 2;
-        constexpr units::degree_t kCoralThetaOffset = units::math::acos((kCoralP1.X() - kCoralXMidpoint) / kCoralRadius);
-        constexpr units::degree_t kCoralVisualOffset = 20_deg;
+        constexpr units::degree_t kOverallOffset = 70_deg;
+        constexpr units::degree_t kCoralThetaOffset = units::math::acos((kCoralP1.X() - kCoralXMidpoint) / kCoralRadius) - kOverallOffset;
+        constexpr units::degree_t kCoralVisualOffset = 20_deg + kOverallOffset;
     }
 }
 

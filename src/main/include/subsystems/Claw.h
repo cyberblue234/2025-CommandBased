@@ -69,10 +69,10 @@ private:
         frc::DCMotor::KrakenX60(1),
         kWristGearRatio,
         1_ft,
-        -10_deg,
+        -180_deg,
         180_deg,
         false,
-        13.5_deg
+        0_deg
     };
 };    
 
