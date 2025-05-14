@@ -16,7 +16,8 @@
 #include "Constants.h"
 #include "subsystems/Drivetrain.h"
 #include "subsystems/Elevator.h"
-#include "subsystems/Claw.h"
+#include "subsystems/Wrist.h"
+#include "subsystems/IO.h"
 #include "subsystems/Climber.h"
 
 #include "sim/Gamepieces.h"
@@ -59,18 +60,6 @@ public:
         stage1DesiredPublisher.Set(frc::Pose3d{0_m, 0_m, elevator.GetHeightSetpoint() / 2, frc::Rotation3d{0_deg, 0_deg, 0_deg}});
         carriageDesiredPublisher.Set(frc::Pose3d{0_m, 0_m, elevator.GetHeightSetpoint(), frc::Rotation3d{0_deg, 0_deg, 0_deg}});
         clawDesiredPublisher.Set(frc::Pose3d{RobotSim::DigitalRobot::kClawX, 0_m, elevator.GetHeightSetpoint() + RobotSim::DigitalRobot::kClawY, frc::Rotation3d{0_deg, wrist.GetAngleSetpoint(), 0_deg}});
-        // if (io.IsCoralInClaw())
-        // {
-        //     frc::Pose2d robotPose = swerve.GetState().Pose;
-        //     units::meter_t xOffset = units::math::cos(RobotSim::DigitalRobot::kCoralThetaOffset - wrist.GetCurrentAngle()) * RobotSim::DigitalRobot::kCoralRadius + RobotSim::DigitalRobot::kCoralXMidpoint;
-        //     coralPublisher.Set(frc::Pose3d{robotPose.X() + xOffset * units::math::cos(robotPose.Rotation().Degrees()), 
-        //         robotPose.Y() + units::math::sin(robotPose.Rotation().Degrees()) * xOffset , elevator.GetHeight() + units::math::sin(RobotSim::DigitalRobot::kCoralThetaOffset- wrist.GetCurrentAngle()) * RobotSim::DigitalRobot::kCoralRadius + RobotSim::DigitalRobot::kCoralYMidpoint, 
-        //         frc::Rotation3d{0_deg, wrist.GetCurrentAngle() + 20_deg, robotPose.Rotation().Degrees()}});
-        // }
-        // else
-        // {
-        //     coralPublisher.Set(frc::Pose3d{});
-        // }
         coralManager.UpdateCoral(io.GetMotorVelocity(), swerve.GetState().Pose, elevator.GetHeight(), wrist.GetCurrentAngle());
     }
 

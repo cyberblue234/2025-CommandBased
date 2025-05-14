@@ -123,7 +123,7 @@ public:
             yPose = robotPose.Y() + units::math::sin(robotPose.Rotation().Degrees()) * xOffset;
             zPose = elevatorHeight + yOffset;
 
-            const std::vector<units::meters_per_second_t> speeds = DecomposeSpeed(ioMotorSpeed * ((2 * ClawConstants::kFlywheelRadius * std::numbers::pi) / 1_tr) / ClawConstants::kIOGearRatio, wristAngle, robotPose.Rotation().Degrees());
+            const std::vector<units::meters_per_second_t> speeds = DecomposeSpeed(ioMotorSpeed * ((2 * IOConstants::kFlywheelRadius * std::numbers::pi) / 1_tr) / IOConstants::kIOGearRatio, wristAngle, robotPose.Rotation().Degrees());
             xSpeed = speeds[0];
             ySpeed = speeds[1];
             zSpeed = speeds[2];

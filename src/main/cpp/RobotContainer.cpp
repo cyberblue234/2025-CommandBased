@@ -118,7 +118,7 @@ void RobotContainer::ConfigureBindings()
 		(
 			elevator.GoToPositionCommand(Positions::Barge),
 			wrist.GoToPositionCommand(Positions::Barge).OnlyIf([this] { return elevator.GetHeight() > 2.5_ft; }),
-			io.SetIOPowerCommand(ClawConstants::kManualIOPower).OnlyWhile([this] { return elevator.GetHeight() > 3.5_ft; })
+			io.SetIOPowerCommand(IOConstants::kManualIOPower).OnlyWhile([this] { return elevator.GetHeight() > 3.5_ft; })
 		).BeforeStarting
 		(
 			[this]
@@ -137,11 +137,11 @@ void RobotContainer::ConfigureBindings()
 	controlBoard.AxisGreaterThan(ControlsConstants::kManualElevatorAxis, 0.5).WhileTrue(elevator.SetMotorsCommand(ElevatorConstants::kElevatorPower).OnlyIf(frc::DriverStation::IsTeleopEnabled));
 	controlBoard.AxisLessThan(ControlsConstants::kManualElevatorAxis, -0.5).WhileTrue(elevator.SetMotorsCommand(-ElevatorConstants::kElevatorPower).OnlyIf(frc::DriverStation::IsTeleopEnabled));
 	// Manual wrist controls
-	controlBoard.AxisGreaterThan(ControlsConstants::kManualWristAxis, 0.5).WhileTrue(wrist.SetWristPowerCommand(ClawConstants::kWristPower).OnlyIf(frc::DriverStation::IsTeleopEnabled));
-	controlBoard.AxisLessThan(ControlsConstants::kManualWristAxis, -0.5).WhileTrue(wrist.SetWristPowerCommand(-ClawConstants::kWristPower).OnlyIf(frc::DriverStation::IsTeleopEnabled));
+	controlBoard.AxisGreaterThan(ControlsConstants::kManualWristAxis, 0.5).WhileTrue(wrist.SetWristPowerCommand(WristConstants::kWristPower).OnlyIf(frc::DriverStation::IsTeleopEnabled));
+	controlBoard.AxisLessThan(ControlsConstants::kManualWristAxis, -0.5).WhileTrue(wrist.SetWristPowerCommand(-WristConstants::kWristPower).OnlyIf(frc::DriverStation::IsTeleopEnabled));
 	// Manual IO controls
-	controlBoard.AxisGreaterThan(ControlsConstants::kManualIntakeAxis, 0.5).WhileTrue(io.SetIOPowerCommand(ClawConstants::kManualIOPower).OnlyIf(frc::DriverStation::IsTeleopEnabled));
-	controlBoard.AxisLessThan(ControlsConstants::kManualIntakeAxis, -0.5).WhileTrue(io.SetIOPowerCommand(-ClawConstants::kManualIOPower).OnlyIf(frc::DriverStation::IsTeleopEnabled));
+	controlBoard.AxisGreaterThan(ControlsConstants::kManualIntakeAxis, 0.5).WhileTrue(io.SetIOPowerCommand(IOConstants::kManualIOPower).OnlyIf(frc::DriverStation::IsTeleopEnabled));
+	controlBoard.AxisLessThan(ControlsConstants::kManualIntakeAxis, -0.5).WhileTrue(io.SetIOPowerCommand(-IOConstants::kManualIOPower).OnlyIf(frc::DriverStation::IsTeleopEnabled));
 	// Climber controls
 	controlBoard.AxisGreaterThan(ControlsConstants::kClimberAxis, 0.5).WhileTrue(climber.SetPowerCommand(ClimberConstants::kClimberPower).OnlyIf(frc::DriverStation::IsTeleopEnabled));
 	controlBoard.AxisLessThan(ControlsConstants::kClimberAxis, -0.5).WhileTrue(climber.SetPowerCommand(-ClimberConstants::kClimberPower).OnlyIf(frc::DriverStation::IsTeleopEnabled));

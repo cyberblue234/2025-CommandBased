@@ -493,7 +493,7 @@ namespace ElevatorConstants
     constexpr double kElevatorPower = 0.25;
 }
 
-namespace ClawConstants
+namespace WristConstants
 {
     namespace Gains
     {
@@ -512,18 +512,6 @@ namespace ClawConstants
         constexpr units::turns_per_second_cubed_t kJerk = 6_tr_per_s_cu;
     }
 
-    // Intake and output powers for coral and algae
-    constexpr double kCoralIntakePower = -0.35;
-    constexpr double kAlgaeIntakePower = 0.5;
-    // Outputting should be negative compared to intaking
-    constexpr double kCoralOutputPower = 0.5;
-    constexpr double kProcessorPower = -0.3;
-    constexpr double kBargePower = -1.0;
-    constexpr double kManualIOPower = 0.2;
-
-    constexpr double kIOGearRatio = 5.0; // may not be exact
-    constexpr units::meter_t kFlywheelRadius = 1_in;
-
     constexpr units::turn_t kCanCoderMagnetOffset = -0.0126953125_tr;
 
     constexpr units::degree_t kTolerance = 2.0_deg;
@@ -535,6 +523,21 @@ namespace ClawConstants
     constexpr units::degrees_per_turn_t kDegreesPerMotorTurn = 360_deg / units::turn_t{kWristGearRatio};
 
     constexpr double kWristPower = 0.2;
+}
+
+namespace IOConstants
+{
+    // Intake and output powers for coral and algae
+    constexpr double kCoralIntakePower = -0.35;
+    constexpr double kAlgaeIntakePower = 0.5;
+    // Outputting should be negative compared to intaking
+    constexpr double kCoralOutputPower = 0.5;
+    constexpr double kProcessorPower = -0.3;
+    constexpr double kBargePower = -1.0;
+    constexpr double kManualIOPower = 0.2;
+
+    constexpr double kIOGearRatio = 5.0; // may not be exact
+    constexpr units::meter_t kFlywheelRadius = 1_in;
     
     constexpr units::meter_t kProximityThreshold = 2.0_in;
 }
@@ -601,16 +604,16 @@ struct Position
 
 namespace Positions
 {    
-    const Position L1           = Position("L1", ElevatorConstants::kHeightOffset, 50.0_deg,  ClawConstants::kCoralOutputPower, false, ControlsConstants::kL1Button);
-    const Position L2           = Position("L2", 1.1_ft, -48.0_deg,  -ClawConstants::kCoralOutputPower, false, ControlsConstants::kL2Button);
-    const Position L3           = Position("L3", 2.5_ft, -48.0_deg,  -ClawConstants::kCoralOutputPower, false, ControlsConstants::kL3Button);
-    const Position L4           = Position("L4", 4.5_ft, -48.0_deg, -ClawConstants::kCoralOutputPower, false, ControlsConstants::kL4Button);
-    const Position AlgaeLow     = Position("AlgaeLow", 2.2_ft, 115.0_deg,  ClawConstants::kAlgaeIntakePower, false, ControlsConstants::kAlgaeLowButton);
-    const Position AlgaeHigh    = Position("AlgaeHigh", 3.5_ft, 115.0_deg,  ClawConstants::kAlgaeIntakePower, false, ControlsConstants::kAlgaeHighButton);
-    const Position CoralStation = Position("CoralStation", 1.915_ft, 50.0_deg,  ClawConstants::kCoralIntakePower, true, ControlsConstants::kCoralStationButton);
-    const Position Processor    = Position("Processor", ElevatorConstants::kHeightOffset, 100.0_deg,  ClawConstants::kProcessorPower, false, ControlsConstants::kProcessorButton);
-    const Position Barge        = Position("Barge", ElevatorConstants::kMaxElevatorHeight, 0.0_deg,  ClawConstants::kBargePower, false, ControlsConstants::kBargeButton);
-    const Position CoralHome    = Position("CoralHome", ElevatorConstants::kHeightOffset, -48.0_deg,  ClawConstants::kCoralIntakePower, true, ControlsConstants::kCoralHomeButton);
+    const Position L1           = Position("L1", ElevatorConstants::kHeightOffset, 50.0_deg,  IOConstants::kCoralOutputPower, false, ControlsConstants::kL1Button);
+    const Position L2           = Position("L2", 1.1_ft, -48.0_deg,  -IOConstants::kCoralOutputPower, false, ControlsConstants::kL2Button);
+    const Position L3           = Position("L3", 2.5_ft, -48.0_deg,  -IOConstants::kCoralOutputPower, false, ControlsConstants::kL3Button);
+    const Position L4           = Position("L4", 4.5_ft, -48.0_deg, -IOConstants::kCoralOutputPower, false, ControlsConstants::kL4Button);
+    const Position AlgaeLow     = Position("AlgaeLow", 2.2_ft, 115.0_deg,  IOConstants::kAlgaeIntakePower, false, ControlsConstants::kAlgaeLowButton);
+    const Position AlgaeHigh    = Position("AlgaeHigh", 3.5_ft, 115.0_deg,  IOConstants::kAlgaeIntakePower, false, ControlsConstants::kAlgaeHighButton);
+    const Position CoralStation = Position("CoralStation", 1.915_ft, 50.0_deg,  IOConstants::kCoralIntakePower, true, ControlsConstants::kCoralStationButton);
+    const Position Processor    = Position("Processor", ElevatorConstants::kHeightOffset, 100.0_deg,  IOConstants::kProcessorPower, false, ControlsConstants::kProcessorButton);
+    const Position Barge        = Position("Barge", ElevatorConstants::kMaxElevatorHeight, 0.0_deg,  IOConstants::kBargePower, false, ControlsConstants::kBargeButton);
+    const Position CoralHome    = Position("CoralHome", ElevatorConstants::kHeightOffset, -48.0_deg,  IOConstants::kCoralIntakePower, true, ControlsConstants::kCoralHomeButton);
     const Position AlgaeHome    = Position("AlgaeHome", ElevatorConstants::kHeightOffset, 25.0_deg,  0.0, false, ControlsConstants::kAlgaeHomeButton);
 }
 
