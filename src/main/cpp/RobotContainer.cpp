@@ -23,6 +23,19 @@ RobotContainer::RobotContainer()
 		}
 	);
 
+	swerve.limelightPoseEstimatesSupplier = [this] ()
+	{
+		ctre::phoenix6::hardware::Pigeon2 &pigeon = swerve.GetPigeon2();
+		units::degree_t yaw = pigeon.GetYaw().GetValue();
+		units::degree_t pitch = pigeon.GetPitch().GetValue();
+		units::degree_t roll = pigeon.GetRoll().GetValue();
+		units::degrees_per_second_t yawRate = pigeon.GetAngularVelocityZWorld().GetValue();
+
+		limelightLow.SetRobotOrientation(yaw, yawRate, pitch, 0_deg_per_s, roll, 0_deg_per_s);
+		limelightHigh.SetRobotOrientation(yaw, yawRate, pitch, 0_deg_per_s, roll, 0_deg_per_s);
+		return std::vector<PoseEstimate>{ limelightLow.GetPose(), limelightHigh.GetPose()};
+	};
+
 	NamedCommands::registerCommand("L1", GoToPositionCommand(Positions::L1));
 	NamedCommands::registerCommand("L2", GoToPositionCommand(Positions::L2));
 	NamedCommands::registerCommand("L3", GoToPositionCommand(Positions::L3));

@@ -70,6 +70,6 @@ private:
         -180_deg,
         180_deg,
         false,
-        0_deg
+        -48_deg
     };
 };    

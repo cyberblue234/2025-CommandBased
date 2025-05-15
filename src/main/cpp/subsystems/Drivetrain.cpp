@@ -45,6 +45,18 @@ void Drivetrain::Periodic()
         }
     }
 
+    if (limelightPoseEstimatesSupplier.has_value())
+    {
+        std::vector<PoseEstimate> poseEstimates = limelightPoseEstimatesSupplier.value()();
+        for (PoseEstimate estimate : poseEstimates)
+        {
+            if (units::math::abs(GetPigeon2().GetAngularVelocityZWorld().GetValue()) <= 720_deg_per_s && estimate.tagCount > 0)
+            {
+                AddVisionMeasurement(estimate.pose, estimate.timestampSeconds, wpi::array<double, 3>{visionStdDevs[0] + estimate.avgTagDist, visionStdDevs[1] + estimate.avgTagDist, visionStdDevs[2] + estimate.avgTagDist});
+            }
+        }
+    }
+
     if (utils::IsSimulation())
     {
         const units::second_t currentTime = utils::GetCurrentTime();

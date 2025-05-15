@@ -19,6 +19,7 @@
 #include "subsystems/Wrist.h"
 #include "subsystems/IO.h"
 #include "subsystems/Climber.h"
+#include "subsystems/Limelight.h"
 
 #include "sim/Gamepieces.h"
 
@@ -124,6 +125,8 @@ private:
     nt::StructPublisher<frc::Pose3d> coralPublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructTopic<frc::Pose3d>("coral").Publish();
     IO io{};
     Climber climber{};
+    Limelight limelightLow{"limelight-low"};
+    Limelight limelightHigh{"limelight-high"};
 
     CoralManager coralManager{};
     frc2::Trigger addCoral{[this] { return io.IsCoralInClaw(); }};
@@ -136,7 +139,7 @@ private:
 
     void AddTeleopButtonControl(const int button, frc2::CommandPtr command)
     {
-        controlBoard.Button(button).Debounce(100_ms).WhileTrue(std::move(command).OnlyIf(frc::DriverStation::IsTeleopEnabled));
+        controlBoard.Button(button).Debounce(40_ms).WhileTrue(std::move(command).OnlyIf(frc::DriverStation::IsTeleopEnabled));
     }
     void AddPositionButtonControl(const Position &position)
     {

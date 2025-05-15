@@ -90,6 +90,7 @@ public:
     /// @param yawRate Angular velocity in the yaw direction in degrees per second
     /// @return PoseEstimate based on MegaTag2 calcluation
     PoseEstimate GetPose(units::degree_t yaw, units::degrees_per_second_t yawRate);
+    PoseEstimate GetPose();
     /// @brief Gets the distance from the targeted april tag
     /// @retval distance in meters
     /// @retval -1 if no april tags are in sight

@@ -112,6 +112,9 @@ public:
     {
         return sysIdRoutineToApplyName;
     }
+
+    std::optional<std::function<std::vector<PoseEstimate>()>> limelightPoseEstimatesSupplier;
+    wpi::array<double, 3> visionStdDevs{1.0, 1.0, 1.0};
     
 private:
     bool hasAppliedDriverPerspective = false;
