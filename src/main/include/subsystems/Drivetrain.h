@@ -116,17 +116,11 @@ public:
 private:
     bool hasAppliedDriverPerspective = false;
 
-    ctre::phoenix6::swerve::requests::FieldCentric driveFieldCentric = ctre::phoenix6::swerve::requests::FieldCentric() 
-        .WithDeadband(DrivetrainConstants::kMaxSpeed * 0.2).WithRotationalDeadband(DrivetrainConstants::kMaxAngularSpeed * 0.2)
-        .WithDriveRequestType(ctre::phoenix6::swerve::impl::DriveRequestType::OpenLoopVoltage);
-    ctre::phoenix6::swerve::requests::FieldCentric driveFieldCentricSlow = ctre::phoenix6::swerve::requests::FieldCentric() 
-        .WithDriveRequestType(ctre::phoenix6::swerve::impl::DriveRequestType::OpenLoopVoltage);
-    ctre::phoenix6::swerve::requests::RobotCentric driveRobotCentric = ctre::phoenix6::swerve::requests::RobotCentric() 
-        .WithDeadband(DrivetrainConstants::kMaxSpeed * 0.1).WithRotationalDeadband(DrivetrainConstants::kMaxAngularSpeed * 0.1)
-        .WithDriveRequestType(ctre::phoenix6::swerve::impl::DriveRequestType::OpenLoopVoltage);
-    ctre::phoenix6::swerve::requests::RobotCentric driveRobotCentricSlow = ctre::phoenix6::swerve::requests::RobotCentric() 
-        .WithDriveRequestType(ctre::phoenix6::swerve::impl::DriveRequestType::OpenLoopVoltage);
-    ctre::phoenix6::swerve::requests::SwerveDriveBrake brake{};
+    swerve::requests::FieldCentric driveFieldCentric = swerve::requests::FieldCentric() 
+        .WithDriveRequestType(swerve::impl::DriveRequestType::Velocity);
+    swerve::requests::RobotCentric driveRobotCentric = swerve::requests::RobotCentric() 
+        .WithDriveRequestType(swerve::impl::DriveRequestType::Velocity);
+    swerve::requests::SwerveDriveBrake brake{};
 
     swerve::requests::ApplyRobotSpeeds pathApplyRobotSpeeds{};
     swerve::requests::SysIdSwerveTranslation translationCharacterization{};
@@ -140,6 +134,8 @@ private:
 
     nt::StructPublisher<frc::Pose2d> odometryPublisher = GetTable()->GetStructTopic<frc::Pose2d>("odometry").Publish();
     nt::StructPublisher<frc::ChassisSpeeds> speedsPublisher = GetTable()->GetStructTopic<frc::ChassisSpeeds>("speeds").Publish();
+    nt::StructPublisher<frc::ChassisSpeeds> setSpeedsPublisher = GetTable()->GetStructTopic<frc::ChassisSpeeds>("setSpeeds").Publish();
+    frc::ChassisSpeeds setSpeeds;
     nt::StructArrayPublisher<frc::SwerveModulePosition> modulePositionsPublisher = GetTable()->GetStructArrayTopic<frc::SwerveModulePosition>("modulePositions").Publish();
     nt::StructArrayPublisher<frc::SwerveModuleState> moduleStatesPublisher = GetTable()->GetStructArrayTopic<frc::SwerveModuleState>("moduleStates").Publish();
     nt::StructArrayPublisher<frc::SwerveModuleState> moduleTargetsPublisher = GetTable()->GetStructArrayTopic<frc::SwerveModuleState>("moduleTargets").Publish();
@@ -212,27 +208,7 @@ private:
     const PIDConstants translationPIDs{PathPlannerConstants::Translation::kP, PathPlannerConstants::Translation::kI, PathPlannerConstants::Translation::kD};
     const PIDConstants rotationPIDs{PathPlannerConstants::Rotation::kP, PathPlannerConstants::Rotation::kI, PathPlannerConstants::Rotation::kD};
 
-    // const units::second_t kSimLoopPeriod = 5_ms;
-    // frc::Notifier simNotifier{[this](){}};
     units::second_t lastSimTime;
-
-    // void StartSimThread()
-    // {
-    //     lastSimTime = utils::GetCurrentTime();
-    //     simNotifier = frc::Notifier
-    //     (
-    //         [this]
-    //         {
-    //             const units::second_t currentTime = utils::GetCurrentTime();
-    //             units::second_t deltaTime = currentTime - lastSimTime;
-    //             lastSimTime = currentTime;
-
-    //             UpdateSimState(deltaTime, frc::RobotController::GetBatteryVoltage());
-    //         }
-    //     );
-    //     simNotifier.StartPeriodic(kSimLoopPeriod);
-    // }
-
 
     frc::Field2d field;
 };

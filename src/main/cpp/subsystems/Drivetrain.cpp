@@ -9,7 +9,8 @@ Drivetrain::Drivetrain() : swerve::SwerveDrivetrain<hardware::TalonFX, hardware:
         [this](){ return GetState().Speeds; }, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
         [this](frc::ChassisSpeeds speeds, DriveFeedforwards feedforwards)
         { 
-            SetControl(pathApplyRobotSpeeds.WithSpeeds(speeds)
+            setSpeeds = speeds;
+            SetControl(pathApplyRobotSpeeds.WithSpeeds(setSpeeds)
                 .WithWheelForceFeedforwardsX(feedforwards.robotRelativeForcesX)
                 .WithWheelForceFeedforwardsY(feedforwards.robotRelativeForcesY));
         }, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
@@ -57,6 +58,7 @@ void Drivetrain::Periodic()
     field.SetRobotPose(state.Pose);
     odometryPublisher.Set(state.Pose);
     speedsPublisher.Set(state.Speeds);
+    setSpeedsPublisher.Set(setSpeeds);
     modulePositionsPublisher.Set(state.ModulePositions);
     moduleStatesPublisher.Set(state.ModuleStates);
     moduleTargetsPublisher.Set(state.ModuleTargets);
@@ -66,28 +68,22 @@ frc2::CommandPtr Drivetrain::DriveWithSpeedsCommand(std::function<frc::ChassisSp
 {
     return Run([this, speedsSupplier, fieldCentric, slow]
     {
-        frc::ChassisSpeeds speeds = speedsSupplier();
+        setSpeeds = speedsSupplier();
         if (fieldCentric)
         {
-            if (slow)
-            {
-                SetControl(driveFieldCentricSlow.WithVelocityX(speeds.vx).WithVelocityY(speeds.vy).WithRotationalRate(speeds.omega));
-            }
-            else
-            {
-                SetControl(driveFieldCentric.WithVelocityX(speeds.vx).WithVelocityY(speeds.vy).WithRotationalRate(speeds.omega));
-            }
+            SetControl
+            (
+                driveFieldCentric.WithVelocityX(setSpeeds.vx).WithVelocityY(setSpeeds.vy).WithRotationalRate(setSpeeds.omega)
+                .WithDeadband(slow == false ? kMaxSpeed * 0.15 : 0_mps).WithRotationalDeadband(slow == false ? kMaxAngularSpeed * 0.10 : 0.1_rad_per_s)
+            );
         }
         else
         {
-            if (slow)
-            {
-                SetControl(driveRobotCentricSlow.WithVelocityX(speeds.vx).WithVelocityY(speeds.vy).WithRotationalRate(speeds.omega));
-            }
-            else
-            {
-                SetControl(driveRobotCentric.WithVelocityX(speeds.vx).WithVelocityY(speeds.vy).WithRotationalRate(speeds.omega));
-            }
+            SetControl
+            (
+                driveRobotCentric.WithVelocityX(setSpeeds.vx).WithVelocityY(setSpeeds.vy).WithRotationalRate(setSpeeds.omega)
+                .WithDeadband(slow == false ? kMaxSpeed * 0.15 : 0_mps).WithRotationalDeadband(slow == false ? kMaxAngularSpeed * 0.10 : 0.1_rad_per_s)
+            );
         }
     }).WithName("DriveWithSpeeds");
 }

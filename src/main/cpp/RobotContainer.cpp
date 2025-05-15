@@ -131,7 +131,7 @@ void RobotContainer::ConfigureBindings()
 
 	AddTeleopButtonControl(ControlsConstants::kIOButton, io.IOAtPosition([this] { return desiredPosition; }).OnlyWhile([this] { return elevator.IsAtPosition() && wrist.IsAtPosition(); }).OnlyIf(frc::DriverStation::IsTeleopEnabled));
 
-	gamepad.Y().Debounce(100_ms).OnTrue(frc2::cmd::RunOnce([this] { swerve.ResetRotation(0_deg); }));
+	gamepad.Y().Debounce(40_ms).OnTrue(frc2::cmd::RunOnce([this] { swerve.ResetRotation(0_deg); }));
 
 	// Manual elevator controls
 	controlBoard.AxisGreaterThan(ControlsConstants::kManualElevatorAxis, 0.5).WhileTrue(elevator.SetMotorsCommand(ElevatorConstants::kElevatorPower).OnlyIf(frc::DriverStation::IsTeleopEnabled));
@@ -147,15 +147,15 @@ void RobotContainer::ConfigureBindings()
 	controlBoard.AxisLessThan(ControlsConstants::kClimberAxis, -0.5).WhileTrue(climber.SetPowerCommand(-ClimberConstants::kClimberPower).OnlyIf(frc::DriverStation::IsTeleopEnabled));
 
 	// Sys Id triggers. Only works during Test mode.
-	gamepad.Back().Debounce(100_ms).OnTrue(frc2::cmd::RunOnce(SignalLogger::Start).OnlyIf(frc::DriverStation::IsTest));
-	gamepad.Start().Debounce(100_ms).OnTrue(frc2::cmd::RunOnce(SignalLogger::Stop).OnlyIf(frc::DriverStation::IsTest));
-	gamepad.POVUp().Debounce(100_ms).WhileTrue(swerve.SysIdQuasistatic(frc2::sysid::Direction::kForward).OnlyIf(frc::DriverStation::IsTestEnabled));
-	gamepad.POVRight().Debounce(100_ms).WhileTrue(swerve.SysIdQuasistatic(frc2::sysid::Direction::kReverse).OnlyIf(frc::DriverStation::IsTestEnabled));
-	gamepad.POVDown().Debounce(100_ms).WhileTrue(swerve.SysIdDynamic(frc2::sysid::Direction::kForward).OnlyIf(frc::DriverStation::IsTestEnabled));
-	gamepad.POVLeft().Debounce(100_ms).WhileTrue(swerve.SysIdDynamic(frc2::sysid::Direction::kReverse).OnlyIf(frc::DriverStation::IsTestEnabled));
-	gamepad.X().Debounce(100_ms).OnTrue(frc2::cmd::RunOnce([this] { swerve.SetSysIdRoutineToApply(swerve.GetTranslationRoutine(), "translation"); }).OnlyIf(frc::DriverStation::IsTest));
-	gamepad.A().Debounce(100_ms).OnTrue(frc2::cmd::RunOnce([this] { swerve.SetSysIdRoutineToApply(swerve.GetSteerRoutine(), "steer"); }).OnlyIf(frc::DriverStation::IsTest));
-	gamepad.B().Debounce(100_ms).OnTrue(frc2::cmd::RunOnce([this] { swerve.SetSysIdRoutineToApply(swerve.GetRotationRoutine(), "rotation"); }).OnlyIf(frc::DriverStation::IsTest));
+	gamepad.Back().Debounce(40_ms).OnTrue(frc2::cmd::RunOnce(SignalLogger::Start).OnlyIf(frc::DriverStation::IsTest));
+	gamepad.Start().Debounce(40_ms).OnTrue(frc2::cmd::RunOnce(SignalLogger::Stop).OnlyIf(frc::DriverStation::IsTest));
+	gamepad.POVUp().Debounce(40_ms).WhileTrue(swerve.SysIdQuasistatic(frc2::sysid::Direction::kForward).OnlyIf(frc::DriverStation::IsTestEnabled));
+	gamepad.POVRight().Debounce(40_ms).WhileTrue(swerve.SysIdQuasistatic(frc2::sysid::Direction::kReverse).OnlyIf(frc::DriverStation::IsTestEnabled));
+	gamepad.POVDown().Debounce(40_ms).WhileTrue(swerve.SysIdDynamic(frc2::sysid::Direction::kForward).OnlyIf(frc::DriverStation::IsTestEnabled));
+	gamepad.POVLeft().Debounce(40_ms).WhileTrue(swerve.SysIdDynamic(frc2::sysid::Direction::kReverse).OnlyIf(frc::DriverStation::IsTestEnabled));
+	gamepad.X().Debounce(40_ms).OnTrue(frc2::cmd::RunOnce([this] { swerve.SetSysIdRoutineToApply(swerve.GetTranslationRoutine(), "translation"); }).OnlyIf(frc::DriverStation::IsTest));
+	gamepad.A().Debounce(40_ms).OnTrue(frc2::cmd::RunOnce([this] { swerve.SetSysIdRoutineToApply(swerve.GetSteerRoutine(), "steer"); }).OnlyIf(frc::DriverStation::IsTest));
+	gamepad.B().Debounce(40_ms).OnTrue(frc2::cmd::RunOnce([this] { swerve.SetSysIdRoutineToApply(swerve.GetRotationRoutine(), "rotation"); }).OnlyIf(frc::DriverStation::IsTest));
 }
 
 std::optional<frc2::CommandPtr> RobotContainer::GetAutonomousCommand()

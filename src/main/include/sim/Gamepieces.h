@@ -25,7 +25,7 @@ constexpr units::meter_t deltaParallel = 0.165_m;
 constexpr units::meter_t deltaPerpendicular = 0.0525_m;
 constexpr units::degree_t angleBetweenTagAndBranch = units::math::atan(deltaPerpendicular / deltaParallel);
 constexpr units::degree_t angleBetweenBranches = 180_deg - 2 * angleBetweenTagAndBranch;
-constexpr units::meter_t deltaTotal = units::math::sqrt(units::math::pow<2>(deltaParallel) + units::math::pow<2>(deltaPerpendicular));
+constexpr units::meter_t deltaTotal = units::math::hypot(deltaParallel, deltaPerpendicular);
 constexpr std::array<frc::Pose2d, 2> GetBranchPoses(const frc::Pose2d &pose)
 {
     const units::degree_t rightAngle = 90_deg + angleBetweenTagAndBranch + pose.Rotation().Degrees();
@@ -70,7 +70,8 @@ public:
         {
             bool flip = robotPose.X() > pathplanner::FlippingUtil::fieldSizeX / 2;
             frc::Pose2d nearestPose = endPose.ToPose2d().Nearest(flip ? FlipFieldPoses(std::vector<frc::Pose2d>{branchPoses.begin(), branchPoses.end()}) : std::vector<frc::Pose2d>{branchPoses.begin(), branchPoses.end()});
-            units::meter_t distanceToNearestPose = units::math::sqrt(units::math::pow<2>(endPose.X() - nearestPose.X()) + units::math::pow<2>(endPose.Y() - nearestPose.Y()));
+            units::meter_t distanceToNearestPose = units::math::hypot(endPose.X() - nearestPose.X(), endPose.Y() - nearestPose.Y());
+            // units::math::sqrt(units::math::pow<2>(endPose.X() - nearestPose.X()) + units::math::pow<2>(endPose.Y() - nearestPose.Y()));
             if (distanceToNearestPose < 3_in)
             {
                 units::meter_t dL4 = units::math::abs(endPose.Z() - l4Height);
