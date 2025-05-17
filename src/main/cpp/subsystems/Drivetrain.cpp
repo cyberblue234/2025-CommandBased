@@ -30,6 +30,7 @@ Drivetrain::Drivetrain() : swerve::SwerveDrivetrain<hardware::TalonFX, hardware:
         this // Reference to this subsystem to set requirements
     );
 
+    frc::SmartDashboard::PutData("Swerve/pigeon2", &GetPigeon2());
     frc::SmartDashboard::PutData("Field", &field);
 }
 
@@ -76,9 +77,9 @@ void Drivetrain::Periodic()
     moduleTargetsPublisher.Set(state.ModuleTargets);
 }
 
-frc2::CommandPtr Drivetrain::DriveWithSpeedsCommand(std::function<frc::ChassisSpeeds()> speedsSupplier, bool fieldCentric, bool slow)
+frc2::CommandPtr Drivetrain::DriveWithSpeedsCommand(std::function<frc::ChassisSpeeds()> speedsSupplier, bool fieldCentric)
 {
-    return Run([this, speedsSupplier, fieldCentric, slow]
+    return Run([this, speedsSupplier, fieldCentric]
     {
         setSpeeds = speedsSupplier();
         if (fieldCentric)
@@ -86,7 +87,6 @@ frc2::CommandPtr Drivetrain::DriveWithSpeedsCommand(std::function<frc::ChassisSp
             SetControl
             (
                 driveFieldCentric.WithVelocityX(setSpeeds.vx).WithVelocityY(setSpeeds.vy).WithRotationalRate(setSpeeds.omega)
-                .WithDeadband(slow == false ? kMaxSpeed * 0.15 : 0_mps).WithRotationalDeadband(slow == false ? kMaxAngularSpeed * 0.10 : 0.1_rad_per_s)
             );
         }
         else
@@ -94,7 +94,6 @@ frc2::CommandPtr Drivetrain::DriveWithSpeedsCommand(std::function<frc::ChassisSp
             SetControl
             (
                 driveRobotCentric.WithVelocityX(setSpeeds.vx).WithVelocityY(setSpeeds.vy).WithRotationalRate(setSpeeds.omega)
-                .WithDeadband(slow == false ? kMaxSpeed * 0.15 : 0_mps).WithRotationalDeadband(slow == false ? kMaxAngularSpeed * 0.10 : 0.1_rad_per_s)
             );
         }
     }).WithName("DriveWithSpeeds");

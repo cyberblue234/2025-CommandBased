@@ -271,9 +271,9 @@ namespace DrivetrainConstants
     }
 
     // Maximum desired speed of the robot. Does not have to be maximum theoretical speed if that is too high for desired driving speed
-    constexpr units::meters_per_second_t kMaxSpeed = 4.5_mps;
+    constexpr units::meters_per_second_t kMaxSpeed = 5_mps;
     // Maximum desired angular speed of the robot. Does not have to be maximum theoretical speed if that is too high for desired driving speed
-    constexpr units::radians_per_second_t kMaxAngularSpeed = 3_tps;
+    constexpr units::radians_per_second_t kMaxAngularSpeed = 11.2_rad_per_s;
 
     // Every 1 rotation of the azimuth results in kCoupleRatio drive motor turns;
     // This may need to be tuned to your individual robot

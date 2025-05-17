@@ -38,7 +38,7 @@ class Drivetrain : public swerve::SwerveDrivetrain<hardware::TalonFX, hardware::
 public:
     Drivetrain();
 
-    frc2::CommandPtr DriveWithSpeedsCommand(std::function<frc::ChassisSpeeds()> speedsSupplier, bool fieldCentric, bool slow);
+    frc2::CommandPtr DriveWithSpeedsCommand(std::function<frc::ChassisSpeeds()> speedsSupplier, bool fieldCentric);
 
     frc2::CommandPtr SysIdDynamic(frc2::sysid::Direction direction)
     {
@@ -59,7 +59,7 @@ public:
             [this] 
             {
                 frc::ChassisSpeeds speeds = GetState().Speeds;
-                return std::pow(std::pow(speeds.vx.value(), 2) + std::pow(speeds.vy.value(), 2), 0.5);
+                return units::math::hypot(speeds.vx, speeds.vy).value();
             },
             nullptr
         );
@@ -120,9 +120,11 @@ private:
     bool hasAppliedDriverPerspective = false;
 
     swerve::requests::FieldCentric driveFieldCentric = swerve::requests::FieldCentric() 
-        .WithDriveRequestType(swerve::impl::DriveRequestType::Velocity);
+        .WithDriveRequestType(swerve::impl::DriveRequestType::Velocity)
+        .WithDeadband(kMaxSpeed * 0.15).WithRotationalDeadband(kMaxAngularSpeed * 0.10);
     swerve::requests::RobotCentric driveRobotCentric = swerve::requests::RobotCentric() 
-        .WithDriveRequestType(swerve::impl::DriveRequestType::Velocity);
+        .WithDriveRequestType(swerve::impl::DriveRequestType::Velocity)
+        .WithDeadband(kMaxSpeed * 0.15).WithRotationalDeadband(kMaxAngularSpeed * 0.10);
     swerve::requests::SwerveDriveBrake brake{};
 
     swerve::requests::ApplyRobotSpeeds pathApplyRobotSpeeds{};

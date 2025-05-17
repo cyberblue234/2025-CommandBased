@@ -87,12 +87,11 @@ void RobotContainer::ConfigureBindings()
 		swerve.DriveWithSpeedsCommand([this]
 		{
 			frc::ChassisSpeeds speeds;
-			double speedAdjust = gamepad.GetRightTriggerAxis() > 0.5 ? 0.4 : 1;
-			speeds.vx = -gamepad.GetLeftY() * DrivetrainConstants::kMaxSpeed * speedAdjust;
-			speeds.vy = -gamepad.GetLeftX() * DrivetrainConstants::kMaxSpeed * speedAdjust;
-			speeds.omega = -gamepad.GetRightX() * DrivetrainConstants::kMaxAngularSpeed * speedAdjust;
+			speeds.vx = -gamepad.GetLeftY() * DrivetrainConstants::kMaxSpeed;
+			speeds.vy = -gamepad.GetLeftX() * DrivetrainConstants::kMaxSpeed;
+			speeds.omega = -gamepad.GetRightX() * DrivetrainConstants::kMaxAngularSpeed;
 			return speeds;
-		}, frc::RobotBase::IsReal(), gamepad.GetRightTriggerAxis() > 0.5)
+		}, true)
 	);
 	
 	elevator.SetDefaultCommand
