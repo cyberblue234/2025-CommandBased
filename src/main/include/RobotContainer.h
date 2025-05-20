@@ -137,13 +137,13 @@ private:
 
     Position desiredPosition;
 
-    void AddTeleopButtonControl(const int button, frc2::CommandPtr command)
+    void AddControlBoardCommand(const int button, frc2::CommandPtr command)
     {
         controlBoard.Button(button).Debounce(40_ms).WhileTrue(std::move(command).OnlyIf(frc::DriverStation::IsTeleopEnabled));
     }
-    void AddPositionButtonControl(const Position &position)
+    void AddControlBoardPositionCommand(const Position &position)
     {
-        AddTeleopButtonControl
+        AddControlBoardCommand
         (
             position.button,
             GoToPositionCommand(position)

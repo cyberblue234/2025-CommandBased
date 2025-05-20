@@ -98,3 +98,48 @@ frc2::CommandPtr Drivetrain::DriveWithSpeedsCommand(std::function<frc::ChassisSp
         }
     }).WithName("DriveWithSpeeds");
 }
+
+void Drivetrain::InitSendable(wpi::SendableBuilder &builder)
+{
+    frc2::SubsystemBase::InitSendable(builder);
+
+    builder.AddDoubleProperty("setSpeed",
+        [this] 
+        {
+            frc::ChassisSpeeds speeds = GetState().Speeds;
+            return units::math::hypot(speeds.vx, speeds.vy).value();
+        },
+        nullptr
+    );
+
+    std::string modules[] = {"frontLeft", "frontRight", "backLeft", "backRight"};
+
+    for (int i = 0; i < 4; i++)
+    {
+        builder.AddDoubleProperty(modules[i] + "/speed",
+            [this, i] { return GetState().ModuleStates[i].speed.value(); },
+            nullptr
+        );
+        builder.AddDoubleProperty(modules[i] + "/angle",
+            [this, i] { return GetState().ModuleStates[i].angle.Degrees().value(); },
+            nullptr
+        );
+        builder.AddDoubleProperty(modules[i] + "/speedSet",
+            [this, i] { return GetState().ModuleTargets[i].speed.value(); },
+            nullptr
+        );
+        builder.AddDoubleProperty(modules[i] + "/angleSet",
+            [this, i] { return GetState().ModuleTargets[i].angle.Degrees().value(); },
+            nullptr
+        );
+        builder.AddDoubleProperty(modules[i] + "/distance",
+            [this, i] { return GetState().ModulePositions[i].distance.value(); },
+            nullptr
+        );
+    }
+
+    builder.AddStringProperty("sysIdRoutineToApply",
+        [this] { return SysIdRoutineToString(); },
+        {}
+    );
+}
