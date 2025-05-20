@@ -44,59 +44,44 @@ public:
 
     frc2::CommandPtr SysIdDynamic(frc2::sysid::Direction direction)
     {
-        return sysIdRoutineToApply.Dynamic(direction);
+        switch(sysIdRoutineToApply)
+        {
+            case SysIdRoutines::Translation:
+                return sysIdRoutineTranslation.Dynamic(direction);
+                break;
+            case SysIdRoutines::Rotation:
+                return sysIdRoutineRotation.Dynamic(direction);
+                break;
+            case SysIdRoutines::Steer:
+                return sysIdRoutineSteer.Dynamic(direction);
+                break;
+            default:
+                return frc2::cmd::RunOnce([this] { std::cout << "Error - drive sys id set error" << std::endl; });
+                break;
+        }
     }
     frc2::CommandPtr SysIdQuasistatic(frc2::sysid::Direction direction)
     {
-        return sysIdRoutineToApply.Quasistatic(direction);
+        switch(sysIdRoutineToApply)
+        {
+            case SysIdRoutines::Translation:
+                return sysIdRoutineTranslation.Quasistatic(direction);
+                break;
+            case SysIdRoutines::Rotation:
+                return sysIdRoutineRotation.Quasistatic(direction);
+                break;
+            case SysIdRoutines::Steer:
+                return sysIdRoutineSteer.Quasistatic(direction);
+                break;
+            default:
+                return frc2::cmd::RunOnce([this] { std::cout << "Error - drive sys id set error" << std::endl; });
+                break;
+        }
     }
 
     void Periodic() override;
 
-    void InitSendable(wpi::SendableBuilder &builder) override
-    {
-        frc2::SubsystemBase::InitSendable(builder);
-
-        builder.AddDoubleProperty("setSpeed",
-            [this] 
-            {
-                frc::ChassisSpeeds speeds = GetState().Speeds;
-                return units::math::hypot(speeds.vx, speeds.vy).value();
-            },
-            nullptr
-        );
-
-        std::string modules[] = {"frontLeft", "frontRight", "backLeft", "backRight"};
-
-        for (int i = 0; i < 4; i++)
-        {
-            builder.AddDoubleProperty(modules[i] + "/speed",
-                [this, i] { return GetState().ModuleStates[i].speed.value(); },
-                nullptr
-            );
-            builder.AddDoubleProperty(modules[i] + "/angle",
-                [this, i] { return GetState().ModuleStates[i].angle.Degrees().value(); },
-                nullptr
-            );
-            builder.AddDoubleProperty(modules[i] + "/speedSet",
-                [this, i] { return GetState().ModuleTargets[i].speed.value(); },
-                nullptr
-            );
-            builder.AddDoubleProperty(modules[i] + "/angleSet",
-                [this, i] { return GetState().ModuleTargets[i].angle.Degrees().value(); },
-                nullptr
-            );
-            builder.AddDoubleProperty(modules[i] + "/distance",
-                [this, i] { return GetState().ModulePositions[i].distance.value(); },
-                nullptr
-            );
-        }
-
-        builder.AddStringProperty("sysIdRoutineToApply",
-            [this] { return sysIdRoutineToApplyName; },
-            {}
-        );
-    }
+    void InitSendable(wpi::SendableBuilder &builder) override;
 
     frc::Field2d *GetField() { return &field; }
 
@@ -104,15 +89,19 @@ public:
     frc2::sysid::SysIdRoutine &GetSteerRoutine() { return sysIdRoutineSteer; }
     frc2::sysid::SysIdRoutine &GetRotationRoutine() { return sysIdRoutineRotation; }
 
-    void SetSysIdRoutineToApply(frc2::sysid::SysIdRoutine &routine, const std::string &name)
+    enum SysIdRoutines
     {
-        sysIdRoutineToApply = std::move(routine);
-        sysIdRoutineToApplyName = name;
+        Translation, Rotation, Steer
+    };
+
+    void SetSysIdRoutineToApply(const SysIdRoutines &routine)
+    {        
+        sysIdRoutineToApply = routine;
     }
     
-    const std::string &GetSysIdRoutineToApply()
+    const SysIdRoutines &GetSysIdRoutineToApply()
     {
-        return sysIdRoutineToApplyName;
+        return sysIdRoutineToApply;
     }
 
     std::optional<std::function<std::vector<PoseEstimate>()>> limelightPoseEstimatesSupplier;
@@ -213,8 +202,26 @@ private:
         }
     };
 
-    frc2::sysid::SysIdRoutine sysIdRoutineToApply = std::move(sysIdRoutineTranslation);
-    std::string sysIdRoutineToApplyName = "translation";
+    SysIdRoutines sysIdRoutineToApply = SysIdRoutines::Translation;
+
+    std::string SysIdRoutineToString()
+    {
+        switch(sysIdRoutineToApply)
+        {
+            case SysIdRoutines::Translation:
+                return "Translation";
+                break;
+            case SysIdRoutines::Rotation:
+                return "Rotation";
+                break;
+            case SysIdRoutines::Steer:
+                return "Steer";
+                break;
+            default:
+                return "";
+                break;
+        }
+    }
 
     const PIDConstants translationPIDs{PathPlannerConstants::Translation::kP, PathPlannerConstants::Translation::kI, PathPlannerConstants::Translation::kD};
     const PIDConstants rotationPIDs{PathPlannerConstants::Rotation::kP, PathPlannerConstants::Rotation::kI, PathPlannerConstants::Rotation::kD};
