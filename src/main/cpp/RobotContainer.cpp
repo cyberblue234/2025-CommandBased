@@ -93,6 +93,32 @@ void RobotContainer::ConfigureBindings()
 			return speeds;
 		}, true)
 	);
+
+	gamepad.LeftTrigger(0.5).Debounce(40_ms).WhileTrue
+	(
+		swerve.DriveWithSpeedsAtAngleCommand
+		([this]
+			{
+				frc::ChassisSpeeds speeds;
+				speeds.vx = -gamepad.GetLeftY() * DrivetrainConstants::kMaxSpeed;
+				speeds.vy = -gamepad.GetLeftX() * DrivetrainConstants::kMaxSpeed;
+				return speeds;
+			}, -234_deg + swerve.GetOperatorForwardDirection().Degrees()
+		)
+	);
+
+	gamepad.RightTrigger(0.5).Debounce(40_ms).WhileTrue
+	(
+		swerve.DriveWithSpeedsAtAngleCommand
+		([this]
+			{
+				frc::ChassisSpeeds speeds;
+				speeds.vx = -gamepad.GetLeftY() * DrivetrainConstants::kMaxSpeed;
+				speeds.vy = -gamepad.GetLeftX() * DrivetrainConstants::kMaxSpeed;
+				return speeds;
+			}, 234_deg + swerve.GetOperatorForwardDirection().Degrees()
+		)
+	);
 	
 	elevator.SetDefaultCommand
 	(

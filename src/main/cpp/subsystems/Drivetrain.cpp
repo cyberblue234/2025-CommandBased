@@ -10,7 +10,7 @@ Drivetrain::Drivetrain() : swerve::SwerveDrivetrain<hardware::TalonFX, hardware:
         [this](frc::ChassisSpeeds speeds, DriveFeedforwards feedforwards)
         { 
             setSpeeds = speeds;
-            SetControl(pathApplyRobotSpeeds.WithSpeeds(setSpeeds)
+            SetControl(applyRobotSpeeds.WithSpeeds(setSpeeds)
                 .WithWheelForceFeedforwardsX(feedforwards.robotRelativeForcesX)
                 .WithWheelForceFeedforwardsY(feedforwards.robotRelativeForcesY));
         }, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
@@ -98,6 +98,14 @@ frc2::CommandPtr Drivetrain::DriveWithSpeedsCommand(std::function<frc::ChassisSp
         }
     }).WithName("DriveWithSpeeds");
 }
+
+frc2::CommandPtr Drivetrain::DriveWithSpeedsAtAngleCommand(std::function<frc::ChassisSpeeds()> speedsSupplier, frc::Rotation2d rotation)
+{
+    return Run([this, speedsSupplier, rotation]
+    {
+        setSpeeds = speedsSupplier();
+        SetControl(driveFieldCentricAtAngle.WithVelocityX(setSpeeds.vx).WithVelocityY(setSpeeds.vy).WithTargetDirection(rotation));
+    }).WithName("DriveWithSpeedsAtAngle");
 
 void Drivetrain::InitSendable(wpi::SendableBuilder &builder)
 {
