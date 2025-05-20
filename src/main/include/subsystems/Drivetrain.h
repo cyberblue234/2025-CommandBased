@@ -40,6 +40,8 @@ public:
 
     frc2::CommandPtr DriveWithSpeedsCommand(std::function<frc::ChassisSpeeds()> speedsSupplier, bool fieldCentric);
 
+    frc2::CommandPtr DriveWithSpeedsAtAngleCommand(std::function<frc::ChassisSpeeds()> speedsSupplier, frc::Rotation2d rotation);
+
     frc2::CommandPtr SysIdDynamic(frc2::sysid::Direction direction)
     {
         return sysIdRoutineToApply.Dynamic(direction);
@@ -122,12 +124,16 @@ private:
     swerve::requests::FieldCentric driveFieldCentric = swerve::requests::FieldCentric() 
         .WithDriveRequestType(swerve::impl::DriveRequestType::Velocity)
         .WithDeadband(kMaxSpeed * 0.15).WithRotationalDeadband(kMaxAngularSpeed * 0.10);
+    swerve::requests::FieldCentricFacingAngle driveFieldCentricAtAngle = swerve::requests::FieldCentricFacingAngle()
+        .WithDriveRequestType(swerve::impl::DriveRequestType::Velocity)
+        .WithDeadband(kMaxSpeed * 0.15)
+        .WithHeadingPID(Rotation::kP * 2 * std::numbers::pi, Rotation::kI * 2 * std::numbers::pi, Rotation::kD * 2 * std::numbers::pi);
     swerve::requests::RobotCentric driveRobotCentric = swerve::requests::RobotCentric() 
         .WithDriveRequestType(swerve::impl::DriveRequestType::Velocity)
         .WithDeadband(kMaxSpeed * 0.15).WithRotationalDeadband(kMaxAngularSpeed * 0.10);
+    swerve::requests::ApplyRobotSpeeds applyRobotSpeeds{};
     swerve::requests::SwerveDriveBrake brake{};
 
-    swerve::requests::ApplyRobotSpeeds pathApplyRobotSpeeds{};
     swerve::requests::SysIdSwerveTranslation translationCharacterization{};
     swerve::requests::SysIdSwerveSteerGains steerCharacterization{};
     swerve::requests::SysIdSwerveRotation rotationCharacterization{};
