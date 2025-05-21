@@ -106,6 +106,7 @@ frc2::CommandPtr Drivetrain::DriveWithSpeedsAtAngleCommand(std::function<frc::Ch
         setSpeeds = speedsSupplier();
         SetControl(driveFieldCentricAtAngle.WithVelocityX(setSpeeds.vx).WithVelocityY(setSpeeds.vy).WithTargetDirection(rotation));
     }).WithName("DriveWithSpeedsAtAngle");
+}
 
 void Drivetrain::InitSendable(wpi::SendableBuilder &builder)
 {
