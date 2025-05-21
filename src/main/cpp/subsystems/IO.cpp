@@ -66,8 +66,8 @@ frc2::CommandPtr IO::IOAtPosition(std::function<const Position()> positionSuppli
     (
         [this, positionSupplier]
         {
-            if (IsForAlgae(positionSupplier())) return false;
-            return IsCoralInClaw() == positionSupplier().isForCoralIntake;
+            if (positionSupplier().isForCoral == false) return false;
+            return IsCoralInClaw() == positionSupplier().isForIntake;
         }
     ).AndThen
     (
