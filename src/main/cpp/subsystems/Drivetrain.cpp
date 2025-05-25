@@ -96,7 +96,7 @@ frc2::CommandPtr Drivetrain::DriveWithSpeedsCommand(std::function<frc::ChassisSp
                 driveRobotCentric.WithVelocityX(setSpeeds.vx).WithVelocityY(setSpeeds.vy).WithRotationalRate(setSpeeds.omega)
             );
         }
-    }).WithName("DriveWithSpeeds");
+    });
 }
 
 frc2::CommandPtr Drivetrain::DriveWithSpeedsAtAngleCommand(std::function<frc::ChassisSpeeds()> speedsSupplier, frc::Rotation2d rotation)
@@ -105,7 +105,16 @@ frc2::CommandPtr Drivetrain::DriveWithSpeedsAtAngleCommand(std::function<frc::Ch
     {
         setSpeeds = speedsSupplier();
         SetControl(driveFieldCentricAtAngle.WithVelocityX(setSpeeds.vx).WithVelocityY(setSpeeds.vy).WithTargetDirection(rotation));
-    }).WithName("DriveWithSpeedsAtAngle");
+    });
+}
+
+frc2::CommandPtr Drivetrain::ApplyRobotSpeedsCommand(std::function<frc::ChassisSpeeds()> speedsSupplier)
+{
+    return Run([this, speedsSupplier]
+    {
+        setSpeeds = speedsSupplier();
+        SetControl(applyRobotSpeeds.WithSpeeds(setSpeeds));
+    });
 }
 
 void Drivetrain::InitSendable(wpi::SendableBuilder &builder)

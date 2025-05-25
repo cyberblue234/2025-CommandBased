@@ -42,41 +42,49 @@ public:
 
     frc2::CommandPtr DriveWithSpeedsAtAngleCommand(std::function<frc::ChassisSpeeds()> speedsSupplier, frc::Rotation2d rotation);
 
-    frc2::CommandPtr SysIdDynamic(frc2::sysid::Direction direction)
+    frc2::CommandPtr ApplyRobotSpeedsCommand(std::function<frc::ChassisSpeeds()> speedsSupplier);
+
+    frc2::CommandPtr ScheduleSysIdDynamic(frc2::sysid::Direction direction)
     {
-        switch(sysIdRoutineToApply)
-        {
-            case SysIdRoutines::Translation:
-                return sysIdRoutineTranslation.Dynamic(direction);
-                break;
-            case SysIdRoutines::Rotation:
-                return sysIdRoutineRotation.Dynamic(direction);
-                break;
-            case SysIdRoutines::Steer:
-                return sysIdRoutineSteer.Dynamic(direction);
-                break;
-            default:
-                return frc2::cmd::RunOnce([this] { std::cout << "Error - drive sys id set error" << std::endl; });
-                break;
-        }
+        return frc2::cmd::RunOnce
+        (
+            [this, direction] ()
+            {
+                sysIdRoutineCommand = sysIdRoutineTranslation.Dynamic(direction);
+                if (sysIdRoutineToApply == SysIdRoutines::Steer)
+                    sysIdRoutineCommand = sysIdRoutineSteer.Dynamic(direction);
+                else if (sysIdRoutineToApply == SysIdRoutines::Rotation)
+                    sysIdRoutineCommand = sysIdRoutineRotation.Dynamic(direction);
+                sysIdRoutineCommand->Schedule();
+            }
+        );
     }
-    frc2::CommandPtr SysIdQuasistatic(frc2::sysid::Direction direction)
+    frc2::CommandPtr ScheduleSysIdQuasistatic(frc2::sysid::Direction direction)
     {
-        switch(sysIdRoutineToApply)
-        {
-            case SysIdRoutines::Translation:
-                return sysIdRoutineTranslation.Quasistatic(direction);
-                break;
-            case SysIdRoutines::Rotation:
-                return sysIdRoutineRotation.Quasistatic(direction);
-                break;
-            case SysIdRoutines::Steer:
-                return sysIdRoutineSteer.Quasistatic(direction);
-                break;
-            default:
-                return frc2::cmd::RunOnce([this] { std::cout << "Error - drive sys id set error" << std::endl; });
-                break;
-        }
+        return frc2::cmd::RunOnce
+        (
+            [this, direction] ()
+            {
+                sysIdRoutineCommand = sysIdRoutineTranslation.Quasistatic(direction);
+                if (sysIdRoutineToApply == SysIdRoutines::Steer)
+                    sysIdRoutineCommand = sysIdRoutineSteer.Quasistatic(direction);
+                else if (sysIdRoutineToApply == SysIdRoutines::Rotation)
+                    sysIdRoutineCommand = sysIdRoutineRotation.Quasistatic(direction);
+                sysIdRoutineCommand->Schedule();
+            }
+        );
+    }
+
+    frc2::CommandPtr CancelSysId()
+    {
+        return frc2::cmd::RunOnce
+        (
+            [this] ()
+            {
+                if (sysIdRoutineCommand)
+                    sysIdRoutineCommand->Cancel();
+            }
+        );
     }
 
     void Periodic() override;
@@ -123,10 +131,6 @@ private:
     swerve::requests::ApplyRobotSpeeds applyRobotSpeeds{};
     swerve::requests::SwerveDriveBrake brake{};
 
-    swerve::requests::SysIdSwerveTranslation translationCharacterization{};
-    swerve::requests::SysIdSwerveSteerGains steerCharacterization{};
-    swerve::requests::SysIdSwerveRotation rotationCharacterization{};
-
     std::shared_ptr<nt::NetworkTable> GetTable()
     {
         return nt::NetworkTableInstance::GetDefault().GetTable("SmartDashboard")->GetSubTable("Swerve");
@@ -139,7 +143,13 @@ private:
     nt::StructArrayPublisher<frc::SwerveModulePosition> modulePositionsPublisher = GetTable()->GetStructArrayTopic<frc::SwerveModulePosition>("modulePositions").Publish();
     nt::StructArrayPublisher<frc::SwerveModuleState> moduleStatesPublisher = GetTable()->GetStructArrayTopic<frc::SwerveModuleState>("moduleStates").Publish();
     nt::StructArrayPublisher<frc::SwerveModuleState> moduleTargetsPublisher = GetTable()->GetStructArrayTopic<frc::SwerveModuleState>("moduleTargets").Publish();
+
+    std::optional<frc2::CommandPtr> sysIdRoutineCommand;
     
+    swerve::requests::SysIdSwerveTranslation translationCharacterization{};
+    swerve::requests::SysIdSwerveSteerGains steerCharacterization{};
+    swerve::requests::SysIdSwerveRotation rotationCharacterization{};
+
     frc2::sysid::SysIdRoutine sysIdRoutineTranslation
     {
         frc2::sysid::Config

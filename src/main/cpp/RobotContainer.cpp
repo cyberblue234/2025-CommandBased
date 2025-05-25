@@ -91,7 +91,7 @@ void RobotContainer::ConfigureBindings()
 			speeds.vy = -gamepad.GetLeftX() * DrivetrainConstants::kMaxSpeed;
 			speeds.omega = -gamepad.GetRightX() * DrivetrainConstants::kMaxAngularSpeed;
 			return speeds;
-		}, true)
+		}, true).Unless(frc::DriverStation::IsAutonomous).WithName("Drive With Speeds")
 	);
 
 	gamepad.LeftTrigger(0.5).Debounce(40_ms).WhileTrue
@@ -104,7 +104,7 @@ void RobotContainer::ConfigureBindings()
 				speeds.vy = -gamepad.GetLeftX() * DrivetrainConstants::kMaxSpeed;
 				return speeds;
 			}, -234_deg + swerve.GetOperatorForwardDirection().Degrees()
-		)
+		).Unless(frc::DriverStation::IsAutonomous).WithName("Face Left Coral Station")
 	);
 
 	gamepad.RightTrigger(0.5).Debounce(40_ms).WhileTrue
@@ -117,8 +117,13 @@ void RobotContainer::ConfigureBindings()
 				speeds.vy = -gamepad.GetLeftX() * DrivetrainConstants::kMaxSpeed;
 				return speeds;
 			}, 234_deg + swerve.GetOperatorForwardDirection().Degrees()
-		)
+		).Unless(frc::DriverStation::IsAutonomous).WithName("Face Right Coral Station")
 	);
+
+	gamepad.POVUp().Debounce(40_ms).WhileTrue(swerve.ApplyRobotSpeedsCommand([this] { frc::ChassisSpeeds speeds; speeds.vx = 1_mps; return speeds; }).OnlyIf(frc::DriverStation::IsTeleop).WithName("Slow Robot Forward"));
+	gamepad.POVRight().Debounce(40_ms).WhileTrue(swerve.ApplyRobotSpeedsCommand([this] { frc::ChassisSpeeds speeds; speeds.vy = -1_mps; return speeds; }).OnlyIf(frc::DriverStation::IsTeleop).WithName("Slow Robot Right"));
+	gamepad.POVDown().Debounce(40_ms).WhileTrue(swerve.ApplyRobotSpeedsCommand([this] { frc::ChassisSpeeds speeds; speeds.vx = -1_mps; return speeds; }).OnlyIf(frc::DriverStation::IsTeleop).WithName("Slow Robot Backward"));
+	gamepad.POVLeft().Debounce(40_ms).WhileTrue(swerve.ApplyRobotSpeedsCommand([this] { frc::ChassisSpeeds speeds; speeds.vy = 1_mps; return speeds; }).OnlyIf(frc::DriverStation::IsTeleop).WithName("Slow Robot Left"));
 	
 	elevator.SetDefaultCommand
 	(
@@ -168,12 +173,7 @@ void RobotContainer::ConfigureBindings()
 
 	AddControlBoardCommand(ControlsConstants::kIOButton, io.IOAtPosition([this] { return desiredPosition; }).OnlyWhile([this] { return elevator.IsAtPosition() && wrist.IsAtPosition(); }).OnlyIf(frc::DriverStation::IsTeleopEnabled));
 
-	gamepad.POVUp().Debounce(40_ms).WhileTrue(swerve.DriveWithSpeedsCommand([this] { frc::ChassisSpeeds speeds; speeds.vx = 1_mps; return speeds; }, false).OnlyIf(frc::DriverStation::IsTeleopEnabled).WithName("Test"));
-	gamepad.POVRight().Debounce(40_ms).WhileTrue(swerve.DriveWithSpeedsCommand([this] { frc::ChassisSpeeds speeds; speeds.vy = -1_mps; return speeds; }, false).OnlyIf(frc::DriverStation::IsTeleopEnabled));
-	gamepad.POVDown().Debounce(40_ms).WhileTrue(swerve.DriveWithSpeedsCommand([this] { frc::ChassisSpeeds speeds; speeds.vx = -1_mps; return speeds; }, false).OnlyIf(frc::DriverStation::IsTeleopEnabled));
-	gamepad.POVLeft().Debounce(40_ms).WhileTrue(swerve.DriveWithSpeedsCommand([this] { frc::ChassisSpeeds speeds; speeds.vy = 1_mps; return speeds; }, false).OnlyIf(frc::DriverStation::IsTeleopEnabled));
-
-	gamepad.Y().Debounce(40_ms).OnTrue(frc2::cmd::RunOnce([this] { swerve.ResetRotation(0_deg); }));
+	gamepad.Y().Debounce(40_ms).OnTrue(frc2::cmd::RunOnce([this] { swerve.ResetRotation(0_deg); }).IgnoringDisable(true).WithName("Reset Gyro"));
 
 	// Manual elevator controls
 	controlBoard.AxisGreaterThan(ControlsConstants::kManualElevatorAxis, 0.5).WhileTrue(elevator.SetMotorsCommand(ElevatorConstants::kElevatorPower).OnlyIf(frc::DriverStation::IsTeleopEnabled));
@@ -189,15 +189,21 @@ void RobotContainer::ConfigureBindings()
 	controlBoard.AxisLessThan(ControlsConstants::kClimberAxis, -0.5).WhileTrue(climber.SetPowerCommand(-ClimberConstants::kClimberPower).OnlyIf(frc::DriverStation::IsTeleopEnabled));
 
 	// Sys Id triggers. Only works during Test mode.
-	gamepad.Back().Debounce(40_ms).OnTrue(frc2::cmd::RunOnce(SignalLogger::Start).OnlyIf(frc::DriverStation::IsTest));
-	gamepad.Start().Debounce(40_ms).OnTrue(frc2::cmd::RunOnce(SignalLogger::Stop).OnlyIf(frc::DriverStation::IsTest));
-	gamepad.POVUp().Debounce(40_ms).WhileTrue(swerve.SysIdQuasistatic(frc2::sysid::Direction::kForward).OnlyIf(frc::DriverStation::IsTestEnabled).WithName("Quasistatic Forward"));
-	gamepad.POVRight().Debounce(40_ms).WhileTrue(swerve.SysIdQuasistatic(frc2::sysid::Direction::kReverse).OnlyIf(frc::DriverStation::IsTestEnabled).WithName("Quasistatic Reverse"));
-	gamepad.POVDown().Debounce(40_ms).WhileTrue(swerve.SysIdDynamic(frc2::sysid::Direction::kForward).OnlyIf(frc::DriverStation::IsTestEnabled).WithName("Dynamic Forward"));
-	gamepad.POVLeft().Debounce(40_ms).WhileTrue(swerve.SysIdDynamic(frc2::sysid::Direction::kReverse).OnlyIf(frc::DriverStation::IsTestEnabled).WithName("Dynamic Reverse"));
-	gamepad.X().Debounce(40_ms).OnTrue(frc2::cmd::RunOnce([this] { swerve.SetSysIdRoutineToApply(Drivetrain::SysIdRoutines::Translation); }).OnlyIf(frc::DriverStation::IsTest));
-	gamepad.A().Debounce(40_ms).OnTrue(frc2::cmd::RunOnce([this] { swerve.SetSysIdRoutineToApply(Drivetrain::SysIdRoutines::Rotation); }).OnlyIf(frc::DriverStation::IsTest));
-	gamepad.B().Debounce(40_ms).OnTrue(frc2::cmd::RunOnce([this] { swerve.SetSysIdRoutineToApply(Drivetrain::SysIdRoutines::Steer); }).OnlyIf(frc::DriverStation::IsTest));
+	gamepad.Back().Debounce(40_ms).OnTrue(frc2::cmd::RunOnce(SignalLogger::Start).OnlyIf(frc::DriverStation::IsTest).IgnoringDisable(true));
+	gamepad.Start().Debounce(40_ms).OnTrue(frc2::cmd::RunOnce(SignalLogger::Stop).OnlyIf(frc::DriverStation::IsTest).IgnoringDisable(true));
+
+	gamepad.POVUp().Debounce(40_ms).OnTrue(swerve.ScheduleSysIdQuasistatic(frc2::sysid::Direction::kForward).OnlyIf(frc::DriverStation::IsTest).WithName("Quasistatic Forward"));
+	gamepad.POVUp().Debounce(40_ms).OnFalse(swerve.CancelSysId().OnlyIf(frc::DriverStation::IsTest));
+	gamepad.POVRight().Debounce(40_ms).OnTrue(swerve.ScheduleSysIdQuasistatic(frc2::sysid::Direction::kReverse).OnlyIf(frc::DriverStation::IsTest).WithName("Quasistatic Reverse"));
+	gamepad.POVRight().Debounce(40_ms).OnFalse(swerve.CancelSysId().OnlyIf(frc::DriverStation::IsTest));
+	gamepad.POVDown().Debounce(40_ms).OnTrue(swerve.ScheduleSysIdDynamic(frc2::sysid::Direction::kForward).OnlyIf(frc::DriverStation::IsTest).WithName("Dynamic Forward"));
+	gamepad.POVDown().Debounce(40_ms).OnFalse(swerve.CancelSysId().OnlyIf(frc::DriverStation::IsTest));
+	gamepad.POVLeft().Debounce(40_ms).OnTrue(swerve.ScheduleSysIdDynamic(frc2::sysid::Direction::kReverse).OnlyIf(frc::DriverStation::IsTest).WithName("Dynamic Reverse"));
+	gamepad.POVLeft().Debounce(40_ms).OnFalse(swerve.CancelSysId().OnlyIf(frc::DriverStation::IsTest));
+
+	gamepad.X().Debounce(40_ms).OnTrue(frc2::cmd::RunOnce([this] { swerve.SetSysIdRoutineToApply(Drivetrain::SysIdRoutines::Translation); }).OnlyIf(frc::DriverStation::IsTest).IgnoringDisable(true));
+	gamepad.A().Debounce(40_ms).OnTrue(frc2::cmd::RunOnce([this] { swerve.SetSysIdRoutineToApply(Drivetrain::SysIdRoutines::Rotation); }).OnlyIf(frc::DriverStation::IsTest).IgnoringDisable(true));
+	gamepad.B().Debounce(40_ms).OnTrue(frc2::cmd::RunOnce([this] { swerve.SetSysIdRoutineToApply(Drivetrain::SysIdRoutines::Steer); }).OnlyIf(frc::DriverStation::IsTest).IgnoringDisable(true));
 }
 
 std::optional<frc2::CommandPtr> RobotContainer::GetAutonomousCommand()
