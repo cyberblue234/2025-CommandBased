@@ -54,6 +54,10 @@ public:
             [this] { return GetDistance().convert<units::inch>().value(); },
             {}
         );
+        builder.AddDoubleProperty("speed",
+            [this] { return ioMotor.Get(); },
+            {}
+        );
     }
 
     void Periodic() override

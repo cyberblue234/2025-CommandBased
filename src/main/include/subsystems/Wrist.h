@@ -61,7 +61,7 @@ private:
         frc::LinearSystemId::SingleJointedArmSystem
         (
             frc::DCMotor::KrakenX60(1),
-            1.0_kg_sq_m,
+            0.05_kg_sq_m,
             kWristGearRatio
         ),
         frc::DCMotor::KrakenX60(1),

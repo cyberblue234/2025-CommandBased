@@ -160,8 +160,8 @@ void RobotContainer::ConfigureBindings()
 		frc2::cmd::Parallel
 		(
 			elevator.GoToPositionCommand(Positions::Barge),
-			wrist.GoToPositionCommand(Positions::Barge).OnlyIf([this] { return elevator.GetHeight() > 2.5_ft; }),
-			io.SetIOPowerCommand(IOConstants::kManualIOPower).OnlyWhile([this] { return elevator.GetHeight() > 3.5_ft; })
+			wrist.StopWristMotorCommand().Repeatedly().Until([this] { return elevator.GetHeight() > 2.5_ft; }).AndThen(wrist.GoToPositionCommand(Positions::Barge)),
+			io.SetIOPowerCommand(IOConstants::kManualIOPower).Repeatedly().Until([this] { return elevator.IsAtPosition() && wrist.IsAtPosition(); }).AndThen(io.StopIOMotorCommand())
 		).BeforeStarting
 		(
 			[this]
