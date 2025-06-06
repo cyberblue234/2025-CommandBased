@@ -1,7 +1,6 @@
 #pragma once
 
 #include <frc/smartdashboard/SmartDashboard.h>
-#include <frc/apriltag/AprilTagFieldLayout.h>
 
 #include "Constants.h"
 

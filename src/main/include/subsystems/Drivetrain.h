@@ -44,6 +44,30 @@ public:
 
     frc2::CommandPtr ApplyRobotSpeedsCommand(std::function<frc::ChassisSpeeds()> speedsSupplier);
 
+    frc2::CommandPtr GoToPositionCommand(frc::Pose2d desiredPose)
+    {
+        return Run([this, desiredPose]
+        {
+            frc::Pose2d currentPose = GetState().Pose;
+            units::meter_t deltaX = desiredPose.X() - currentPose.X();
+            units::meter_t deltaY = desiredPose.Y() - currentPose.Y();
+            units::radian_t deltaTheta = desiredPose.Rotation().Radians() - currentPose.Rotation().Radians();
+            // Theoretical kP
+            deltaX *= 0.15;
+            deltaY *= 0.15;
+            deltaTheta *= 0.15;
+            units::meters_per_second_t vx = deltaX.value() * kMaxSpeed;
+            units::meters_per_second_t vy = deltaY.value() * kMaxSpeed;
+            units::radians_per_second_t omega = deltaTheta.value() * kMaxAngularSpeed;
+
+            setSpeeds.vx = vx;
+            setSpeeds.vy = vy;
+            setSpeeds.omega = omega;
+
+            SetControl(driveRobotCentric.WithVelocityX(vx).WithVelocityY(vy).WithRotationalRate(omega));
+        });
+    }
+
     frc2::CommandPtr ScheduleSysIdDynamic(frc2::sysid::Direction direction)
     {
         return frc2::cmd::RunOnce
@@ -124,10 +148,14 @@ private:
     swerve::requests::FieldCentricFacingAngle driveFieldCentricAtAngle = swerve::requests::FieldCentricFacingAngle()
         .WithDriveRequestType(swerve::impl::DriveRequestType::Velocity)
         .WithDeadband(kMaxSpeed * 0.15)
-        .WithHeadingPID(Rotation::kP * 2 * std::numbers::pi, Rotation::kI * 2 * std::numbers::pi, Rotation::kD * 2 * std::numbers::pi);
+        .WithHeadingPID(PathPlannerConstants::Rotation::kP, PathPlannerConstants::Rotation::kI, PathPlannerConstants::Rotation::kD);
     swerve::requests::RobotCentric driveRobotCentric = swerve::requests::RobotCentric() 
         .WithDriveRequestType(swerve::impl::DriveRequestType::Velocity)
         .WithDeadband(kMaxSpeed * 0.15).WithRotationalDeadband(kMaxAngularSpeed * 0.10);
+    swerve::requests::RobotCentricFacingAngle driveRobotCentricAtAngle = swerve::requests::RobotCentricFacingAngle()
+        .WithDriveRequestType(swerve::impl::DriveRequestType::Velocity)
+        .WithDeadband(kMaxSpeed * 0.15)
+        .WithHeadingPID(PathPlannerConstants::Rotation::kP, PathPlannerConstants::Rotation::kI, PathPlannerConstants::Rotation::kD);
     swerve::requests::ApplyRobotSpeeds applyRobotSpeeds{};
     swerve::requests::SwerveDriveBrake brake{};
 

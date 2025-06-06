@@ -13,6 +13,8 @@
 #include <pathplanner/lib/commands/PathPlannerAuto.h>
 #include <pathplanner/lib/auto/NamedCommands.h>
 
+#include <frc/apriltag/AprilTagFieldLayout.h>
+
 #include "Constants.h"
 #include "subsystems/Drivetrain.h"
 #include "subsystems/Elevator.h"
@@ -122,11 +124,12 @@ private:
     Wrist wrist{};
     nt::StructPublisher<frc::Pose3d> clawPublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructTopic<frc::Pose3d>("claw").Publish();
     nt::StructPublisher<frc::Pose3d> clawDesiredPublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructTopic<frc::Pose3d>("claw-desired").Publish();
-    nt::StructPublisher<frc::Pose3d> coralPublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructTopic<frc::Pose3d>("coral").Publish();
     IO io{};
     Climber climber{};
     Limelight limelightLow{"limelight-low"};
     Limelight limelightHigh{"limelight-high"};
+
+    frc::AprilTagFieldLayout aprilTagFieldLayout = frc::AprilTagFieldLayout::LoadField(frc::AprilTagField::k2025ReefscapeAndyMark);
 
     CoralManager coralManager{};
     frc2::Trigger addCoral{[this] { return io.IsCoralInClaw(); }};

@@ -122,7 +122,7 @@ void Drivetrain::InitSendable(wpi::SendableBuilder &builder)
     frc2::SubsystemBase::InitSendable(builder);
 
     builder.AddDoubleProperty("setSpeed",
-        [this] 
+        [this]
         {
             frc::ChassisSpeeds speeds = GetState().Speeds;
             return units::math::hypot(speeds.vx, speeds.vy).value();
