@@ -673,3 +673,8 @@ inline static frc::Pose2d FlipPose(frc::Pose2d pose)
     }
     else return pose;
 }
+
+enum Sides
+{
+    Left, Right
+};

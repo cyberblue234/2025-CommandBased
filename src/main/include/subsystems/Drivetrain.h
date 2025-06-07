@@ -44,6 +44,24 @@ public:
 
     frc2::CommandPtr ApplyRobotSpeedsCommand(std::function<frc::ChassisSpeeds()> speedsSupplier);
 
+    frc2::CommandPtr AlignToReefCommand(std::function<std::vector<double>()> t2dSupplier, Sides side)
+    {
+        // [0: targetValid, 1: targetCount, 2: targetLatency, 3: captureLatency, 4: tx, 5: ty, 6: txnc, 7: tync, 8: ta, 9: tid, targetClassIndexDetector , targetClassIndexClassifier, targetLongSidePixels, targetShortSidePixels, targetHorizontalExtentPixels, targetVerticalExtentPixels, targetSkewDegrees]
+        return StartRun(
+        [this]
+        {
+            SetControl(brake);
+        },
+        [this, t2dSupplier, side]
+        {
+            std::vector<double> t2d = t2dSupplier();
+            double tid = t2d[9];
+            // Confirm tag ID is on the reef
+            if (tid < 6 || (tid > 11 && tid < 17) || tid > 22) return;
+            
+        });
+    }
+
     frc2::CommandPtr GoToPositionCommand(frc::Pose2d desiredPose)
     {
         return Run([this, desiredPose]

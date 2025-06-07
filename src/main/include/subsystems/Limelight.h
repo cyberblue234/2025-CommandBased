@@ -468,3 +468,73 @@ private:
     */
     nt::DoubleArraySubscriber rawdetections;
 };
+
+#include <frc/apriltag/AprilTagFieldLayout.h>
+
+class SimLimelight
+{
+public:
+    SimLimelight(frc::Pose3d cameraPoseRobot)
+    {
+        this->cameraPoseRobot = cameraPoseRobot;
+    }
+
+    void Update(frc::Pose2d robotPose)
+    {
+        cameraPoseWorld = frc::Pose3d
+        (
+            robotPose.X() + units::math::hypot(cameraPoseRobot.X(), cameraPoseRobot.Y()) * robotPose.Rotation().Cos(),
+            robotPose.Y() + units::math::hypot(cameraPoseRobot.X(), cameraPoseRobot.Y()) * robotPose.Rotation().Sin(),
+            cameraPoseRobot.Z(), 
+            frc::Rotation3d(
+                cameraPoseRobot.Rotation().X(),
+                -cameraPoseRobot.Rotation().Y(),
+                robotPose.Rotation().Radians() + cameraPoseRobot.Rotation().Z()
+            )
+        );
+        std::vector<frc::Pose3d> visionTargets;
+        std::vector<double> txs;
+        for (int i = 1; i <= 22; i++)
+        {
+            frc::Pose3d aprilTagPose = aprilTagFieldLayout.GetTagPose(i).value();
+            units::meter_t dist = units::math::sqrt(units::math::pow<2>(aprilTagPose.X() - cameraPoseWorld.X()) + units::math::pow<2>(aprilTagPose.Z() - cameraPoseWorld.Z()));
+            units::degree_t tx = robotPose.Rotation().Degrees() - (aprilTagPose.Rotation().Z() + 180_deg);
+            while (tx > 360_deg)
+            {
+                tx -= 360_deg;
+            }
+            while (tx < 0_deg)
+            {
+                tx += 360_deg;
+            }
+            txs.push_back(tx.value());
+            units::meter_t height = cameraPoseWorld.Z() - aprilTagPose.Z();
+            units::degree_t ty = units::math::atan(height / dist);
+            if (tx > (360_deg + -29.8_deg) || tx < 29.8_deg && ty > -20.5_deg && ty < 20.5_deg)
+            {
+                visionTargets.push_back(aprilTagPose);
+            }
+        }
+        visionTargetsPublisher.Set(visionTargets);
+        txPub.Set(txs);
+    }
+
+    frc::Pose3d GetCameraPoseWorld()
+    {
+        return cameraPoseWorld;
+    }
+
+    std::vector<double> GetT2D()
+    {
+        return t2d;
+    }
+
+private:
+    frc::Pose3d cameraPoseRobot;
+    frc::Pose3d cameraPoseWorld;
+    // [0: targetValid, 1: targetCount, 2: targetLatency, 3: captureLatency, 4: tx, 5: ty, 6: txnc, 7: tync, 8: ta, 9: tid, targetClassIndexDetector , targetClassIndexClassifier, targetLongSidePixels, targetShortSidePixels, targetHorizontalExtentPixels, targetVerticalExtentPixels, targetSkewDegrees]
+    std::vector<double> t2d;
+    frc::AprilTagFieldLayout aprilTagFieldLayout = frc::AprilTagFieldLayout::LoadField(frc::AprilTagField::k2025ReefscapeAndyMark);
+    nt::DoubleArrayPublisher txPub = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetDoubleArrayTopic("tx").Publish();
+    nt::StructArrayPublisher<frc::Pose3d> visionTargetsPublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructArrayTopic<frc::Pose3d>("visionTargets").Publish();
+};

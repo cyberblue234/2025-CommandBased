@@ -109,16 +109,30 @@ void RobotContainer::ConfigureBindings()
 
 	gamepad.RightTrigger(0.5).Debounce(40_ms).WhileTrue
 	(
-		// swerve.DriveWithSpeedsAtAngleCommand
-		// ([this]
-		// 	{
-		// 		frc::ChassisSpeeds speeds;
-		// 		speeds.vx = -gamepad.GetLeftY() * DrivetrainConstants::kMaxSpeed;
-		// 		speeds.vy = -gamepad.GetLeftX() * DrivetrainConstants::kMaxSpeed;
-		// 		return speeds;
-		// 	}, 234_deg + swerve.GetOperatorForwardDirection().Degrees()
-		// ).Unless(frc::DriverStation::IsAutonomous).WithName("Face Right Coral Station")
-		swerve.GoToPositionCommand(frc::Pose2d{0_m, 0_m, 0_deg})
+		swerve.DriveWithSpeedsAtAngleCommand
+		([this]
+			{
+				frc::ChassisSpeeds speeds;
+				speeds.vx = -gamepad.GetLeftY() * DrivetrainConstants::kMaxSpeed;
+				speeds.vy = -gamepad.GetLeftX() * DrivetrainConstants::kMaxSpeed;
+				return speeds;
+			}, 234_deg + swerve.GetOperatorForwardDirection().Degrees()
+		).Unless(frc::DriverStation::IsAutonomous).WithName("Face Right Coral Station")
+	);
+
+	gamepad.LeftBumper().Debounce(40_ms).WhileTrue
+	(
+		swerve.AlignToReefCommand
+		([this]
+			{
+				if (frc::RobotBase::IsReal())
+				{
+					return limelightLow.GetT2D();
+				}
+								
+			},
+			Sides::Left
+		).Unless(frc::DriverStation::IsAutonomous).WithName("Align Left")
 	);
 
 	gamepad.POVUp().Debounce(40_ms).WhileTrue(swerve.ApplyRobotSpeedsCommand([this] { frc::ChassisSpeeds speeds; speeds.vx = 1_mps; return speeds; }).OnlyIf(frc::DriverStation::IsTeleop).WithName("Slow Robot Forward"));

@@ -13,8 +13,6 @@
 #include <pathplanner/lib/commands/PathPlannerAuto.h>
 #include <pathplanner/lib/auto/NamedCommands.h>
 
-#include <frc/apriltag/AprilTagFieldLayout.h>
-
 #include "Constants.h"
 #include "subsystems/Drivetrain.h"
 #include "subsystems/Elevator.h"
@@ -64,6 +62,9 @@ public:
         carriageDesiredPublisher.Set(frc::Pose3d{0_m, 0_m, elevator.GetHeightSetpoint(), frc::Rotation3d{0_deg, 0_deg, 0_deg}});
         clawDesiredPublisher.Set(frc::Pose3d{RobotSim::DigitalRobot::kClawX, 0_m, elevator.GetHeightSetpoint() + RobotSim::DigitalRobot::kClawY, frc::Rotation3d{0_deg, wrist.GetAngleSetpoint(), 0_deg}});
         coralManager.UpdateCoral(io.GetMotorVelocity(), swerve.GetState().Pose, elevator.GetHeight(), wrist.GetCurrentAngle());
+
+        simLimelightLow.Update(swerve.GetState().Pose);
+        llLowPublisher.Set(simLimelightLow.GetCameraPoseWorld());
     }
 
     void UpdateTelemetry()
@@ -127,9 +128,10 @@ private:
     IO io{};
     Climber climber{};
     Limelight limelightLow{"limelight-low"};
+    SimLimelight simLimelightLow{LimelightConstants::kLowOffset};
+    nt::StructPublisher<frc::Pose3d> llLowPublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructTopic<frc::Pose3d>("Limelight Low").Publish();
     Limelight limelightHigh{"limelight-high"};
-
-    frc::AprilTagFieldLayout aprilTagFieldLayout = frc::AprilTagFieldLayout::LoadField(frc::AprilTagField::k2025ReefscapeAndyMark);
+    nt::StructPublisher<frc::Pose3d> llHighPublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructTopic<frc::Pose3d>("Limelight High").Publish();
 
     CoralManager coralManager{};
     frc2::Trigger addCoral{[this] { return io.IsCoralInClaw(); }};
