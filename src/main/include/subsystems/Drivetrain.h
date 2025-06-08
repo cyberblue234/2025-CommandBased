@@ -58,7 +58,7 @@ public:
             double tid = t2d[9];
             // Confirm tag ID is on the reef
             if (tid < 6 || (tid > 11 && tid < 17) || tid > 22) return;
-            
+            std::cout << "HERE" << std::endl;
         });
     }
 

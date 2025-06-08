@@ -129,7 +129,7 @@ void RobotContainer::ConfigureBindings()
 				{
 					return limelightLow.GetT2D();
 				}
-								
+				return simLimelightLow.GetT2D();				
 			},
 			Sides::Left
 		).Unless(frc::DriverStation::IsAutonomous).WithName("Align Left")
