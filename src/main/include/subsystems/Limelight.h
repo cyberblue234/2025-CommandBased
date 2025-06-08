@@ -498,19 +498,13 @@ public:
         {
             frc::Pose3d aprilTagPose = aprilTagFieldLayout.GetTagPose(i).value();
             units::meter_t dist = units::math::sqrt(units::math::pow<2>(aprilTagPose.X() - cameraPoseWorld.X()) + units::math::pow<2>(aprilTagPose.Z() - cameraPoseWorld.Z()));
-            units::degree_t tx = robotPose.Rotation().Degrees() - (aprilTagPose.Rotation().Z() + 180_deg);
-            while (tx > 360_deg)
-            {
-                tx -= 360_deg;
-            }
-            while (tx < 0_deg)
-            {
-                tx += 360_deg;
-            }
-            txs.push_back(tx.value());
+            units::degree_t tx = units::math::atan2((aprilTagPose.Y() - cameraPoseWorld.Y()), (aprilTagPose.X() - cameraPoseWorld.X())) - robotPose.Rotation().Degrees();
+            if (tx > 180_deg) tx -= 360_deg;
+            else if (tx < -180_deg) tx += 360_deg;
             units::meter_t height = cameraPoseWorld.Z() - aprilTagPose.Z();
-            units::degree_t ty = units::math::atan(height / dist);
-            if (tx > (360_deg + -29.8_deg) || tx < 29.8_deg && ty > -20.5_deg && ty < 20.5_deg)
+            units::degree_t ty = units::math::atan(height / dist); 
+            txs.push_back((robotPose.Rotation().Degrees() - aprilTagPose.Rotation().Z()).value());
+            if ((tx > -29.8_deg && tx < 29.8_deg) && (ty > -20.5_deg && ty < 20.5_deg) && units::math::abs(robotPose.Rotation().Degrees() - aprilTagPose.Rotation().Z()) > 90_deg)
             {
                 visionTargets.push_back(aprilTagPose);
             }
