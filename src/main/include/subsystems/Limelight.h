@@ -471,16 +471,19 @@ private:
 
 #include <frc/apriltag/AprilTagFieldLayout.h>
 
-class SimLimelight
+class LimelightWithSim : public Limelight
 {
 public:
-    SimLimelight(frc::Pose3d cameraPoseRobot)
+    LimelightWithSim(std::string name, frc::Pose3d cameraPoseRobot) : Limelight(name)
     {
         this->cameraPoseRobot = cameraPoseRobot;
     }
 
-    void Update(frc::Pose2d robotPose)
+    void UpdateSim(frc::Pose2d robotPose)
     {
+        singleTargetPublisher.Set(std::vector<frc::Pose3d>{});
+        singleTargetSimPublisher.Set(std::vector<frc::Pose3d>{});
+        
         cameraPoseWorld = frc::Pose3d
         (
             robotPose.X() + units::math::hypot(cameraPoseRobot.X(), cameraPoseRobot.Y()) * robotPose.Rotation().Cos(),
@@ -494,22 +497,23 @@ public:
         );
         std::vector<frc::Pose3d> visionTargets;
         std::vector<std::array<double, 4>> visionData;
+        std::vector<std::array<double, 4>> allVisionData;
         for (int tid = 1; tid <= 22; tid++)
         {
             frc::Pose3d aprilTagPose = aprilTagFieldLayout.GetTagPose(tid).value();
-            units::meter_t dist = units::math::sqrt(units::math::pow<2>(aprilTagPose.X() - cameraPoseWorld.X()) + units::math::pow<2>(aprilTagPose.Z() - cameraPoseWorld.Z()));
             units::degree_t tx = units::math::atan2((aprilTagPose.Y() - cameraPoseWorld.Y()), (aprilTagPose.X() - cameraPoseWorld.X())) - robotPose.Rotation().Degrees();
             if (tx > 180_deg) tx -= 360_deg;
             else if (tx < -180_deg) tx += 360_deg;
             units::meter_t height = cameraPoseWorld.Z() - aprilTagPose.Z();
-            units::degree_t ty = units::math::atan(height / dist); 
-            
+            units::degree_t ty = units::math::atan(height / (cameraPoseWorld.Translation() - aprilTagPose.Translation()).Norm());
+            double ta;
             if ((tx > -29.8_deg && tx < 29.8_deg) && (ty > -20.5_deg && ty < 20.5_deg) && units::math::abs(robotPose.Rotation().Degrees() - aprilTagPose.Rotation().Z()) > 90_deg)
             {
                 visionTargets.push_back(aprilTagPose);
-                double ta = 0.6 / (1 + dist.value());
+                ta = (units::math::pow<2>(6.5_in) / units::math::pow<2>((cameraPoseWorld.Translation() - aprilTagPose.Translation()).Norm())).value();
                 visionData.push_back(std::array<double, 4>{(double) tid, tx.value(), ty.value(), ta});
             }
+            allVisionData.push_back(std::array<double, 4>{(double) tid, tx.value(), ty.value(), ta});
         }
         double taMax = -INFINITY;
         int targetIndex = 0;
@@ -527,20 +531,25 @@ public:
             std::array<double, 4> data = visionData[targetIndex];
             t2d = {1, (double) visionTargets.size(), 0, 0, data[1], data[2], 0, 0, data[3], data[0], 0, 0, 0, 0, 0, 0, 0};
             frc::Pose3d singleTarget = visionTargets[targetIndex];
-            singleTargetPublisher.Set(singleTarget);
+            singleTargetSimPublisher.Set(std::vector<frc::Pose3d>{singleTarget});
             visionTargets.erase(visionTargets.begin() + targetIndex);
         }
         visionTargetsPublisher.Set(visionTargets);
+        t2dPublisher.Set(allVisionData);
+        if (frc::RobotBase::IsReal())
+        {
+            if (GetT2D()[0] == 0) return;
+            singleTargetPublisher.Set(std::vector<frc::Pose3d>{aprilTagFieldLayout.GetTagPose((int) GetT2D()[9]).value()});
+        }
+        else
+        {
+            GetDoubleArrayPublisher("t2d").Set(t2d);
+        }
     }
 
     frc::Pose3d GetCameraPoseWorld()
     {
         return cameraPoseWorld;
-    }
-
-    std::vector<double> GetT2D()
-    {
-        return t2d;
     }
 
 private:
@@ -549,6 +558,8 @@ private:
     // [0: targetValid, 1: targetCount, 2: targetLatency, 3: captureLatency, 4: tx, 5: ty, 6: txnc, 7: tync, 8: ta, 9: tid, 10: targetClassIndexDetector, 11: targetClassIndexClassifier, 12: targetLongSidePixels, 13: targetShortSidePixels, 14: targetHorizontalExtentPixels, 15: targetVerticalExtentPixels, 16: targetSkewDegrees]
     std::vector<double> t2d;
     frc::AprilTagFieldLayout aprilTagFieldLayout = frc::AprilTagFieldLayout::LoadField(frc::AprilTagField::k2025ReefscapeAndyMark);
-    nt::StructArrayPublisher<frc::Pose3d> visionTargetsPublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructArrayTopic<frc::Pose3d>("visionTargets").Publish();
-    nt::StructPublisher<frc::Pose3d> singleTargetPublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructTopic<frc::Pose3d>("singleVisionTarget").Publish();
+    nt::StructArrayPublisher<std::array<double, 4>> t2dPublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructArrayTopic<std::array<double, 4>>("t2dAll").Publish();
+    nt::StructArrayPublisher<frc::Pose3d> visionTargetsPublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructArrayTopic<frc::Pose3d>("visionTargetsSim").Publish();
+    nt::StructArrayPublisher<frc::Pose3d> singleTargetSimPublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructArrayTopic<frc::Pose3d>("singleVisionTargetSim").Publish();
+    nt::StructArrayPublisher<frc::Pose3d> singleTargetPublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructArrayTopic<frc::Pose3d>("singleVisionTarget").Publish();
 };

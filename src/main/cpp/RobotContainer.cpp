@@ -125,11 +125,7 @@ void RobotContainer::ConfigureBindings()
 		swerve.AlignToReefCommand
 		([this]
 			{
-				if (frc::RobotBase::IsReal())
-				{
-					return limelightLow.GetT2D();
-				}
-				return simLimelightLow.GetT2D();				
+				return limelightLow.GetT2D();
 			},
 			Sides::Left
 		).Unless(frc::DriverStation::IsAutonomous).WithName("Align Left")

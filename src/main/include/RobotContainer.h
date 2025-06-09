@@ -63,8 +63,8 @@ public:
         clawDesiredPublisher.Set(frc::Pose3d{RobotSim::DigitalRobot::kClawX, 0_m, elevator.GetHeightSetpoint() + RobotSim::DigitalRobot::kClawY, frc::Rotation3d{0_deg, wrist.GetAngleSetpoint(), 0_deg}});
         coralManager.UpdateCoral(io.GetMotorVelocity(), swerve.GetState().Pose, elevator.GetHeight(), wrist.GetCurrentAngle());
 
-        simLimelightLow.Update(swerve.GetState().Pose);
-        llLowPublisher.Set(simLimelightLow.GetCameraPoseWorld());
+        limelightLow.UpdateSim(swerve.GetState().Pose);
+        llLowPublisher.Set(limelightLow.GetCameraPoseWorld());
     }
 
     void UpdateTelemetry()
@@ -127,8 +127,7 @@ private:
     nt::StructPublisher<frc::Pose3d> clawDesiredPublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructTopic<frc::Pose3d>("claw-desired").Publish();
     IO io{};
     Climber climber{};
-    Limelight limelightLow{"limelight-low"};
-    SimLimelight simLimelightLow{LimelightConstants::kLowOffset};
+    LimelightWithSim limelightLow{"limelight-low", LimelightConstants::kLowOffset};
     nt::StructPublisher<frc::Pose3d> llLowPublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructTopic<frc::Pose3d>("Limelight Low").Publish();
     Limelight limelightHigh{"limelight-high"};
     nt::StructPublisher<frc::Pose3d> llHighPublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructTopic<frc::Pose3d>("Limelight High").Publish();
