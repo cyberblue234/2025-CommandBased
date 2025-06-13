@@ -13,7 +13,7 @@ Limelight::Limelight(std::string name)
     ta = GetDoubleSubscriber("ta");
     tl = GetDoubleSubscriber("tl");
     cl = GetDoubleSubscriber("cl");
-    t2d = GetDoubleArraySubscriber("t2d");
+    t2d = GetDoubleArrayEntry("t2d");
     getpipe = GetIntegerSubscriber("getpipe");
     getpipetype = GetStringSubscriber("getpipetype"); 
     json = GetStringSubscriber("json");

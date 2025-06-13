@@ -123,7 +123,8 @@ void RobotContainer::ConfigureBindings()
 	gamepad.LeftBumper().Debounce(40_ms).WhileTrue
 	(
 		swerve.AlignToReefCommand
-		([this]
+		(
+			[this]
 			{
 				return limelightLow.GetT2D();
 			},

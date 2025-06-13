@@ -111,6 +111,7 @@ public:
     double GetTL() { return tl.Get(); }
     double GetCL() { return cl.Get(); }
     std::vector<double> GetT2D() { return t2d.Get(); }
+    void SetT2D(std::vector<double> t2dData) { t2d.Set(t2dData); }
     int GetPipe() { return getpipe.Get(); }
     std::string GetPipeType() { return getpipetype.Get(); }
     std::string GetJSON() { return json.Get(); }
@@ -265,6 +266,11 @@ public:
     {
         return GetTable(SanitizeName(name))->GetDoubleArrayTopic(entryName).Publish();
     }
+    nt::DoubleArrayEntry GetDoubleArrayEntry(const std::string &entryName)
+    {
+        return GetTable(SanitizeName(name))->GetDoubleArrayTopic(entryName).GetEntry(std::span<double>{});
+    }
+    
 
     void SetupPortForwarding() 
     {
@@ -391,7 +397,7 @@ private:
     nt::DoubleSubscriber ta; // Target Area (0% of image to 100% of image)
     nt::DoubleSubscriber tl; // The pipeline's latency contribution (ms). Add to "cl" to get total latency.
     nt::DoubleSubscriber cl; // Capture pipeline latency (ms). Time between the end of the exposure of the middle row of the sensor to the beginning of the tracking pipeline.
-    nt::DoubleArraySubscriber t2d; // Array containing several values for matched-timestamp statistics: [targetValid, targetCount, targetLatency, captureLatency, tx, ty, txnc, tync, ta, tid, targetClassIndexDetector , targetClassIndexClassifier, targetLongSidePixels, targetShortSidePixels, targetHorizontalExtentPixels, targetVerticalExtentPixels, targetSkewDegrees]
+    nt::DoubleArrayEntry t2d; // Array containing several values for matched-timestamp statistics: [targetValid, targetCount, targetLatency, captureLatency, tx, ty, txnc, tync, ta, tid, targetClassIndexDetector , targetClassIndexClassifier, targetLongSidePixels, targetShortSidePixels, targetHorizontalExtentPixels, targetVerticalExtentPixels, targetSkewDegrees]
     nt::IntegerSubscriber getpipe; // True active pipeline index of the camera (0 .. 9)
     nt::StringSubscriber getpipetype; // Pipeline Type e.g. "pipe_color"
     nt::StringSubscriber json; // Full JSON dump of targeting results. Must be enabled per-pipeline in the 'output' tab
@@ -469,8 +475,6 @@ private:
     nt::DoubleArraySubscriber rawdetections;
 };
 
-#include <frc/apriltag/AprilTagFieldLayout.h>
-
 class LimelightWithSim : public Limelight
 {
 public:
@@ -543,7 +547,7 @@ public:
         }
         else
         {
-            GetDoubleArrayPublisher("t2d").Set(t2d);
+            SetT2D(t2d);
         }
     }
 
@@ -557,7 +561,6 @@ private:
     frc::Pose3d cameraPoseWorld;
     // [0: targetValid, 1: targetCount, 2: targetLatency, 3: captureLatency, 4: tx, 5: ty, 6: txnc, 7: tync, 8: ta, 9: tid, 10: targetClassIndexDetector, 11: targetClassIndexClassifier, 12: targetLongSidePixels, 13: targetShortSidePixels, 14: targetHorizontalExtentPixels, 15: targetVerticalExtentPixels, 16: targetSkewDegrees]
     std::vector<double> t2d;
-    frc::AprilTagFieldLayout aprilTagFieldLayout = frc::AprilTagFieldLayout::LoadField(frc::AprilTagField::k2025ReefscapeAndyMark);
     nt::StructArrayPublisher<std::array<double, 4>> t2dPublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructArrayTopic<std::array<double, 4>>("t2dAll").Publish();
     nt::StructArrayPublisher<frc::Pose3d> visionTargetsPublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructArrayTopic<frc::Pose3d>("visionTargetsSim").Publish();
     nt::StructArrayPublisher<frc::Pose3d> singleTargetSimPublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructArrayTopic<frc::Pose3d>("singleVisionTargetSim").Publish();

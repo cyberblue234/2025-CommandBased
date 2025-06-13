@@ -86,6 +86,8 @@
 #include <ctre/phoenix6/swerve/SwerveModuleConstants.hpp>
 #include <ctre/phoenix6/swerve/SwerveDrivetrain.hpp>
 
+#include <frc/apriltag/AprilTagFieldLayout.h>
+
 #include <numbers>
 #include <string>
 #include <array>
@@ -556,6 +558,8 @@ namespace LimelightConstants
     constexpr wpi::array<double, 3> autonStdDevs{1.8, 1.8, 1.8};
     constexpr wpi::array<double, 3> teleopStdDevs{0.9, 0.9, 0.9};
 }
+
+const frc::AprilTagFieldLayout aprilTagFieldLayout = frc::AprilTagFieldLayout::LoadField(frc::AprilTagField::k2025ReefscapeAndyMark);
 
 namespace RobotSim
 {

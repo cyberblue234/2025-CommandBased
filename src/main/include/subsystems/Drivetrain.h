@@ -55,10 +55,28 @@ public:
         [this, t2dSupplier, side]
         {
             std::vector<double> t2d = t2dSupplier();
+            double tx = t2d[4];
+            std::cout << tx << std::endl;
+            double ta = t2d[8];
+            std::cout << ta << std::endl;
             double tid = t2d[9];
             // Confirm tag ID is on the reef
             if (tid < 6 || (tid > 11 && tid < 17) || tid > 22) return;
-            std::cout << "HERE" << std::endl;
+            units::degree_t setAngle = aprilTagFieldLayout.GetTagPose(tid).value().Rotation().Z() - 180_deg;
+            std::cout << setAngle.value() << std::endl;
+            units::meters_per_second_t vx = 0_mps;
+            units::meters_per_second_t vy = 0_mps;
+            std::cout << units::math::abs(GetState().Pose.Rotation().Degrees() - setAngle - 180_deg).value() << std::endl;
+            if (units::math::abs(GetState().Pose.Rotation().Degrees() - setAngle) < 2_deg)
+            {
+                vx = ta * 100_mps;
+                vy = tx * 0.5_mps;
+            }
+            std::cout << vx.value() << std::endl;
+            std::cout << vy.value() << std::endl;
+            std::cout << std::endl;
+            std::cout << std::endl;
+            SetControl(driveRobotCentricAtAngle.WithVelocityX(vx).WithVelocityY(vy).WithTargetDirection(setAngle));
         });
     }
 
