@@ -92,6 +92,7 @@
 #include <string>
 #include <array>
 #include <vector>
+#include <algorithm>
 #include <math.h>
 #include <iostream>
 
@@ -216,6 +217,13 @@ namespace units
     using radians_per_turn_t = unit_t<radians_per_turn>;
     using degrees_per_turn = compound_unit<degree, inverse<turn>>;
     using degrees_per_turn_t = unit_t<degrees_per_turn>;
+}
+
+namespace FieldConstants
+{
+    constexpr units::meter_t kDeltaReefAprilTagToBranch = 6.5_in;
+    constexpr std::array<int, 6> kRedTagIDs = {6, 7, 8, 9, 10, 11};
+    constexpr std::array<int, 6> kBlueTagIDs = {17, 18, 19, 20, 21, 22};
 }
 
 namespace RobotConstants
@@ -677,6 +685,8 @@ inline static frc::Pose2d FlipPose(frc::Pose2d pose)
     }
     else return pose;
 }
+
+
 
 enum Sides
 {
