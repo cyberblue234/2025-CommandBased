@@ -32,6 +32,8 @@ Drivetrain::Drivetrain() : swerve::SwerveDrivetrain<hardware::TalonFX, hardware:
 
     frc::SmartDashboard::PutData("Swerve/pigeon2", &GetPigeon2());
     frc::SmartDashboard::PutData("Field", &field);
+    SetStateStdDevs(visionStdDevs);
+    SetVisionMeasurementStdDevs(visionStdDevs);
 }
 
 void Drivetrain::Periodic()
@@ -48,14 +50,22 @@ void Drivetrain::Periodic()
 
     if (limelightPoseEstimatesSupplier.has_value())
     {
-        std::vector<PoseEstimate> poseEstimates = limelightPoseEstimatesSupplier.value()();
-        for (PoseEstimate estimate : poseEstimates)
-        {
-            if (units::math::abs(GetPigeon2().GetAngularVelocityZWorld().GetValue()) <= 720_deg_per_s && estimate.tagCount > 0)
+        // if (frc::DriverStation::IsDisabled())
+        // {
+        //     ResetPose(limelightPoseEstimatesSupplier.value()()[0].pose);
+        // }
+        // else
+        // {
+            std::vector<PoseEstimate> poseEstimates = limelightPoseEstimatesSupplier.value()();
+            for (PoseEstimate estimate : poseEstimates)
             {
-                AddVisionMeasurement(estimate.pose, estimate.timestampSeconds, wpi::array<double, 3>{visionStdDevs[0] + estimate.avgTagDist, visionStdDevs[1] + estimate.avgTagDist, visionStdDevs[2] + estimate.avgTagDist});
+                if (units::math::abs(GetPigeon2().GetAngularVelocityZWorld().GetValue()) <= 720_deg_per_s && estimate.tagCount > 0)
+                {
+                    AddVisionMeasurement(estimate.pose, estimate.timestampSeconds, visionStdDevs);
+                }
             }
-        }
+        // }
+        
     }
 
     if (utils::IsSimulation())

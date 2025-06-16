@@ -44,15 +44,26 @@ public:
 
     frc2::CommandPtr ApplyRobotSpeedsCommand(std::function<frc::ChassisSpeeds()> speedsSupplier);
 
-    std::optional<frc2::CommandPtr> PathfindToBranch(int tid, Sides side, units::meter_t offset, bool usePPLibPathfinding)
+    frc2::CommandPtr BrakeCommand()
     {
-        if (std::find(FieldConstants::kReefTagIDs.begin(), FieldConstants::kReefTagIDs.end(), tid) == FieldConstants::kReefTagIDs.end()) return {};
+        return RunOnce
+        (
+            [this]
+            {
+                SetControl(brake);
+            }
+        );
+    }
+
+    frc2::CommandPtr PathfindToBranch(int tid, Sides side, units::meter_t offset, bool usePPLibPathfinding)
+    {
+        if (tid < 6 || (tid > 11 && tid < 17) || tid > 22) return BrakeCommand();
         frc::Pose2d aprilTagPose = aprilTagFieldLayout.GetTagPose(tid)->ToPose2d();
 
         units::degree_t theta = aprilTagPose.Rotation().Degrees() + 90_deg;
         units::meter_t deltaX1 = units::math::cos(theta) * FieldConstants::kDeltaReefAprilTagToBranch;
         units::meter_t deltaY1 = units::math::sin(theta) * FieldConstants::kDeltaReefAprilTagToBranch;
-        if (tid)
+        if (tid < 9 || (tid > 16 && tid < 20) == false)
         {
             if (side == Sides::Right)
             {
@@ -75,12 +86,12 @@ public:
         frc::Pose2d pose{aprilTagPose.X() + deltaX1 + deltaX2, aprilTagPose.Y() + deltaY1 + deltaY2, aprilTagPose.Rotation().Degrees() + 180_deg};
         // return DriveToPose(pose, pose.Rotation(), frc::TrajectoryConfig{kReefPathfindingConstraints.getMaxVelocity(), kReefPathfindingConstraints.getMaxAcceleration()});
         // Uses PPLib pathfinding with given constraints
-        if (usePPLibPathfinding) return AutoBuilder::pathfindToPose(pose, kReefPathfindingConstraints);
+        if (usePPLibPathfinding) return AutoBuilder::pathfindToPose(pose, PathPlannerConstants::kReefPathfindingConstraints);
         // Uses internal pathfinding
-        return PathfindToPose(pose, pose.Rotation(), true, kReefPathfindingConstraints);
+        return PathfindToPose(pose, pose.Rotation(), true, PathPlannerConstants::kReefPathfindingConstraints);
     }
 
-    std::optional<frc2::CommandPtr> PathfindToPose(frc::Pose2d pose, frc::Rotation2d endHeading, bool preventFlipping, PathConstraints pathConstraints)
+    frc2::CommandPtr PathfindToPose(frc::Pose2d pose, frc::Rotation2d endHeading, bool preventFlipping, PathConstraints pathConstraints)
     {
         // Finds the difference of the two x and the two y values
         double xDiff = pose.X().value() - GetState().Pose.X().value();
@@ -179,7 +190,7 @@ public:
     }
 
     std::optional<std::function<std::vector<PoseEstimate>()>> limelightPoseEstimatesSupplier;
-    wpi::array<double, 3> visionStdDevs{1.0, 1.0, 1.0};
+    wpi::array<double, 3> visionStdDevs{1.0, 1.0, 9999.0};
     
 private:
     bool hasAppliedDriverPerspective = false;

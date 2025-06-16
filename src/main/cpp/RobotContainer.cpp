@@ -122,14 +122,24 @@ void RobotContainer::ConfigureBindings()
 
 	gamepad.LeftBumper().Debounce(40_ms).WhileTrue
 	(
-		swerve.AlignToReefCommand
+		swerve.PathfindToBranch
 		(
-			[this]
-			{
-				return limelightLow.GetT2D();
-			},
-			Sides::Left
+			(int) limelightLow.GetT2D()[9],
+			Sides::Left,
+			0.25_ft,
+			false
 		).Unless(frc::DriverStation::IsAutonomous).WithName("Align Left")
+	);
+
+	gamepad.RightBumper().Debounce(40_ms).WhileTrue
+	(
+		swerve.PathfindToBranch
+		(
+			(int) limelightLow.GetT2D()[9],
+			Sides::Right,
+			0.25_ft,
+			false
+		).Unless(frc::DriverStation::IsAutonomous).WithName("Align Right")
 	);
 
 	gamepad.POVUp().Debounce(40_ms).WhileTrue(swerve.ApplyRobotSpeedsCommand([this] { frc::ChassisSpeeds speeds; speeds.vx = 1_mps; return speeds; }).OnlyIf(frc::DriverStation::IsTeleop).WithName("Slow Robot Forward"));
@@ -173,7 +183,7 @@ void RobotContainer::ConfigureBindings()
 		(
 			elevator.GoToPositionCommand(Positions::Barge),
 			wrist.StopWristMotorCommand().Repeatedly().Until([this] { return elevator.GetHeight() > 2.5_ft; }).AndThen(wrist.GoToPositionCommand(Positions::Barge)),
-			io.SetIOPowerCommand(IOConstants::kManualIOPower).Repeatedly().Until([this] { return elevator.IsAtPosition() && wrist.IsAtPosition(); }).AndThen(io.StopIOMotorCommand())
+			frc2::cmd::RunOnce([this]{ io.SetIOPower(IOConstants::kManualIOPower); }).Repeatedly().Until([this] { return elevator.IsAtPosition() && wrist.IsAtPosition(); }).AndThen(frc2::cmd::RunOnce([this]{ io.StopIOMotor(); }))
 		).BeforeStarting
 		(
 			[this]
