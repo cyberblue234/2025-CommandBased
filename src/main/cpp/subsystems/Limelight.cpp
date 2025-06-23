@@ -1,6 +1,6 @@
 #include "subsystems/Limelight.h"
 
-Limelight::Limelight(std::string name)
+Limelight::Limelight(std::string name, frc::Pose3d cameraPoseRobotSpace)
 {
     this->name = name;
     SetupPortForwarding();
@@ -48,11 +48,13 @@ Limelight::Limelight(std::string name)
     crop = GetDoubleArrayPublisher("crop");
     rawfiducials = GetDoubleArraySubscriber("rawfiducials");
     rawdetections = GetDoubleArraySubscriber("rawdetections");
+
+    SetCameraPoseRobotSpace(cameraPoseRobotSpace);
 }
 
 Limelight::Limelight()
 {
-    Limelight("");
+    Limelight("", frc::Pose3d{});
 }
 
 PoseEstimate Limelight::GetPose(units::degree_t yaw, units::degrees_per_second_t yawRate)

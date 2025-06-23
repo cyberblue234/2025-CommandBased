@@ -132,7 +132,7 @@ private:
     Climber climber{};
     LimelightWithSim limelightLow{"limelight-low", LimelightConstants::kLowOffset};
     nt::StructPublisher<frc::Pose3d> llLowPublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructTopic<frc::Pose3d>("Limelight Low").Publish();
-    Limelight limelightHigh{"limelight-high"};
+    Limelight limelightHigh{"limelight-high", LimelightConstants::kHighOffset};
     nt::StructPublisher<frc::Pose3d> llHighPublisher = nt::NetworkTableInstance::GetDefault().GetTable("SimRobot")->GetStructTopic<frc::Pose3d>("Limelight High").Publish();
 
     CoralManager coralManager{};

@@ -68,9 +68,9 @@ public:
                 units::degree_t theta = aprilTagPose.Rotation().Degrees() + 90_deg;
                 units::meter_t deltaX1 = units::math::cos(theta) * FieldConstants::kDeltaReefAprilTagToBranch;
                 units::meter_t deltaY1 = units::math::sin(theta) * FieldConstants::kDeltaReefAprilTagToBranch;
-                if (tid < 9 || (tid > 16 && tid < 20) == false)
+                if (tid == 6 || tid == 7 || tid == 8 || tid == 17 || tid == 18 || tid == 19)
                 {
-                    if (side == Sides::Right)
+                    if (side == Sides::Left)
                     {
                         deltaX1 = -deltaX1;
                         deltaY1 = -deltaY1;
@@ -78,7 +78,7 @@ public:
                 }
                 else
                 {
-                    if (side == Sides::Left)
+                    if (side == Sides::Right)
                     {
                         deltaX1 = -deltaX1;
                         deltaY1 = -deltaY1;

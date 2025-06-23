@@ -82,7 +82,7 @@ class Limelight
 public:
     /// @brief Constructor for the limelight object that sets the name of the limelight to the parameter
     /// @param name Name of the limelight
-    Limelight(std::string name);
+    Limelight(std::string name, frc::Pose3d cameraPoseRobotSpace);
     /// @brief Constructor for the limelight object that sets the name of the limelight to ""
     Limelight();
     /// @brief Gets the estimated position of the robot with the blue origin as is FRC standard
@@ -484,7 +484,7 @@ private:
 class LimelightWithSim : public Limelight
 {
 public:
-    LimelightWithSim(std::string name, frc::Pose3d cameraPoseRobot) : Limelight(name)
+    LimelightWithSim(std::string name, frc::Pose3d cameraPoseRobot) : Limelight(name, cameraPoseRobot)
     {
         this->cameraPoseRobot = cameraPoseRobot;
     }

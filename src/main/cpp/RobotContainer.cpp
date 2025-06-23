@@ -26,14 +26,10 @@ RobotContainer::RobotContainer()
 	swerve.limelightPoseEstimatesSupplier = [this] ()
 	{
 		ctre::phoenix6::hardware::Pigeon2 &pigeon = swerve.GetPigeon2();
-		units::degree_t yaw = pigeon.GetYaw().GetValue();
-		units::degree_t pitch = pigeon.GetPitch().GetValue();
-		units::degree_t roll = pigeon.GetRoll().GetValue();
+		units::degree_t yaw = swerve.GetState().Pose.Rotation().Degrees();
 		units::degrees_per_second_t yawRate = pigeon.GetAngularVelocityZWorld().GetValue();
 
-		limelightLow.SetRobotOrientation(yaw, yawRate, pitch, 0_deg_per_s, roll, 0_deg_per_s);
-		limelightHigh.SetRobotOrientation(yaw, yawRate, pitch, 0_deg_per_s, roll, 0_deg_per_s);
-		return std::vector<PoseEstimate>{ limelightLow.GetPose(), limelightHigh.GetPose()};
+		return std::vector<PoseEstimate>{ limelightLow.GetPose(yaw, yawRate), limelightHigh.GetPose(yaw, yawRate)};
 	};
 
 	NamedCommands::registerCommand("L1", GoToPositionCommand(Positions::L1));
@@ -187,11 +183,12 @@ void RobotContainer::ConfigureBindings()
 			{
 				this->desiredPosition = Positions::Barge;
 			}
-		).AlongWith
-		(
-			io.SetIOPowerCommand(IOConstants::kManualIOPower).Repeatedly().Until([this] { return elevator.IsAtPosition() && wrist.IsAtPosition(); }).AndThen(io.StopIOMotorCommand())
 		)
 	);
+	AddControlBoardCommand(Positions::Barge.button, 
+		io.SetIOPowerCommand(IOConstants::kManualIOPower)
+	);
+	
 
 	AddControlBoardCommand(ControlsConstants::kIOButton, io.IOAtPosition([this] { return desiredPosition; }).OnlyWhile([this] { return elevator.IsAtPosition() && wrist.IsAtPosition(); }).OnlyIf(frc::DriverStation::IsTeleopEnabled));
 
