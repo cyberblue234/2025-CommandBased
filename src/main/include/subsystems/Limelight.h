@@ -128,6 +128,7 @@ public:
     std::vector<double> GetBotPoseTargetSpace() { return botpose_targetspace.Get(); }
     std::vector<double> GetCameraPoseRobotSpace() { return camerapose_robotspace.Get(); }
     int GetTID() { return tid.Get(); }
+    void SetTID(int tidData) { tid.Set(tidData); }
     std::vector<double> GetStdDevs() { return stddevs.Get(); }
 
     PoseEstimate GetBotPose() { return GetBotPoseEstimate(botpose); }
@@ -254,6 +255,11 @@ public:
     {
         return GetTable(SanitizeName(name))->GetIntegerTopic(entryName).Publish();
     }
+    nt::IntegerEntry GetIntegerEntry(const std::string &entryName)
+    {
+        return GetTable(SanitizeName(name))->GetIntegerTopic(entryName).GetEntry(0);
+    }
+    
     nt::IntegerArrayPublisher GetIntegerArrayPublisher(const std::string &entryName)
     {
         return GetTable(SanitizeName(name))->GetIntegerArrayTopic(entryName).Publish();
@@ -423,7 +429,7 @@ private:
     nt::DoubleArraySubscriber targetpose_robotspace; // 3D transform of the primary in-view AprilTag in the coordinate system of the Robot (array (6)) [tx, ty, tz, pitch, yaw, roll] (meters, degrees)
     nt::DoubleArraySubscriber botpose_targetspace; // 3D transform of the robot in the coordinate system of the primary in-view AprilTag (array (6)) [tx, ty, tz, pitch, yaw, roll] (meters, degrees)
     nt::DoubleArraySubscriber camerapose_robotspace; // 3D transform of the camera in the coordinate system of the robot (array (6))
-    nt::IntegerSubscriber tid; // ID of the primary in-view AprilTag
+    nt::IntegerEntry tid; // ID of the primary in-view AprilTag
     nt::DoubleArraySubscriber stddevs; // MegaTag Standard Deviations [MT1x, MT1y, MT1z, MT1roll, MT1pitch, MT1Yaw, MT2x, MT2y, MT2z, MT2roll, MT2pitch, MT2yaw]
 
     nt::DoubleArrayPublisher camerapose_robotspace_set; // SET the camera's pose in the coordinate system of the robot.
@@ -548,6 +554,7 @@ public:
         else
         {
             SetT2D(t2d);
+            SetTID(t2d[9]);
         }
     }
 

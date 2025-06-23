@@ -63,11 +63,11 @@ public:
         clawDesiredPublisher.Set(frc::Pose3d{RobotSim::DigitalRobot::kClawX, 0_m, elevator.GetHeightSetpoint() + RobotSim::DigitalRobot::kClawY, frc::Rotation3d{0_deg, wrist.GetAngleSetpoint(), 0_deg}});
         coralManager.UpdateCoral(io.GetMotorVelocity(), swerve.GetState().Pose, elevator.GetHeight(), wrist.GetCurrentAngle());
 
-        // if (frc::RobotBase::IsSimulation)
-        // {
-        //     limelightLow.UpdateSim(swerve.GetState().Pose);
-        //     llLowPublisher.Set(limelightLow.GetCameraPoseWorld());
-        // }
+        if (frc::RobotBase::IsSimulation())
+        {
+            limelightLow.UpdateSim(swerve.GetState().Pose);
+            llLowPublisher.Set(limelightLow.GetCameraPoseWorld());
+        }
     }
 
     void UpdateTelemetry()

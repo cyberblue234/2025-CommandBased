@@ -55,70 +55,80 @@ public:
         );
     }
 
-    frc2::CommandPtr PathfindToBranch(int tid, Sides side, units::meter_t offset, bool usePPLibPathfinding)
+    frc::Pose2d desiredPose;
+    frc2::CommandPtr PathfindToBranch(std::function<int()> tidSupplier, Sides side, units::meter_t offset)
     {
-        if (tid < 6 || (tid > 11 && tid < 17) || tid > 22) return BrakeCommand();
-        frc::Pose2d aprilTagPose = aprilTagFieldLayout.GetTagPose(tid)->ToPose2d();
-
-        units::degree_t theta = aprilTagPose.Rotation().Degrees() + 90_deg;
-        units::meter_t deltaX1 = units::math::cos(theta) * FieldConstants::kDeltaReefAprilTagToBranch;
-        units::meter_t deltaY1 = units::math::sin(theta) * FieldConstants::kDeltaReefAprilTagToBranch;
-        if (tid < 9 || (tid > 16 && tid < 20) == false)
-        {
-            if (side == Sides::Right)
+        return frc2::cmd::DeferredProxy
+        (
+            [this, tidSupplier, side, offset]
             {
-                deltaX1 = -deltaX1;
-                deltaY1 = -deltaY1;
-            }
-        }
-        else
-        {
-            if (side == Sides::Left)
-            {
-                deltaX1 = -deltaX1;
-                deltaY1 = -deltaY1;
-            }
-        }
-        
-        units::meter_t deltaX2 = units::math::sin(theta) * offset;
-        units::meter_t deltaY2 = -units::math::cos(theta) * offset;
+                int tid = tidSupplier();
+                frc::Pose2d aprilTagPose = aprilTagFieldLayout.GetTagPose(tid)->ToPose2d();
 
-        frc::Pose2d pose{aprilTagPose.X() + deltaX1 + deltaX2, aprilTagPose.Y() + deltaY1 + deltaY2, aprilTagPose.Rotation().Degrees() + 180_deg};
-        // return DriveToPose(pose, pose.Rotation(), frc::TrajectoryConfig{kReefPathfindingConstraints.getMaxVelocity(), kReefPathfindingConstraints.getMaxAcceleration()});
-        // Uses PPLib pathfinding with given constraints
-        if (usePPLibPathfinding) return AutoBuilder::pathfindToPose(pose, PathPlannerConstants::kReefPathfindingConstraints);
-        // Uses internal pathfinding
-        return PathfindToPose(pose, pose.Rotation(), true, PathPlannerConstants::kReefPathfindingConstraints);
+                units::degree_t theta = aprilTagPose.Rotation().Degrees() + 90_deg;
+                units::meter_t deltaX1 = units::math::cos(theta) * FieldConstants::kDeltaReefAprilTagToBranch;
+                units::meter_t deltaY1 = units::math::sin(theta) * FieldConstants::kDeltaReefAprilTagToBranch;
+                if (tid < 9 || (tid > 16 && tid < 20) == false)
+                {
+                    if (side == Sides::Right)
+                    {
+                        deltaX1 = -deltaX1;
+                        deltaY1 = -deltaY1;
+                    }
+                }
+                else
+                {
+                    if (side == Sides::Left)
+                    {
+                        deltaX1 = -deltaX1;
+                        deltaY1 = -deltaY1;
+                    }
+                }
+                
+                units::meter_t deltaX2 = units::math::sin(theta) * offset;
+                units::meter_t deltaY2 = -units::math::cos(theta) * offset;
+
+                desiredPose = {aprilTagPose.X() + deltaX1 + deltaX2, aprilTagPose.Y() + deltaY1 + deltaY2, aprilTagPose.Rotation().Degrees() + 180_deg};
+
+                return PathfindToPose(desiredPose);
+            }
+        ).Unless([this, tidSupplier] { return tidSupplier() < 6 || (tidSupplier() > 11 && tidSupplier() < 17) || tidSupplier() > 22; } );
     }
 
-    frc2::CommandPtr PathfindToPose(frc::Pose2d pose, frc::Rotation2d endHeading, bool preventFlipping, PathConstraints pathConstraints)
+    frc2::CommandPtr PathfindToPose(frc::Pose2d pose)
     {
-        // Finds the difference of the two x and the two y values
-        double xDiff = pose.X().value() - GetState().Pose.X().value();
-        double yDiff = pose.Y().value() - GetState().Pose.Y().value();
-        // cos(x) is equal to the lengh of the adjacent side divided by the length of the hypotenuse
-        // The inverse of cos will give you the angle to drive at, in quadrants one and two
-        // If you multiply that by the sign of the yDiff, you will get the final heading in radians
-        units::radian_t heading = units::radian_t(sgn(yDiff) * acos((xDiff) / (pow(pow(xDiff, 2) + pow(yDiff, 2), 0.5))));
-        // Creates a vector of two poses with the rotation being the heading to drive at
-        // The first pose is the current pose, and the second is the pose to drive to
-        std::vector<frc::Pose2d> poses 
-        {
-            frc::Pose2d(GetState().Pose.X(), GetState().Pose.Y(), frc::Rotation2d(heading)), 
-            frc::Pose2d(pose.X(), pose.Y(), endHeading)
-        };
-        // Creates a path based on the vector of poses and PathPlanner constraints
-        auto path = std::make_shared<PathPlannerPath>(
-            PathPlannerPath::waypointsFromPoses(poses),
-            pathConstraints,
-            std::nullopt,
-            GoalEndState(0.0_mps, pose.Rotation())
+        return frc2::cmd::DeferredProxy
+        (
+            [this, pose]
+            {
+                // Finds the difference of the two x and the two y values
+                double xDiff = pose.X().value() - GetState().Pose.X().value();
+                double yDiff = pose.Y().value() - GetState().Pose.Y().value();
+                // cos(x) is equal to the lengh of the adjacent side divided by the length of the hypotenuse
+                // The inverse of cos will give you the angle to drive at, in quadrants one and two
+                // If you multiply that by the sign of the yDiff, you will get the final heading in radians
+                units::radian_t heading = units::radian_t(sgn(yDiff) * acos((xDiff) / (pow(pow(xDiff, 2) + pow(yDiff, 2), 0.5))));
+                // Creates a vector of two poses with the rotation being the heading to drive at
+                // The first pose is the current pose, and the second is the pose to drive to
+                std::vector<frc::Pose2d> poses 
+                {
+                    frc::Pose2d(GetState().Pose.X(), GetState().Pose.Y(), frc::Rotation2d(heading)), 
+                    frc::Pose2d(pose.X(), pose.Y(), pose.Rotation())
+                };
+                // Creates a path based on the vector of poses and PathPlanner constraints
+                auto path = std::make_shared<PathPlannerPath>(
+                    PathPlannerPath::waypointsFromPoses(poses),
+                    PathPlannerConstants::kReefPathfindingConstraints,
+                    std::nullopt,
+                    GoalEndState(0.0_mps, pose.Rotation())
+                );
+                // If preventFlipping is true, it stops the path from flipping automatically 
+                // because we have already flipped the desired poses
+                path->preventFlipping = true;
+
+                return AutoBuilder::followPath(path);
+            }
         );
-        // If preventFlipping is true, it stops the path from flipping automatically 
-        // because we have already flipped the desired poses
-        path->preventFlipping = preventFlipping;
-        // Creates and returns the command to follow the path
-        return AutoBuilder::followPath(path);
     }
 
     frc2::CommandPtr ScheduleSysIdDynamic(frc2::sysid::Direction direction)

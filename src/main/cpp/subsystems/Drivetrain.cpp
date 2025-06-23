@@ -32,8 +32,6 @@ Drivetrain::Drivetrain() : swerve::SwerveDrivetrain<hardware::TalonFX, hardware:
 
     frc::SmartDashboard::PutData("Swerve/pigeon2", &GetPigeon2());
     frc::SmartDashboard::PutData("Field", &field);
-    SetStateStdDevs(visionStdDevs);
-    SetVisionMeasurementStdDevs(visionStdDevs);
 }
 
 void Drivetrain::Periodic()

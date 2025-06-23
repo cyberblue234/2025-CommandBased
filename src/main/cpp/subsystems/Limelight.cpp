@@ -35,7 +35,7 @@ Limelight::Limelight(std::string name)
     targetpose_robotspace = GetDoubleArraySubscriber("targetpose_robotspace");
     botpose_targetspace = GetDoubleArraySubscriber("botpose_targetspace");
     camerapose_robotspace = GetDoubleArraySubscriber("camerapose_robotspace");
-    tid = GetIntegerSubscriber("tid");
+    tid = GetIntegerEntry("tid");
     stddevs = GetDoubleArraySubscriber("stddevs");
     camerapose_robotspace_set = GetDoubleArrayPublisher("camerapose_robotspace_set");
     priorityid = GetIntegerPublisher("priorityid");

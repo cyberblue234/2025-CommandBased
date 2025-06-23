@@ -124,10 +124,9 @@ void RobotContainer::ConfigureBindings()
 	(
 		swerve.PathfindToBranch
 		(
-			(int) limelightLow.GetT2D()[9],
+			[this] { return limelightLow.GetTID(); },
 			Sides::Left,
-			0.25_ft,
-			false
+			1_ft
 		).Unless(frc::DriverStation::IsAutonomous).WithName("Align Left")
 	);
 
@@ -135,10 +134,9 @@ void RobotContainer::ConfigureBindings()
 	(
 		swerve.PathfindToBranch
 		(
-			(int) limelightLow.GetT2D()[9],
+			[this] { return limelightLow.GetTID(); },
 			Sides::Right,
-			0.25_ft,
-			false
+			1_ft
 		).Unless(frc::DriverStation::IsAutonomous).WithName("Align Right")
 	);
 
@@ -182,14 +180,16 @@ void RobotContainer::ConfigureBindings()
 		frc2::cmd::Parallel
 		(
 			elevator.GoToPositionCommand(Positions::Barge),
-			wrist.StopWristMotorCommand().Repeatedly().Until([this] { return elevator.GetHeight() > 2.5_ft; }).AndThen(wrist.GoToPositionCommand(Positions::Barge)),
-			frc2::cmd::RunOnce([this]{ io.SetIOPower(IOConstants::kManualIOPower); }).Repeatedly().Until([this] { return elevator.IsAtPosition() && wrist.IsAtPosition(); }).AndThen(frc2::cmd::RunOnce([this]{ io.StopIOMotor(); }))
+			wrist.StopWristMotorCommand().Repeatedly().Until([this] { return elevator.GetHeight() > 2.5_ft; }).AndThen(wrist.GoToPositionCommand(Positions::Barge))
 		).BeforeStarting
 		(
 			[this]
 			{
 				this->desiredPosition = Positions::Barge;
 			}
+		).AlongWith
+		(
+			io.SetIOPowerCommand(IOConstants::kManualIOPower).Repeatedly().Until([this] { return elevator.IsAtPosition() && wrist.IsAtPosition(); }).AndThen(io.StopIOMotorCommand())
 		)
 	);
 
