@@ -50,22 +50,15 @@ void Drivetrain::Periodic()
 
     if (limelightPoseEstimatesSupplier.has_value())
     {
-        // if (frc::DriverStation::IsDisabled())
-        // {
-        //     ResetPose(limelightPoseEstimatesSupplier.value()()[0].pose);
-        // }
-        // else
-        // {
-            std::vector<PoseEstimate> poseEstimates = limelightPoseEstimatesSupplier.value()();
-            for (PoseEstimate estimate : poseEstimates)
+        std::vector<PoseEstimate> poseEstimates = limelightPoseEstimatesSupplier.value()();
+        for (PoseEstimate estimate : poseEstimates)
+        {
+            if (units::math::abs(GetPigeon2().GetAngularVelocityZWorld().GetValue()) <= 720_deg_per_s && estimate.tagCount > 0)
             {
-                if (units::math::abs(GetPigeon2().GetAngularVelocityZWorld().GetValue()) <= 720_deg_per_s && estimate.tagCount > 0)
-                {
-                    AddVisionMeasurement(estimate.pose, estimate.timestampSeconds, visionStdDevs);
-                }
+                // According to a CD thread, FPGA time needs to be converted to current time for vision measurements to work :(
+                AddVisionMeasurement(estimate.pose, utils::FPGAToCurrentTime(estimate.timestampSeconds), visionStdDevs);
             }
-        // }
-        
+        }
     }
 
     if (utils::IsSimulation())
