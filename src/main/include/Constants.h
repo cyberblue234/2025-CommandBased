@@ -301,13 +301,13 @@ namespace DrivetrainConstants
         // Gearing between the drive motor and wheel in turns - how many turns of the drive motor does it take to drive the wheel one full revolution
         constexpr double kGearRatio = 6.39;
 
-        constexpr double kP = 0.13571;
+        constexpr double kP = 0.069279;
         constexpr double kI = 0.0;
         constexpr double kD = 0.0;
 
-        constexpr double kS = 0.17851;
-        constexpr double kV = 0.12454;
-        constexpr double kA = 0.004383;
+        constexpr double kS = 0.13756;
+        constexpr double kV = 0.11614;
+        constexpr double kA = 0.0091761;
 
         // This stator current limit ensures we don't damage the motor by pushing too much current
         constexpr units::ampere_t kStatorCurrentLimit = 100_A;
@@ -622,7 +622,7 @@ namespace Positions
     const Position L1           = Position("L1", ElevatorConstants::kHeightOffset, 50.0_deg,  IOConstants::kCoralOutputPower, true, false, ControlsConstants::kL1Button);
     const Position L2           = Position("L2", 1.1_ft, -48.0_deg,  -IOConstants::kCoralOutputPower, true, false, ControlsConstants::kL2Button);
     const Position L3           = Position("L3", 2.5_ft, -48.0_deg,  -IOConstants::kCoralOutputPower, true, false, ControlsConstants::kL3Button);
-    const Position L4           = Position("L4", 4.5_ft, -48.0_deg, -IOConstants::kCoralOutputPower, true, false, ControlsConstants::kL4Button);
+    const Position L4           = Position("L4", 4.4_ft, -48.0_deg, -IOConstants::kCoralOutputPower, true, false, ControlsConstants::kL4Button);
     const Position AlgaeLow     = Position("AlgaeLow", 2.2_ft, 115.0_deg,  IOConstants::kAlgaeIntakePower, false, false, ControlsConstants::kAlgaeLowButton);
     const Position AlgaeHigh    = Position("AlgaeHigh", 3.5_ft, 115.0_deg,  IOConstants::kAlgaeIntakePower, false, false, ControlsConstants::kAlgaeHighButton);
     const Position CoralStation = Position("CoralStation", 1.915_ft, 50.0_deg,  IOConstants::kCoralIntakePower, true, true, ControlsConstants::kCoralStationButton);
